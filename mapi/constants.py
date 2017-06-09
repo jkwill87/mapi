@@ -1,0 +1,46 @@
+# coding=utf-8
+
+MEDIA_TYPE_MOVIE = 'movie'
+MEDIA_TYPE_TELEVISION = 'television'
+MEDIA_TYPE_ALL = {MEDIA_TYPE_MOVIE, MEDIA_TYPE_TELEVISION}
+
+DB_IMDB = 'imdb'
+DB_TMDB = 'tmdb'
+DB_TVDB = 'tvdb'
+
+API_TELEVISION = {DB_TVDB}
+API_MOVIE = {DB_IMDB, DB_TMDB}
+API_ALL = API_TELEVISION | API_MOVIE
+
+META_EPISODE = 'episode'
+META_ID = 'id_imdb'
+META_SEASON = 'season'
+META_SERIES = 'series'
+META_SYNOPSIS = 'synopsis'
+META_TITLE = 'title'
+META_TYPE = 'type'
+META_YEAR = 'year'
+META_MEDIA = 'media'
+META_OVERVIEW = 'overview'
+META_ID_IMDB = 'id_imdb'
+META_ID_TVDB = 'id_tvdb'
+
+PARAMS_MOVIE = {
+    META_ID,
+    META_SYNOPSIS,
+    META_TITLE,
+    META_TYPE,
+    META_YEAR,
+}
+
+PARAMS_TELEVISION = {
+    META_EPISODE,
+    META_ID,
+    META_SEASON,
+    META_SERIES,
+    META_SYNOPSIS,
+    META_TITLE,
+    META_TYPE,
+}
+
+PARAMS_ALL = PARAMS_MOVIE | PARAMS_TELEVISION
