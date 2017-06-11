@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
@@ -91,9 +90,6 @@ ENV/
 .spyderproject
 .spyproject
 
-# Rope project settings
-.ropeproject
-
 # mkdocs documentation
 /site
 
@@ -102,3 +98,6 @@ ENV/
 
 playground.py
 .idea
+.vscode
+setup.cfg
+/mapi/__init__old.py
