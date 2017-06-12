@@ -84,7 +84,7 @@ def filter_meta(entries, max_hits=None, year_delta=None, year=None):
     entries = unique_entries
 
     # Remove entries outside of year delta for target year, if available
-    if year and year_delta:
+    if year and isinstance(year_delta,int):
         entries = [entry for entry in entries if year_diff(entry) <= year_delta]
 
         # Sort entries around year
