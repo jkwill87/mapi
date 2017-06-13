@@ -1,27 +1,22 @@
 # coding=utf-8
 
 import json
-from random import choice
-from sys import stderr, version_info
+import random
+
+import requests
+import requests_cache
 
 from mapi.constants import *
-from mapi.exceptions import MapiNetworkException
 
 
-# noinspection PyUnusedLocal
-def request_json_py2(url, parameters=None, body=None, headers=None, agent=None):
-    pass  # TODO
+def request_json(url, parameters=None, body=None, headers=None, agent=None):
+    assert url
+    status = 400
 
-
-def request_json_py3(url, parameters=None, body=None, headers=None, agent=None):
-    if not url:
-        return 400, None
-
-    # Format request
-    if isinstance(parameters, dict):
-        url += '?' + urlencode(clean_dict(parameters))
     if isinstance(headers, dict):
         headers = clean_dict(headers)
+    if isinstance(parameters, dict):
+        parameters = clean_dict(parameters)
     if body:
         method = 'POST'
         if isinstance(body, str):
@@ -34,33 +29,19 @@ def request_json_py3(url, parameters=None, body=None, headers=None, agent=None):
         headers['user-agent'] = get_user_agent(agent)
     else:
         method = 'GET'
-
-    # Perform request
     try:
-        request = Request(
+        response = requests.request(
             url=url,
-            data=body,
-            headers=headers or {},
-            method=method
+            params=parameters,
+            json=body,
+            headers=headers,
+            method=method,
         )
-        response = urlopen(request)
-    except (ValueError, TypeError):
-        return 400, None
-    except HTTPError as e:
-        return e.code, None
-    except URLError:
-        raise MapiNetworkException
-    if response.status != 200:
-        return response.status, None
-
-    # Parse JSON
-    try:
-        content = response.read()
-        content = unescape(content.decode())
-        content = json.loads(content)
-    except ValueError:
-        return 400, None
-    return response.status, content
+        status = response.status_code
+        content = response.json() if status // 100 == 2 else None
+    except (requests.RequestException, ValueError):
+        content = None
+    return status, content
 
 
 def clean_dict(x):
@@ -84,7 +65,7 @@ def filter_meta(entries, max_hits=None, year_delta=None, year=None):
     entries = unique_entries
 
     # Remove entries outside of year delta for target year, if available
-    if year and isinstance(year_delta,int):
+    if year and isinstance(year_delta, int):
         entries = [entry for entry in entries if year_diff(entry) <= year_delta]
 
         # Sort entries around year
@@ -101,23 +82,8 @@ def get_user_agent(platform=None):
         PLATFORM_CHROME: USER_AGENT_CHROME,
         PLATFORM_EDGE: USER_AGENT_EDGE,
         PLATFORM_IOS: USER_AGENT_IOS
-    }.get(platform, choice(USER_AGENT_ALL))
+    }.get(platform, random.choice(USER_AGENT_ALL))
 
 
-# Python version enforcement ---------------------------------------------------
-if version_info >= (3, 0):
-    # noinspection PyCompatibility
-    from html import unescape
-    # noinspection PyCompatibility
-    from urllib.error import HTTPError, URLError
-    # noinspection PyCompatibility
-    from urllib.parse import urlencode
-    # noinspection PyCompatibility
-    from urllib.request import Request, urlopen
-
-    request_json = request_json_py3
-elif version_info == (2, 7):
-    request_json = request_json_py2
-else:
-    stderr.write('Incompatible version of python; requires 2.7 or 3+')
-    exit(1)
+# Setup requests caching
+requests_cache.install_cache('.mapi', expire_after=604800)  # week

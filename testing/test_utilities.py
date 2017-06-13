@@ -1,63 +1,78 @@
+from json import loads
 from unittest import TestCase
 from unittest.mock import patch
+
+from requests import request
 
 from mapi.utilities import *
 
 
-class MockHTTPResponse:
+class MockRequestResponse:
     def __init__(self, status, content):
-        self.status = status
+        self.status_code = status
         self.content = content
 
-    def read(self):
-        return self.content
+    def json(self):
+        return loads(self.content)
 
 
 class TestRequestJson(TestCase):
-    @patch('mapi.utilities.urlopen')
-    def test_2xx_status(self, mock_urlopen):
-        mock_response = MockHTTPResponse(200, b'{}')
-        mock_urlopen.return_value = mock_response
-        status, _ = request_json('http://...')
-        self.assertEqual(status, 200)
+    @patch('mapi.utilities.requests.request')
+    def test_2xx_status(self, mock_request):
+        with self.subTest(code=200):
+            mock_response = MockRequestResponse(200, b'{}')
+            mock_request.return_value = mock_response
+            status, _ = request_json('http://...')
+            self.assertEqual(status, 200)
+        with self.subTest(code=299):
+            mock_response = MockRequestResponse(299, b'{}')
+            mock_request.return_value = mock_response
+            status, _ = request_json('http://...')
+            self.assertEqual(status, 299)
 
-    @patch('mapi.utilities.urlopen')
-    def test_4xx_status(self, mock_urlopen):
-        mock_response = MockHTTPResponse(400, b'{}')
-        mock_urlopen.return_value = mock_response
+    @patch('mapi.utilities.requests.request')
+    def test_4xx_status(self, mock_request):
+        mock_response = MockRequestResponse(400, b'{}')
+        mock_request.return_value = mock_response
         status, _ = request_json('http://...')
         self.assertEqual(status, 400)
 
-    @patch('mapi.utilities.urlopen')
-    def test_5xx_status(self, mock_urlopen):
-        mock_response = MockHTTPResponse(500, b'{}')
-        mock_urlopen.return_value = mock_response
+    @patch('mapi.utilities.requests.request')
+    def test_5xx_status(self, mock_request):
+        mock_response = MockRequestResponse(500, b'{}')
+        mock_request.return_value = mock_response
         status, _ = request_json('http://...')
         self.assertEqual(status, 500)
 
-    @patch('mapi.utilities.urlopen')
-    def test_2xx_data(self, mock_urlopen):
-        mock_response = MockHTTPResponse(200, b'{"status":true}')
-        mock_urlopen.return_value = mock_response
-        _, content = request_json('http://...')
-        self.assertTrue(content)
+    @patch('mapi.utilities.requests.request')
+    def test_2xx_data(self, mock_request):
+        with self.subTest(code=200):
+            mock_response = MockRequestResponse(200, b'{"status":true}')
+            mock_request.return_value = mock_response
+            _, content = request_json('http://...')
+            self.assertTrue(content)
+        with self.subTest(code=299):
+            mock_response = MockRequestResponse(299, b'{"status":true}')
+            mock_request.return_value = mock_response
+            _, content = request_json('http://...')
+            self.assertTrue(content)
 
-    @patch('mapi.utilities.urlopen')
-    def test_4xx_data(self, mock_urlopen):
-        mock_response = MockHTTPResponse(400, b'{"status":false}')
-        mock_urlopen.return_value = mock_response
+    @patch('mapi.utilities.requests.request')
+    def test_4xx_data(self, mock_request):
+        mock_response = MockRequestResponse(400, b'{"status":false}')
+        mock_request.return_value = mock_response
         _, content = request_json('http://...')
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.urlopen')
-    def test_5xx_data(self, mock_urlopen):
-        mock_response = MockHTTPResponse(500, b'{"status":false}')
-        mock_urlopen.return_value = mock_response
+    @patch('mapi.utilities.requests.request')
+    def test_5xx_data(self, mock_request):
+        mock_response = MockRequestResponse(500, b'{"status":false}')
+        mock_request.return_value = mock_response
         _, content = request_json('http://...')
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.urlopen')
-    def test_json_data(self, mock_urlopen):
+    @patch('mapi.utilities.requests.request')
+    def test_json_data(self, mock_request):
         json_data = b"""{
             "status": true,
             "data": {
@@ -74,14 +89,14 @@ class TestRequestJson(TestCase):
                 'genre': None
             }
         }
-        mock_response = MockHTTPResponse(200, json_data)
-        mock_urlopen.return_value = mock_response
+        mock_response = MockRequestResponse(200, json_data)
+        mock_request.return_value = mock_response
         status, content = request_json('http://...')
         self.assertEqual(status, 200)
         self.assertDictEqual(content, json_dict)
 
-    @patch('mapi.utilities.urlopen')
-    def test_xml_data(self, mock_urlopen):
+    @patch('mapi.utilities.requests.request')
+    def test_xml_data(self, mock_request):
         xml_data = b"""
             <?xml version="1.0" encoding="UTF-8" ?>
             <status>true</status>
@@ -92,14 +107,14 @@ class TestRequestJson(TestCase):
             </data>
         """
 
-        mock_response = MockHTTPResponse(200, xml_data)
-        mock_urlopen.return_value = mock_response
+        mock_response = MockRequestResponse(200, xml_data)
+        mock_request.return_value = mock_response
         status, content = request_json('http://...')
-        self.assertEqual(status, 400)
+        self.assertEqual(status, 200)
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.urlopen')
-    def test_html_data(self, mock_urlopen):
+    @patch('mapi.utilities.requests.request')
+    def test_html_data(self, mock_request):
         html_data = b"""
             <!DOCTYPE html>
             <html>
@@ -113,58 +128,75 @@ class TestRequestJson(TestCase):
                 </body>
             </html>
         """
-        mock_response = MockHTTPResponse(200, html_data)
-        mock_urlopen.return_value = mock_response
+        mock_response = MockRequestResponse(200, html_data)
+        mock_request.return_value = mock_response
         status, content = request_json('http://...')
-        self.assertEqual(status, 400)
+        self.assertEqual(status, 200)
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.Request')
+    @patch('mapi.utilities.requests.request')
     def test_get_headers(self, mock_request):
-        mock_request.side_effect = Request
-        request_json('http://...', headers={'apple': 'pie', 'orange': None})
+        mock_request.side_effect = request
+        request_json(
+            url='http://google.com',
+            headers={'apple': 'pie', 'orange': None}
+        )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'GET')
         self.assertEqual(kwargs['headers'], {'apple': 'pie'})
 
-    @patch('mapi.utilities.Request')
+    @patch('mapi.utilities.requests.request')
     def test_get_parameters(self, mock_request):
         test_parameters = {'apple': 'pie'}
-        mock_request.side_effect = Request
-        request_json(url='http://...', parameters=test_parameters)
+        mock_request.side_effect = request
+        request_json(
+            url='http://google.com',
+            parameters=test_parameters
+        )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'GET')
-        self.assertTrue(kwargs['url'].endswith(urlencode(test_parameters)))
+        self.assertTrue(kwargs['params'] == test_parameters)
 
     def test_get_invalid_url(self):
         status, content = request_json('mapi rulez')
         self.assertEqual(status, 400)
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.Request')
+    @patch('mapi.utilities.requests.request')
     def test_post_body(self, mock_request):
         data = {'apple': 'pie'}
-        mock_request.side_effect = Request
-        request_json(url='http://...', body=data)
+        mock_request.side_effect = request
+        request_json(
+            url='http://google.com',
+            body=data
+        )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'POST')
-        self.assertEqual(kwargs['data'], b'{"apple": "pie"}')
+        self.assertEqual(kwargs['json'], b'{"apple": "pie"}')
 
-    @patch('mapi.utilities.Request')
+    @patch('mapi.utilities.requests.request')
     def test_post_parameters(self, mock_request):
-        mock_request.side_effect = Request
+        mock_request.side_effect = request
         data = {'apple': 'pie', 'orange': None}
-        request_json('http://...', body=data, parameters=data)
+        request_json(
+            url='http://google.com',
+            body=data,
+            parameters=data
+        )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'POST')
-        self.assertIn('apple', kwargs['url'])
-        self.assertNotIn('orange', kwargs['url'])
+        self.assertIn('apple', kwargs['params'])
+        self.assertNotIn('orange', kwargs['params'])
 
-    @patch('mapi.utilities.Request')
+    @patch('mapi.utilities.requests.request')
     def test_post_headers(self, mock_request):
-        mock_request.side_effect = Request
+        mock_request.side_effect = request
         data = {'apple': 'pie', 'orange': None}
-        request_json('http://...', body=data, headers=data)
+        request_json(
+            url='http://google.com',
+            body=data,
+            headers=data
+        )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'POST')
         self.assertIn('apple', kwargs['headers'])
@@ -293,11 +325,11 @@ class TestFilterMeta(TestCase):
             with self.subTest(diff=i):
                 entries_out = filter_meta(entries_in, year=2000, year_delta=i)
                 for j in range(i + 1):
-                    self.assertEquals(
+                    self.assertEqual(
                         j <= i,
                         2000 - j in [e['year'] for e in entries_out]
                     )
-                    self.assertEquals(
+                    self.assertEqual(
                         j <= i,
                         2000 + j in [e['year'] for e in entries_out]
                     )

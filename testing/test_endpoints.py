@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from mapi.endpoints import *
 
 RANDOM_JUNK = 'asdf#$@#g9765sdfg54hggaw'
@@ -12,16 +13,16 @@ class TestImdbMainDetails(TestCase):
         self.assertIn('data', response)
 
         self.assertIn('tconst', response['data'])
-        self.assertEquals('tt0089218', response['data']['tconst'])
+        self.assertEqual('tt0089218', response['data']['tconst'])
 
         self.assertIn('title', response['data'])
-        self.assertEquals('The Goonies', response['data']['title'])
+        self.assertEqual('The Goonies', response['data']['title'])
 
         self.assertIn('type', response['data'])
-        self.assertEquals('feature', response['data']['type'])
+        self.assertEqual('feature', response['data']['type'])
 
         self.assertIn('year', response['data'])
-        self.assertEquals('1985', response['data']['year'])
+        self.assertEqual('1985', response['data']['year'])
 
         self.assertIn('plot', response['data'])
         self.assertIn('outline', response['data']['plot'])

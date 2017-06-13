@@ -101,3 +101,4 @@ playground.py
 .vscode
 setup.cfg
 /mapi/__init__old.py
+.mapi.sqlite
