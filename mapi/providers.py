@@ -10,8 +10,7 @@ from mapi.utilities import filter_meta
 
 
 def provider_factory(provider, **options):
-    """
-    Factory function for DB Provider Concrete Classes.
+    """ Factory function for DB Provider Concrete Classes.
 
     :param provider: one of the constants contained within the API_ALL or their
         resolved value.
@@ -39,13 +38,11 @@ def provider_factory(provider, **options):
 
 
 class IMDb:
-    """
-    Queries the unofficial IMDb mobile API.
+    """ Queries the unofficial IMDb mobile API.
     """
 
     def __init__(self, **options):
-        """
-        Initializes an IMDb provider.
+        """ Initializes an IMDb provider.
 
         :param dict options: Optional kwargs; see below..
         :keyword int year_delta: If set and a year is provided for a movie
@@ -54,13 +51,11 @@ class IMDb:
             a search. If unset or None, searches yield as many as possible from
             the API provider.
         """
-        # Retrieve and set relevant parameters
         self.year_delta = options.get('year_delta', 5)
         self.max_hits = options.get('max_hits')
 
     def search(self, **parameters):
-        """
-        Searches IMDb for movie metadata.
+        """ Searches IMDb for movie metadata.
 
         :param kwargs parameters: Search parameters.
         :keyword str id_imdb: IMDb primary key; must be prefixed with 'tt'.

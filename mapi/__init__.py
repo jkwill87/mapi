@@ -1,15 +1,9 @@
 # coding=utf-8
 
-"""
-mapi is an API for media database APIs which allows you to lookup and search for
-metadata using simple, common interface.
+""" mapi is an API for media database APIs which allows you to lookup and search
+for metadata using simple, common interface.
 
 See https://github.com/jkwill87/mapi for more information.
-
-
-copyright: 2017 Jessy Williams (jkwill87)
-license: MIT, see license.txt for more details
-email: jessy@jessywilliams.com
 """
 
 import logging
@@ -23,8 +17,7 @@ logging.getLogger('requests').setLevel(logging.CRITICAL)
 
 
 def has_provider(provider):
-    """
-    Verifies that module has support for requested API provider.
+    """ Verifies that module has support for requested API provider.
 
     :param str provider: API constant or its corresponding value from API_ALL.
     :return bool: True if package supports specified db provider, else False.
@@ -33,8 +26,7 @@ def has_provider(provider):
 
 
 def has_provider_support(provider, media_type):
-    """
-    Verifies if API provider has support for requested media type
+    """ Verifies if API provider has support for requested media type
 
     :param str provider: API constant or its corresponding value from API_ALL.
     :param str media_type: Media type constant or its corresponding value from.
