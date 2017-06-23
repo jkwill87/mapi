@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from mapi.__about__ import *
+
 MEDIA_MOVIE = 'movie'
 MEDIA_TELEVISION = 'television'
 MEDIA_ALL = {MEDIA_MOVIE, MEDIA_TELEVISION}
