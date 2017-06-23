@@ -1,3 +1,6 @@
+# coding=utf-8
+
+
 class MapiException(Exception):
     """ Base exception for the mapi module.
     """

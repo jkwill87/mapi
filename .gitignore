@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
@@ -61,9 +60,6 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
 
@@ -91,14 +87,15 @@ ENV/
 .spyderproject
 .spyproject
 
-# Rope project settings
-.ropeproject
-
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
 
-playground.py
+# other
 .idea
+*.sqlite
+.vscode
+playground.py
+scripts
