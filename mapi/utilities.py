@@ -121,11 +121,14 @@ def get_user_agent(platform=None):
 
     Valid platforms are listed in the constants module
 
-    :param str platform: the platform for the required user agent string
+    :param optional str platform: the platform for the required user agent string
     :return: the user agent string
+    :rtype: str
     """
+    if isinstance(platform, str):
+        platform = platform.upper()
     return {
         PLATFORM_CHROME: USER_AGENT_CHROME,
         PLATFORM_EDGE: USER_AGENT_EDGE,
         PLATFORM_IOS: USER_AGENT_IOS
-    }.get(platform.upper(), random.choice(USER_AGENT_ALL))
+    }.get(platform, random.choice(USER_AGENT_ALL))
