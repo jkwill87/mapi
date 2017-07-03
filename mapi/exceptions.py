@@ -6,13 +6,6 @@ class MapiException(Exception):
     """
 
 
-class MapiError(MapiException):
-    """ Raised when an endpoint fails, if its response is undefined, or if a
-    precondition of the library is not satisfied, i.e. a DB provider changes
-    its interface.
-    """
-
-
 class MapiNetworkException(MapiException):
     """ Raised when a network request is unaccepted; ie. no internet connection.
     """
