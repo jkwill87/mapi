@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-from mapi.__about__ import *
+from mapi.constants import *
 
 setup(
     name=ABOUT_TITLE,
