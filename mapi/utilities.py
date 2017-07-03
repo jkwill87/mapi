@@ -9,6 +9,7 @@ import random
 import requests
 import requests_cache
 
+from mapi import log
 from mapi.constants import *
 
 # Setup requests caching
@@ -26,20 +27,24 @@ def request_json(url, parameters=None, body=None, headers=None, agent=None):
     :param str url: The url to query
     :param dict parameters: Query string parameters
     :param dict body: JSON body parameters; if set implicitly POSTs
-    :param headers: HTTP headers; content type, length, and user agent
-        already get set internally
+    :param optional dict headers: HTTP headers; content type, length, and user
+        agent already get set internally
     :param str agent: User agent handle to include in headers; must be one
         specified in the constants module; if unset on will be chosen randomly
     :return: a list where the first item is the numeric status code and the
         second is a dict containing the JSON data retrieved
+    :rtype: list
     """
     assert url
     status = 400
+    log.info("url: %s" % url)
 
     if isinstance(headers, dict):
         headers = clean_dict(headers)
+        log.info("headers: %s" % headers)
     if isinstance(parameters, dict):
         parameters = clean_dict(parameters)
+        log.info("parameters: %s" % parameters)
     if body:
         method = 'POST'
         if isinstance(body, str):
@@ -52,6 +57,7 @@ def request_json(url, parameters=None, body=None, headers=None, agent=None):
         headers['user-agent'] = get_user_agent(agent)
     else:
         method = 'GET'
+
     try:
         response = requests.request(
             url=url,
@@ -62,8 +68,14 @@ def request_json(url, parameters=None, body=None, headers=None, agent=None):
         )
         status = response.status_code
         content = response.json() if status // 100 == 2 else None
-    except (requests.RequestException, ValueError):
+        log.debug("response: %s" % response)
+    except (requests.RequestException, ValueError) as e:
+        log.debug(e, exc_info=True)
         content = None
+
+    log.info("method: %s" % method)
+    log.info("status: %d" % status)
+    log.info("content: %s" % content)
     return status, content
 
 
@@ -72,6 +84,7 @@ def clean_dict(d):
 
     :param dict d: the dict to clean
     :return: the cleaned dict
+    :rtype: dict
     """
     assert isinstance(d, dict)
     return {
@@ -90,8 +103,9 @@ def filter_meta(entries, max_hits=None, year=None, year_delta=None):
     :param list entries: the list of metadata dicts
     :param int max_hits: the maximum number of entries to include in the list
     :param int or str year: the target year to filter around
-    :param int year_delta: results will be filtered around this value inclusively
+    :param int year_delta: results are filtered around this value inclusively
     :return: the filtered list of entries
+    :rtype: dict
     """
     assert isinstance(entries, list)
 
