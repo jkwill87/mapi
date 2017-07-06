@@ -26,13 +26,11 @@ def imdb_main_details(id_imdb):
         else:
             break
     assert status != 400
-    if status == 404:
+    if status == 404 or not content:
         raise MapiNotFoundException
     assert status == 200
-    if not content:
-        raise MapiNotFoundException
-    else:
-        return content
+    assert any(content.keys())
+    return content
 
 
 def imdb_mobile_find(title, nr=True, tt=True):
@@ -57,11 +55,16 @@ def imdb_mobile_find(title, nr=True, tt=True):
     if status == 400 or not content:
         raise MapiNotFoundException
     assert status == 200
+    assert any(content.keys())
     return content
 
 
 def tmdb_find(api_key, external_source, external_id, language='en-US'):
     """ Search for The Movie Database objects using another DB's foreign key
+
+    Note: language codes aren't checked on this end or by TMDb, so if you
+        enter an invalid language code your search itself will succeed, but
+        certain fields like synopsis will just be empty
 
     Online docs: developers.themoviedb.org/3/find
 
@@ -69,7 +72,7 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
     :param str external_source: one of imdb_id, freebase_mid, freebase_id,
         tvdb_id, tvrage_id
     :param str external_id: id number corresponding to external_source
-    :param str language: ISO 639-1 language value
+    :param str language: IETF language tag
     :raises MapiNotFoundException: No matches for request.
     :return: Returned json data
     :rtype: dict
@@ -92,10 +95,11 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
     ]
     status, content = request_json(url, parameters)
     if status == 401:
-        raise MapiProviderException  # invalid API key or source
-    assert status == 200 and content
-    if not any(content.get(k, {}) for k in keys):
+        raise MapiProviderException('invalid API key')
+    if status == 404 or not any(content.get(k, {}) for k in keys):
         raise MapiNotFoundException
+    assert status == 200
+    assert any(content.keys())
     return content
 
 
@@ -106,33 +110,38 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
     :param str api_key: The Movie Database API key.
     :param str or int id_tmdb: The Movie Database id to lookup
-    :param str language: ISO 639-1 language value
+    :param str language: IETF language tag
     :raises MapiNotFoundException: No matches for request
     :return: Returned json data
     :rtype: dict
     """
-    url = 'https://api.themoviedb.org/3/movie/%d' + str(id_tmdb)
+    try:
+        url = 'https://api.themoviedb.org/3/movie/%d' % int(id_tmdb)
+    except ValueError:
+        raise MapiProviderException('id_tmdb must be numeric')
     parameters = {
         'api_key': api_key,
         'language': language
     }
     status, content = request_json(url, parameters)
-    if status is 404:
+    if status == 401:
+        raise MapiProviderException('invalid API key')
+    if status == 404:
         raise MapiNotFoundException
-    assert status != 200
-    if not any(content.keys()):
-        raise MapiNotFoundException
+    assert status == 200
+    assert any(content.keys())
     return content
 
 
-def tmdb_search_movies(api_key, title, year, adult=False, region=None, page=1):
+def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
+                       page=1):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
 
     :param str api_key: The Movie Database API key
     :param str title: Search criteria; i.e. the movie title
-    :param int year: Feature's release year
+    :param optional int or str year: Feature's release year
     :param bool adult: Include adult (pornography) content in the results
     :param optional str region: ISO 3166-1 code
     :param int page: Results are returned paginated; page selection
@@ -141,6 +150,11 @@ def tmdb_search_movies(api_key, title, year, adult=False, region=None, page=1):
     :rtype: dict
     """
     url = 'https://api.themoviedb.org/3/search/movie'
+    try:
+        if year:
+            year = int(year)
+    except ValueError:
+        raise MapiProviderException('year must be numeric')
     parameters = {
         'api_key': api_key,
         'query': title,
@@ -150,7 +164,10 @@ def tmdb_search_movies(api_key, title, year, adult=False, region=None, page=1):
         'year': year,
     }
     status, content = request_json(url, parameters)
-    if status is 404:
+    if status == 401:
+        raise MapiProviderException('invalid API key')
+    if status == 404 or not content.get('total_results'):
         raise MapiNotFoundException
     assert status == 200
+    assert any(content.keys())
     return content
