@@ -47,13 +47,9 @@ def request_json(url, parameters=None, body=None, headers=None, agent=None):
         log.info("parameters: %s" % parameters)
     if body:
         method = 'POST'
-        if isinstance(body, str):
-            body = body.encode()
-        elif isinstance(body, dict):
-            body = json.dumps(body).encode()
         headers = headers or {}
         headers['content-type'] = 'application/json'
-        headers['content-length'] = len(body)
+        headers['content-length'] = str(len(body))
         headers['user-agent'] = get_user_agent(agent)
     else:
         method = 'GET'
