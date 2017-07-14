@@ -79,18 +79,20 @@ def request_json(url, parameters=None, body=None, headers=None, agent=None):
     return status, content
 
 
-def clean_dict(d):
+def clean_dict(target_dict, whitelist=None):
     """ Convenience function that removes a dicts keys that have falsy values
 
-    :param dict d: the dict to clean
+    :param dict target_dict: the dict to clean
+    :param optional set whitelist: if set, will filter keys outside of whitelist
     :return: the cleaned dict
     :rtype: dict
     """
-    assert isinstance(d, dict)
+    assert isinstance(target_dict, dict)
     return {
         str(k).strip(): str(v).strip()
-        for k, v in d.items()
+        for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
+        and (not whitelist or k in whitelist)
     }
 
 
