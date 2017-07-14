@@ -15,7 +15,7 @@ def imdb_main_details(id_imdb):
     :return: dict
     """
     if not match(r'tt\d+', id_imdb):
-        raise MapiNotFoundException
+        raise MapiProviderException('invalid imdb tt-const value')
     url = 'http://app.imdb.com/title/maindetails'
     parameters = {'tconst': id_imdb}
     status = content = None
@@ -80,6 +80,8 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
     sources = ['imdb_id', 'freebase_mid', 'freebase_id', 'tvdb_id', 'tvrage_id']
     if external_source not in sources:
         raise MapiProviderException('external_source must be in %s' % sources)
+    if external_source == 'imdb_id' and not match(r'tt\d+', external_id):
+        raise MapiProviderException('invalid imdb tt-const value')
     url = 'https://api.themoviedb.org/3/find/' + external_id or ''
     parameters = {
         'api_key': api_key,
@@ -166,7 +168,7 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
     status, content = request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
-    if status == 404 or not content.get('total_results'):
+    if status == 404 or status == 422 or not content.get('total_results'):
         raise MapiNotFoundException
     assert status == 200
     assert any(content.keys())
