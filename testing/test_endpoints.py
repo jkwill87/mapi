@@ -2,13 +2,17 @@ from os import environ
 from unittest import TestCase
 
 from mapi import log
+from mapi.constants import *
 from mapi.endpoints import *
+
+log.setLevel(20)
 
 GOONIES_IMDB_ID = 'tt0089218'
 GOONIES_TMDB_ID = '9340'
+JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'
-TMDB_API_KEY = environ.get('TMDB_API_KEY')
-log.setLevel(20)
+TMDB_API_KEY = environ.get(ENV_TMDB_API_KEY)
+TVDB_API_KEY = environ.get(ENV_TVDB_API_KEY)
 
 
 class TestImdbMainDetails(TestCase):
@@ -33,13 +37,17 @@ class TestImdbMainDetails(TestCase):
         self.assertIn('plot', result['data'])
         self.assertIn('outline', result['data']['plot'])
 
+    def test_invalid_id_imdb(self):
+        with self.assertRaises(MapiProviderException):
+            imdb_main_details(JUNK_TEXT)
+        with self.assertRaises(MapiProviderException):
+            imdb_main_details('')
+        with self.assertRaises(MapiProviderException):
+            imdb_main_details('The Goonies')
+
     def test_not_found(self):
         with self.assertRaises(MapiNotFoundException):
-            imdb_main_details(JUNK_TEXT)
-        with self.assertRaises(MapiNotFoundException):
-            imdb_main_details('')
-        with self.assertRaises(MapiNotFoundException):
-            imdb_main_details('The Goonies')
+            imdb_main_details(JUNK_IMDB_ID)
 
 
 class TestImdbMobileFind(TestCase):
@@ -131,9 +139,13 @@ class TestTmdbFind(TestCase):
         with self.assertRaises(MapiProviderException):
             tmdb_find(JUNK_TEXT, 'imdb_id', GOONIES_IMDB_ID)
 
+    def test_invalid_id_imdb(self):
+        with self.assertRaises(MapiProviderException):
+            tmdb_find(TMDB_API_KEY, 'imdb_id', JUNK_TEXT)
+
     def test_not_found(self):
         with self.assertRaises(MapiNotFoundException):
-            tmdb_find(TMDB_API_KEY, 'imdb_id', JUNK_TEXT)
+            tmdb_find(TMDB_API_KEY, 'imdb_id', JUNK_IMDB_ID)
 
     def test_invalid_provider(self):
         with self.assertRaises(MapiProviderException):

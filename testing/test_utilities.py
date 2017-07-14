@@ -172,7 +172,7 @@ class TestRequestJson(TestCase):
         )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'POST')
-        self.assertEqual(kwargs['json'], b'{"apple": "pie"}')
+        self.assertDictEqual(kwargs['json'], data)
 
     @patch('mapi.utilities.requests.request')
     def test_post_parameters(self, mock_request):
