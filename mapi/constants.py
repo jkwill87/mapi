@@ -23,20 +23,21 @@ API_MOVIE = {PROVIDER_IMDB, PROVIDER_TMDB}
 API_ALL = API_TELEVISION | API_MOVIE
 
 META_EPISODE = 'episode'
-META_ID = 'id_imdb'
+META_ID_IMDB = 'id_imdb'
+META_ID_TMDB = 'id_tmdb'
+META_ID_TVDB = 'id_tvdb'
+META_MEDIA = 'media'
+META_OVERVIEW = 'overview'
 META_SEASON = 'season'
 META_SERIES = 'series'
 META_SYNOPSIS = 'synopsis'
 META_TITLE = 'title'
 META_TYPE = 'type'
 META_YEAR = 'year'
-META_MEDIA = 'media'
-META_OVERVIEW = 'overview'
-META_ID_IMDB = 'id_imdb'
-META_ID_TVDB = 'id_tvdb'
 
 PARAMS_MOVIE = {
-    META_ID,
+    META_ID_IMDB,
+    META_ID_TMDB,
     META_SYNOPSIS,
     META_TITLE,
     META_TYPE,
@@ -45,7 +46,7 @@ PARAMS_MOVIE = {
 
 PARAMS_TELEVISION = {
     META_EPISODE,
-    META_ID,
+    META_ID_TVDB,
     META_SEASON,
     META_SERIES,
     META_SYNOPSIS,
