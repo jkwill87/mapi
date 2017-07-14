@@ -68,7 +68,7 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
 
     Online docs: developers.themoviedb.org/3/find
 
-    :param str api_key: The Movie Database API key
+    :param str api_key: A Movie Database API key
     :param str external_source: one of imdb_id, freebase_mid, freebase_id,
         tvdb_id, tvrage_id
     :param str external_id: id number corresponding to external_source
@@ -110,7 +110,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
     Online docs: developers.themoviedb.org/3/movies
 
-    :param str api_key: The Movie Database API key.
+    :param str api_key: A Movie Database API key
     :param str or int id_tmdb: The Movie Database id to lookup
     :param str language: IETF language tag
     :raises MapiNotFoundException: No matches for request
@@ -136,12 +136,12 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
 
 def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
-                       page=1):
+        page=1):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
 
-    :param str api_key: The Movie Database API key
+    :param str api_key: A Movie Database API key
     :param str title: Search criteria; i.e. the movie title
     :param optional int or str year: Feature's release year
     :param bool adult: Include adult (pornography) content in the results
@@ -172,4 +172,39 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
         raise MapiNotFoundException
     assert status == 200
     assert any(content.keys())
+    return content
+
+
+def tvdb_login(api_key):
+    """ Logs into TVDb using the provided api key
+
+    You can register for a free TVDb key at thetvdb.com/?tab=apiregister
+
+    :param str api_key: A Television Database api key
+    :return: Token required for all other endpoints; expires after 24 hours
+    :rtype: str
+    """
+    url = 'https://api.thetvdb.com/login'
+    body = {'apikey': api_key}
+    status, content = request_json(url, body=body)
+    if status == 401:
+        raise MapiProviderException
+    assert status == 200
+    assert content.get('token')
+    return content
+
+
+def tvdb_refresh_token(token):
+    """ Refreshes token
+
+    :param token: token to refresh
+    :return: Token required for all other endpoints; expires after 24 hours
+    """
+    url = 'https://api.thetvdb.com/refresh_token'
+    headers = {'Authorization': 'Bearer %s' % token}
+    status, content = request_json(url, headers=headers)
+    if status == 401:
+        raise MapiException
+    assert status == 200
+    assert content.get('token')
     return content

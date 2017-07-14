@@ -11,8 +11,8 @@ GOONIES_IMDB_ID = 'tt0089218'
 GOONIES_TMDB_ID = '9340'
 JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'
-TMDB_API_KEY = environ.get(ENV_TMDB_API_KEY)
-TVDB_API_KEY = environ.get(ENV_TVDB_API_KEY)
+TMDB_API_KEY = environ.get(API_KEY_ENV_TMDB)
+TVDB_API_KEY = environ.get(API_KEY_ENV_TVDB)
 
 
 class TestImdbMainDetails(TestCase):

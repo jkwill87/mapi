@@ -73,6 +73,9 @@ television_meta = [{
     'id_imdb': 'tt0789891',
 }]
 
+API_KEY_TMDB = environ.get(API_KEY_ENV_TMDB)
+API_KEY_TVDB = environ.get(API_KEY_ENV_TVDB)
+
 
 class TestProviderFactory(TestCase):
     def test_imdb(self):
@@ -80,7 +83,7 @@ class TestProviderFactory(TestCase):
         self.assertIsInstance(client, IMDb)
 
     def test_tmdb(self):
-        client = provider_factory(PROVIDER_TMDB)
+        client = provider_factory(PROVIDER_TMDB, api_key=API_KEY_TMDB)
         self.assertIsInstance(client, TMDb)
 
     def test_non_existant(self):
@@ -138,6 +141,9 @@ class TestImdb(TestCase):
 
 
 class TestTmdb(TestCase):
+    def setUp(self):
+        self.client = TMDb(api_key=API_KEY_TMDB)
+
     def test_registrations(self):
         self.assertTrue(PROVIDER_TMDB == 'tmdb')
         self.assertTrue(PROVIDER_TMDB in API_ALL)
@@ -149,59 +155,53 @@ class TestTmdb(TestCase):
         self.assertTrue(has_provider_support(PROVIDER_TMDB, MEDIA_MOVIE))
 
     def test_search_id_imdb_implicit(self):
-        client = TMDb()
         for meta in movie_meta:
             meta = {m: meta[m] for m in meta if m != 'id_tmdb'}
             with self.subTest(id_imdb=meta['id_imdb']):
-                results = client.search(**meta)
+                results = self.client.search(**meta)
                 self.assertTrue(results)
                 result = results[0]
                 self.assertEqual(meta['title'], result['title'])
                 self.assertEqual(meta['year'], result['year'])
 
     def test_search_id_imdb_explicit(self):
-        client = TMDb()
         for meta in movie_meta:
             with self.subTest(id_imdb=meta['id_imdb']):
-                results = client.search(id_imdb=meta['id_imdb'])
+                results = self.client.search(id_imdb=meta['id_imdb'])
                 self.assertTrue(results)
                 result = results[0]
                 self.assertEqual(meta['title'], result['title'])
                 self.assertEqual(meta['year'], result['year'])
 
     def test_search_id_tmdb_implicit(self):
-        client = TMDb()
         for meta in movie_meta:
             with self.subTest(id_tmdb=meta['id_tmdb']):
-                results = client.search(**meta)
+                results = self.client.search(**meta)
                 self.assertTrue(results)
                 result = results[0]
                 self.assertEqual(meta['title'], result['title'])
                 self.assertEqual(meta['year'], result['year'])
 
     def test_search_id_tmdb_explicit(self):
-        client = TMDb()
         for meta in movie_meta:
             with self.subTest(id_tmdb=meta['id_tmdb']):
-                results = client.search(id_tmdb=meta['id_tmdb'])
+                results = self.client.search(id_tmdb=meta['id_tmdb'])
                 self.assertTrue(results)
                 result = results[0]
                 self.assertEqual(meta['title'], result['title'])
                 self.assertEqual(meta['year'], result['year'])
 
     def test_search_title_implicit(self):
-        client = TMDb()
         for meta in movie_meta:
             meta_without_id = {k: v for k, v in meta.items() if k[:2] != 'id'}
             with self.subTest(title=meta['title']):
-                results = client.search(**meta_without_id)
+                results = self.client.search(**meta_without_id)
                 has_id = any(meta['id_tmdb'] in r['id_tmdb'] for r in results)
                 self.assertTrue(has_id)
 
     def test_search_title_explicit(self):
-        client = TMDb()
         for meta in movie_meta:
             with self.subTest(title=meta['title']):
-                results = client.search(title=meta['title'])
+                results = self.client.search(title=meta['title'])
                 has_id = any(meta['id_tmdb'] in r['id_tmdb'] for r in results)
                 self.assertTrue(has_id)

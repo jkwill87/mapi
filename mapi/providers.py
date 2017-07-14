@@ -139,7 +139,7 @@ class TMDb:
         """
         self.year_delta = options.get('year_delta', 5)
         self.max_hits = options.get('max_hits', 25)
-        self.api_key = options.get('api_key') or environ.get(ENV_TMDB_API_KEY)
+        self.api_key = options.get('api_key') or environ.get(API_KEY_ENV_TMDB)
         if not self.api_key:
             raise MapiProviderException('TMDb requires api key')
 
