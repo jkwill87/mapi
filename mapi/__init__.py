@@ -1,9 +1,18 @@
 # coding=utf-8
 
-""" mapi is an API for media database APIs which allows you to lookup and search
-for metadata using simple, common interface.
+"""
+                       o
+  _  _  _    __,    _
+ / |/ |/ |  /  |  |/ \_|
+   |  |  |_/\_/|_/|__/ |_/
+                 /|
+                 \|
+
+mapi is an API for media database APIs which allows you to lookup and search for
+metadata using simple, common interface.
 
 See https://github.com/jkwill87/mapi for more information.
+
 """
 
 import logging
