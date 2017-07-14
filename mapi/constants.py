@@ -1,4 +1,5 @@
 # coding=utf-8
+
 from datetime import date as _date
 
 ABOUT_AUTHOR = 'Jessy Williams'
@@ -66,4 +67,5 @@ USER_AGENT_EDGE = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 USER_AGENT_IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1'
 USER_AGENT_ALL = (USER_AGENT_CHROME, USER_AGENT_EDGE, USER_AGENT_IOS)
 
-ENV_TMDB_API_KEY = 'TMDB_API_KEY'
+ENV_TMDB_API_KEY = 'API_KEY_TMDB'
+ENV_TVDB_API_KEY = 'API_KEY_TVDB'
