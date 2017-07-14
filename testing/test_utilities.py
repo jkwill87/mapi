@@ -203,7 +203,7 @@ class TestRequestJson(TestCase):
         self.assertNotIn('orange', kwargs['headers'])
 
 
-class TestStripDict(TestCase):
+class TestCleanDict(TestCase):
     def test_str_values(self):
         dict_in = {
             'apple': 'pie',
@@ -282,6 +282,12 @@ class TestStripDict(TestCase):
         }
         dict_out = clean_dict(dict_in)
         self.assertDictEqual(dict_out, dict_want)
+
+    def test_whitelist(self):
+        whitelist = {'apple', 'raspberry', 'pecan'}
+        dict_in = {'apple': 'pie', 'pecan': 'pie', 'pumpkin': 'pie'}
+        dict_out = {'apple': 'pie', 'pecan': 'pie'}
+        self.assertDictEqual(clean_dict(dict_in, whitelist), dict_out)
 
 
 class TestGetUserAgent(TestCase):
