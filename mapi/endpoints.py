@@ -3,7 +3,7 @@
 from re import match
 from time import sleep
 
-from mapi.constants import PLATFORM_IOS
+from mapi.constants import PLATFORM_IOS, TVDB_LANGUAGE_CODES
 from mapi.exceptions import *
 from mapi.utilities import request_json
 
@@ -136,7 +136,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
 
 def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
-        page=1):
+                       page=1):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
@@ -146,7 +146,7 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
     :param optional int or str year: Feature's release year
     :param bool adult: Include adult (pornography) content in the results
     :param optional str region: ISO 3166-1 code
-    :param int page: Results are returned paginated; page selection
+    :param int page: Results are returned paginated; page selection; default 1
     :raises MapiNotFoundException: No matches for request
     :return: Returned json data
     :rtype: dict
@@ -178,33 +178,220 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
 def tvdb_login(api_key):
     """ Logs into TVDb using the provided api key
 
-    You can register for a free TVDb key at thetvdb.com/?tab=apiregister
+    Note: You can register for a free TVDb key at thetvdb.com/?tab=apiregister
+    Online docs: api.thetvdb.com/swagger#!/Authentication/post_login
 
     :param str api_key: A Television Database api key
-    :return: Token required for all other endpoints; expires after 24 hours
+    :return: JWT token required for all other endpoints; expires after 24 hours
     :rtype: str
     """
     url = 'https://api.thetvdb.com/login'
     body = {'apikey': api_key}
     status, content = request_json(url, body=body)
     if status == 401:
-        raise MapiProviderException
-    assert status == 200
-    assert content.get('token')
-    return content
+        raise MapiProviderException('invalid token')
+    assert status == 200 and content.get('token')
+    return content['token']
 
 
 def tvdb_refresh_token(token):
-    """ Refreshes token
+    """ Refreshes JWT token
 
-    :param token: token to refresh
-    :return: Token required for all other endpoints; expires after 24 hours
+    Online docs: api.thetvdb.com/swagger#!/Authentication/get_refresh_token
+
+    :param str token: Token to refresh
+    :return: JWT token required for all other endpoints; expires after 24 hours
+    :rtype: str
     """
     url = 'https://api.thetvdb.com/refresh_token'
     headers = {'Authorization': 'Bearer %s' % token}
     status, content = request_json(url, headers=headers)
     if status == 401:
-        raise MapiException
+        raise MapiProviderException('invalid token')
+    assert status == 200 and content.get('token')
+    return content['token']
+
+
+def tvdb_episodes_id(token, id_tvdb, lang='en'):
+    """ Returns the full information for a given episode id
+
+    Online docs: https://api.thetvdb.com/swagger#!/Episodes
+
+    :param str token: TVDb JWT token; generate using login/ reload endpoints
+    :param str or int id_tvdb: TVDb episode id
+    :param str lang: TVDb language abbreviation code; defaults to 'en' for
+        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
+    :return: Returned json data
+    :rtype: dict
+    """
+    if lang not in TVDB_LANGUAGE_CODES:
+        raise MapiProviderException(
+            "'lang' must be one of %s" % ','.join(TVDB_LANGUAGE_CODES)
+        )
+    try:
+        url = 'https://api.thetvdb.com/episodes/%d' % int(id_tvdb)
+    except ValueError:
+        raise MapiProviderException('id_tvdb must be numeric')
+    headers = {
+        'Accept-Language': lang,
+        'Authorization': 'Bearer %s' % token
+    }
+    status, content = request_json(url, headers=headers)
+    if status == 401:
+        raise MapiProviderException('invalid token')
+    elif status == 404:
+        raise MapiNotFoundException
     assert status == 200
-    assert content.get('token')
+    return content
+
+
+def tvdb_search_series(token, series, id_imdb, id_zap2it, lang='en'):
+    """ Allows the user to search for a series based on the following parameters
+
+    Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
+
+    :param str token: TVDb JWT token; generate using login/ reload endpoints
+    :param optional str series: Name of the series
+    :param optional str or int id_imdb: IMDb episode id code
+    :param optional str or int id_zap2it: Zap2It episode id code
+    :param str lang: TVDb language abbreviation code; defaults to 'en' for
+        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
+    :return: Returned json data
+    :rtype: dict
+    """
+    if lang not in TVDB_LANGUAGE_CODES:
+        raise MapiProviderException(
+            "'lang' must be one of %s" % ','.join(TVDB_LANGUAGE_CODES)
+        )
+    url = 'https://api.thetvdb.com/refresh_token'
+    parameters = {
+        'name': series,
+        'imdbId': id_imdb,
+        'zap2itId': id_zap2it
+    }
+    headers = {
+        'Accept-Language': lang,
+        'Authorization': 'Bearer %s' % token
+    }
+    status, content = request_json(url, parameters, headers=headers)
+    if status == 401:
+        raise MapiProviderException('invalid token')
+    elif status == 404:
+        raise MapiNotFoundException
+    assert status == 200
+    return content
+
+
+def tvdb_series_id(token, id_tvdb, lang='en'):
+    """ Returns a series records that contains all information known about a
+    particular series id
+
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id
+
+    :param str token: TVDb JWT token; generate using login/ reload endpoints
+    :param str or int id_tvdb: TVDb series id
+    :param str lang: TVDb language abbreviation code; defaults to 'en' for
+        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
+    :return: Returned json data
+    :rtype: dict
+    """
+    if lang not in TVDB_LANGUAGE_CODES:
+        raise MapiProviderException(
+            "'lang' must be one of %s" % ','.join(TVDB_LANGUAGE_CODES)
+        )
+    try:
+        url = 'https://api.thetvdb.com/series/%d' % int(id_tvdb)
+    except ValueError:
+        raise MapiProviderException('id_tvdb must be numeric')
+    headers = {
+        'Accept-Language': lang,
+        'Authorization': 'Bearer %s' % token
+    }
+    status, content = request_json(url, headers=headers)
+    if status == 401:
+        raise MapiProviderException('invalid token')
+    elif status == 404:
+        raise MapiNotFoundException
+    assert status == 200
+    return content
+
+
+def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
+    """ All episodes for a given series
+
+    Note: Paginated with 100 results per page
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes
+
+    :param str token: TVDb JWT token; generate using login/ reload endpoints
+    :param str or int id_tvdb: TVDb series id
+    :param int page: Page selection; default 1
+    :param str lang: TVDb language abbreviation code; defaults to 'en' for
+        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
+    :return: Returned json data
+    :rtype: dict
+    """
+    if lang not in TVDB_LANGUAGE_CODES:
+        raise MapiProviderException(
+            "'lang' must be one of %s" % ','.join(TVDB_LANGUAGE_CODES)
+        )
+    try:
+        url = 'https://api.thetvdb.com/series/%d/episodes' % int(id_tvdb)
+    except ValueError:
+        raise MapiProviderException('id_tvdb must be numeric')
+    headers = {
+        'Accept-Language': lang,
+        'Authorization': 'Bearer %s' % token
+    }
+    parameters = {'page': page}
+    status, content = request_json(url, parameters, headers=headers)
+    if status == 401:
+        raise MapiProviderException('invalid token')
+    elif status == 404:
+        raise MapiNotFoundException
+    assert status == 200
+    return content
+
+
+def tvdb_series_episodes_query(token, id_tvdb, id_imdb, episode, season, page=1,
+                               lang='en'):
+    """ This route allows the user to query against episodes for the given series
+
+    Note: Paginated with 100 results per page
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes_query
+
+    :param str token: TVDb JWT token; generate using login/ reload endpoints
+    :param optional str or int id_tvdb: TVDb series id
+    :param optional str or int id_imdb: IMDb episode id code
+    :param optional str or int episode: Series' episode number
+    :param optional str or int season: Series' season number
+    :param int page: Page selection; default 1
+    :param str lang: TVDb language abbreviation code; defaults to 'en' for
+        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
+    :return: Returned json data
+    :rtype: dict
+    """
+    if lang not in TVDB_LANGUAGE_CODES:
+        raise MapiProviderException(
+            "'lang' must be one of %s" % ','.join(TVDB_LANGUAGE_CODES)
+        )
+    if not id_imdb or id_imdb:
+        raise MapiProviderException('id_tvdb or id_imdb required for search')
+    url = 'https://api.thetvdb.com/refresh_token'
+    headers = {
+        'Accept-Language': lang,
+        'Authorization': 'Bearer %s' % token
+    }
+    parameters = {
+        'id': id_tvdb,
+        'imdbId': id_imdb,
+        'airedSeason': season,
+        'airedEpisode': episode,
+        'page': page
+    }
+    status, content = request_json(url, parameters, headers=headers)
+    if status == 401:
+        raise MapiProviderException('invalid token')
+    elif status == 404:
+        raise MapiNotFoundException
+    assert status == 200
     return content

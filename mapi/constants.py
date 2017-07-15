@@ -67,5 +67,10 @@ USER_AGENT_EDGE = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 USER_AGENT_IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1'
 USER_AGENT_ALL = (USER_AGENT_CHROME, USER_AGENT_EDGE, USER_AGENT_IOS)
 
+TVDB_LANGUAGE_CODES = [
+    'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it',
+    'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ru', 'sl', 'sv', 'tr', 'zh'
+]
+
 API_KEY_ENV_TMDB = 'API_KEY_TMDB'
 API_KEY_ENV_TVDB = 'API_KEY_TVDB'
