@@ -1,9 +1,7 @@
 from json import loads
 from unittest import TestCase
 from unittest.mock import patch
-
-from requests import request
-
+from requests import Session
 from mapi.utilities import *
 
 
@@ -17,7 +15,7 @@ class MockRequestResponse:
 
 
 class TestRequestJson(TestCase):
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_2xx_status(self, mock_request):
         with self.subTest(code=200):
             mock_response = MockRequestResponse(200, b'{}')
@@ -30,21 +28,21 @@ class TestRequestJson(TestCase):
             status, _ = request_json('http://...')
             self.assertEqual(status, 299)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_4xx_status(self, mock_request):
         mock_response = MockRequestResponse(400, b'{}')
         mock_request.return_value = mock_response
         status, _ = request_json('http://...')
         self.assertEqual(status, 400)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_5xx_status(self, mock_request):
         mock_response = MockRequestResponse(500, b'{}')
         mock_request.return_value = mock_response
         status, _ = request_json('http://...')
         self.assertEqual(status, 500)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_2xx_data(self, mock_request):
         with self.subTest(code=200):
             mock_response = MockRequestResponse(200, b'{"status":true}')
@@ -57,21 +55,21 @@ class TestRequestJson(TestCase):
             _, content = request_json('http://...')
             self.assertTrue(content)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_4xx_data(self, mock_request):
         mock_response = MockRequestResponse(400, b'{"status":false}')
         mock_request.return_value = mock_response
         _, content = request_json('http://...')
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_5xx_data(self, mock_request):
         mock_response = MockRequestResponse(500, b'{"status":false}')
         mock_request.return_value = mock_response
         _, content = request_json('http://...')
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_json_data(self, mock_request):
         json_data = b"""{
             "status": true,
@@ -95,7 +93,7 @@ class TestRequestJson(TestCase):
         self.assertEqual(status, 200)
         self.assertDictEqual(content, json_dict)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_xml_data(self, mock_request):
         xml_data = b"""
             <?xml version="1.0" encoding="UTF-8" ?>
@@ -113,7 +111,7 @@ class TestRequestJson(TestCase):
         self.assertEqual(status, 200)
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_html_data(self, mock_request):
         html_data = b"""
             <!DOCTYPE html>
@@ -134,9 +132,9 @@ class TestRequestJson(TestCase):
         self.assertEqual(status, 200)
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_get_headers(self, mock_request):
-        mock_request.side_effect = request
+        mock_request.side_effect = Session().request
         request_json(
             url='http://google.com',
             headers={'apple': 'pie', 'orange': None}
@@ -145,27 +143,27 @@ class TestRequestJson(TestCase):
         self.assertEqual(kwargs['method'], 'GET')
         self.assertEqual(kwargs['headers'], {'apple': 'pie'})
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_get_parameters(self, mock_request):
         test_parameters = {'apple': 'pie'}
-        mock_request.side_effect = request
+        mock_request.side_effect = Session().request
         request_json(
             url='http://google.com',
             parameters=test_parameters
         )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'GET')
-        self.assertTrue(kwargs['params'] == test_parameters)
+        self.assertTrue(kwargs['params'] == d2l(test_parameters))
 
     def test_get_invalid_url(self):
         status, content = request_json('mapi rulez')
         self.assertEqual(status, 400)
         self.assertIsNone(content)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_post_body(self, mock_request):
         data = {'apple': 'pie'}
-        mock_request.side_effect = request
+        mock_request.side_effect = Session().request
         request_json(
             url='http://google.com',
             body=data
@@ -174,9 +172,9 @@ class TestRequestJson(TestCase):
         self.assertEqual(kwargs['method'], 'POST')
         self.assertDictEqual(kwargs['json'], data)
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_post_parameters(self, mock_request):
-        mock_request.side_effect = request
+        mock_request.side_effect = Session().request
         data = {'apple': 'pie', 'orange': None}
         request_json(
             url='http://google.com',
@@ -185,12 +183,11 @@ class TestRequestJson(TestCase):
         )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'POST')
-        self.assertIn('apple', kwargs['params'])
-        self.assertNotIn('orange', kwargs['params'])
+        self.assertListEqual(d2l(clean_dict(data)), kwargs['params'])
 
-    @patch('mapi.utilities.requests.request')
+    @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_post_headers(self, mock_request):
-        mock_request.side_effect = request
+        mock_request.side_effect = session.request
         data = {'apple': 'pie', 'orange': None}
         request_json(
             url='http://google.com',
@@ -294,11 +291,11 @@ class TestGetUserAgent(TestCase):
     def test_explicit(self):
         for platform in PLATFORM_ALL:
             with self.subTest(platform=platform):
-                self.assertIn(get_user_agent(platform), USER_AGENT_ALL)
+                self.assertIn(get_user_agent(platform), AGENT_ALL)
 
     def test_random(self):
         for i in range(10):
-            self.assertIn(get_user_agent(), USER_AGENT_ALL)
+            self.assertIn(get_user_agent(), AGENT_ALL)
 
 
 class TestFilterMeta(TestCase):

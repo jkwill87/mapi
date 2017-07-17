@@ -2,7 +2,7 @@
 
 
 class MapiException(Exception):
-    """ Base exception for the mapi module.
+    """ Base exception for the mapi package.
     """
 
 

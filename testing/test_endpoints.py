@@ -1,18 +1,20 @@
 from os import environ
 from unittest import TestCase
 
-from mapi import log
 from mapi.constants import *
 from mapi.endpoints import *
+from mapi.utilities import session
 
-log.setLevel(20)
-
-GOONIES_IMDB_ID = 'tt0089218'
-GOONIES_TMDB_ID = '9340'
 JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'
 TMDB_API_KEY = environ.get(API_KEY_ENV_TMDB)
 TVDB_API_KEY = environ.get(API_KEY_ENV_TVDB)
+GOONIES_IMDB_ID = 'tt0089218'
+GOONIES_TMDB_ID = 9340
+LOST_TVDB_ID_EPISODE = 407452
+LOST_TVDB_ID_SERIES = 73739
+
+session.cache.clear()  # clear caches
 
 
 class TestImdbMainDetails(TestCase):

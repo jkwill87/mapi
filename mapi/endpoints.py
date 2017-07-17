@@ -187,7 +187,7 @@ def tvdb_login(api_key):
     """
     url = 'https://api.thetvdb.com/login'
     body = {'apikey': api_key}
-    status, content = request_json(url, body=body)
+    status, content = request_json(url, body=body, cache=False)
     if status == 401:
         raise MapiProviderException('invalid token')
     assert status == 200 and content.get('token')
@@ -205,7 +205,7 @@ def tvdb_refresh_token(token):
     """
     url = 'https://api.thetvdb.com/refresh_token'
     headers = {'Authorization': 'Bearer %s' % token}
-    status, content = request_json(url, headers=headers)
+    status, content = request_json(url, headers=headers, cache=False)
     if status == 401:
         raise MapiProviderException('invalid token')
     assert status == 200 and content.get('token')
