@@ -124,7 +124,6 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
     assert url
     status = 400
     log.info("url: %s" % url)
-    context = cm(lambda: iter([None])) if cache else requests_cache.disabled
 
     if isinstance(headers, dict):
         headers = clean_dict(headers)
@@ -141,14 +140,14 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
         method = 'GET'
 
     try:
-        with context():
-            response = session.request(
-                url=url,
-                params=parameters,
-                json=body,
-                headers=headers,
-                method=method,
-            )
+        session._is_cache_disabled = not cache  # yes, i'm a bad person
+        response = session.request(
+            url=url,
+            params=parameters,
+            json=body,
+            headers=headers,
+            method=method,
+        )
         status = response.status_code
         content = response.json() if status // 100 == 2 else None
         cache = getattr(response, 'from_cache', False)

@@ -187,7 +187,7 @@ class TestRequestJson(TestCase):
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_post_headers(self, mock_request):
-        mock_request.side_effect = session.request
+        mock_request.side_effect = Session().request
         data = {'apple': 'pie', 'orange': None}
         request_json(
             url='http://google.com',
