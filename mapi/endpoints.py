@@ -346,7 +346,6 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
         'Authorization': 'Bearer %s' % token
     }
     parameters = {
-        'id': id_tvdb,
         'airedSeason': season,
         'airedEpisode': episode,
         'page': page
