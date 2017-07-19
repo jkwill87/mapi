@@ -359,7 +359,8 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
     return content
 
 
-def tvdb_search_series(token, series, id_imdb, id_zap2it, lang='en'):
+def tvdb_search_series(token, series=None, id_imdb=None, 
+        id_zap2it=None, lang='en'):
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
