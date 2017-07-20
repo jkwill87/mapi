@@ -136,7 +136,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
 
 def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
-                       page=1):
+        page=1):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
@@ -316,7 +316,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
 
 
 def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
-                               page=1, lang='en'):
+        page=1, lang='en'):
     """ This route allows the user to query against episodes for the given series
 
     Note: Paginated with 100 results per page; omitted imdbId, when would you
@@ -359,16 +359,16 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
     return content
 
 
-def tvdb_search_series(token, series=None, id_imdb=None, 
-        id_zap2it=None, lang='en'):
+def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
+        lang='en'):
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
-
+    Note: results a maximum of 100 entries per page, no option for pagination
     :param str token: TVDb JWT token; generate using login/ reload endpoints
     :param optional str series: Name of the series
-    :param optional str or int id_imdb: IMDb episode id code
-    :param optional str or int id_zap2it: Zap2It episode id code
+    :param optional str id_imdb: IMDb series id code
+    :param optional str id_zap2it: Zap2It series id code
     :param str lang: TVDb language abbreviation code; defaults to 'en' for
         english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
     :return: Returned json data
@@ -378,7 +378,7 @@ def tvdb_search_series(token, series=None, id_imdb=None,
         raise MapiProviderException(
             "'lang' must be one of %s" % ','.join(TVDB_LANGUAGE_CODES)
         )
-    url = 'https://api.thetvdb.com/refresh_token'
+    url = 'https://api.thetvdb.com/search/series'
     parameters = {
         'name': series,
         'imdbId': id_imdb,
@@ -391,6 +391,9 @@ def tvdb_search_series(token, series=None, id_imdb=None,
     status, content = request_json(url, parameters, headers=headers)
     if status == 401:
         raise MapiProviderException('invalid token')
+    elif status == 405:
+        raise MapiProviderException(
+            'series, id_imdb, id_zap2it parameters are mutually exclusive')
     elif status == 404:
         raise MapiNotFoundException
     assert status == 200
