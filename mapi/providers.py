@@ -15,7 +15,7 @@ def provider_factory(provider, **options):
 
     :param provider: one of the constants contained within the API_ALL or their
         resolved value
-    :param dict options: Optional kwargs; passed on to class constructor.
+    :param options: Optional kwargs; passed on to class constructor.
     :keyword str api_key: Some API providers require an API key to use their
         service
     :keyword int year_delta:  If set and a year is provided for a movie query,
@@ -31,8 +31,8 @@ def provider_factory(provider, **options):
         raise MapiException(msg)
     return {
         PROVIDER_IMDB: IMDb,
-        PROVIDER_TMDB: TMDb
-        # DB_TVDB: TVDb  # TODO
+        PROVIDER_TMDB: TMDb,
+        PROVIDER_TVDB: TVDb
     }[provider.lower()](**options)
 
 
@@ -41,9 +41,9 @@ class IMDb:
     """
 
     def __init__(self, **options):
-        """ Initializes an IMDb provider
+        """ Initializes the IMDb provider
 
-        :param dict options: Optional kwargs; see below..
+        :param options: Optional kwargs; see below..
         :keyword int year_delta: If set and a year is provided for a movie
             query, results will be filtered around this value inclusively.
         :keyword int max_hits: Will restrict the maximum number of responses for
@@ -57,7 +57,7 @@ class IMDb:
         """ Searches IMDb for movie metadata
 
         :param kwargs parameters: Search parameters
-        :keyword str id_imdb: IMDb primary key; must be prefixed with 'tt'
+        :keyword str id_imdb: IMDb movie id key; must be prefixed with 'tt'
         :keyword str title: Feature title
         :keyword optional str or int year: Feature year
         :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
@@ -120,13 +120,13 @@ class IMDb:
 
 
 class TMDb:
-    """ Queries the TMDb mobile API
+    """ Queries the TMDb API
     """
 
     def __init__(self, **options):
-        """ Initializes an TMDb provider
+        """ Initializes the TMDb provider
 
-        :param dict options: Optional kwargs; see below..
+        :param options: Optional kwargs; see below..
         :keyword int year_delta: If set and a year is provided for a movie
             query, results will be filtered around this value inclusively.
         :keyword int max_hits: Will restrict the maximum number of responses for
@@ -139,16 +139,18 @@ class TMDb:
         """
         self.year_delta = options.get('year_delta', 5)
         self.max_hits = options.get('max_hits', 25)
-        self.api_key = options.get('api_key') or environ.get(ENV_TMDB_API_KEY)
-        if not self.api_key:
+        api_key = options.get('api_key') or environ.get(API_KEY_ENV_TMDB)
+        if isinstance(api_key, str):
+            self.api_key = api_key
+        else:
             raise MapiProviderException('TMDb requires api key')
 
     def search(self, **parameters):
         """ Searches TMDb for movie metadata
 
         :param kwargs parameters: Search parameters
-        :keyword str id_tmdb: TMDb primary key; must be numeric
-        :keyword str id_imdb: IMDb primary key; must be prefixed with 'tt'
+        :keyword str id_tmdb: TMDb movie id key; must be numeric
+        :keyword str id_imdb: IMDb movie id key; must be prefixed with 'tt'
         :keyword str title: Feature title
         :keyword optional str or int year: Feature year
         :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
@@ -215,4 +217,108 @@ class TMDb:
             elif page >= page_max:
                 break
             page += 1
+        return metadata
+
+
+class TVDb:
+    """ Queries the TVDb API
+    """
+
+    def __init__(self, **options):
+        """ Initializes the TVDb provider
+
+        :param options: Optional kwargs; see below..
+        :keyword int year_delta: If set and a year is provided for a movie
+            query, results will be filtered around this value inclusively.
+        :keyword int max_hits: Will restrict the maximum number of responses for
+            a search. If unset or None, searches yield as many as possible from
+            the API provider.
+        :keyword str api_key: TVDb developer API key; required to either be
+            provided or available from the TVDb_API_KEY environment variable
+        :raises MapiProviderException: If a TVDb key is not provided or found in
+            the environment variables
+        """
+        self.year_delta = options.get('year_delta', 5)
+        self.max_hits = options.get('max_hits', 25)
+        api_key = options.get('api_key') or environ.get(API_KEY_ENV_TVDB)
+        if isinstance(api_key, str):
+            self.token = endpoints.tvdb_login(api_key)
+        else:
+            raise MapiProviderException('TVDb requires api key')
+
+    def search(self, **parameters):
+        """ Searches TVDb for movie metadata
+
+        TODO: Consider making parameters for episode ids
+
+        :param kwargs parameters: Search parameters
+        :keyword str id_tvdb: TVDb series id key; must be numeric
+        :keyword str id_imdb: IMDb series id key; must be prefixed with 'tt'
+        :keyword str series: Series name
+        :keyword str or int season: Aired season number
+        :keyword str or int episode: Aired episode number
+        :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
+        :return list of dict: Movie metadata; see readme for mapping details
+        :rtype: dict
+        """
+        parameters = clean_dict(parameters, PARAMS_TELEVISION)
+        id_tvdb = parameters.get('id_tvdb')
+        id_imdb = parameters.get('id_imdb')
+        series = parameters.get('series')
+        season = parameters.get('season')
+        episode = parameters.get('episode')
+
+        if id_tvdb:
+            metadata = self._search_id_tvdb(id_tvdb, season, episode)
+        elif id_imdb:
+            metadata = self._search_id_imdb(id_imdb, season, episode)
+        elif series:
+            metadata = self._search_series(series, season, episode)
+        else:
+            raise MapiNotFoundException
+        return filter_meta(metadata, self.max_hits)
+
+    def _search_id_tvdb(self, id_tvdb, season, episode):
+        metadata = list()
+        series_data = endpoints.tvdb_series_id(self.token, id_tvdb)
+        page = 1
+        page_max = -(-self.max_hits // 100) if self.max_hits else 5
+        while True:
+            episode_data = endpoints.tvdb_series_episodes_query(self.token,
+                id_tvdb, episode, season)
+            for entry in episode_data['data']:
+                metadata.append({
+                    META_SERIES: series_data['data']['seriesName'],
+                    META_SEASON: str(entry['airedSeason']),
+                    META_EPISODE: str(entry['airedEpisodeNumber']),
+                    META_TITLE: entry['episodeName'],
+                    META_SYNOPSIS: str(entry['overview'])
+                        .replace('\r\n', '').replace('  ', '').strip(),
+                    META_MEDIA: MEDIA_TELEVISION,
+                    META_ID_TVDB: str(id_tvdb),
+                })
+            if page == episode_data['links']['last']:
+                break
+            elif page >= page_max:
+                break
+            page += 1
+        return metadata
+
+    def _search_id_imdb(self, id_imdb, season, episode):
+        series_data = endpoints.tvdb_search_series(self.token, id_imdb=id_imdb)
+        id_tvdb = (series_data['data'][0]['id'])
+        return self._search_id_tvdb(id_tvdb, season, episode)
+
+    def _search_series(self, series, season, episode):
+        metadata = list()
+        series_data = endpoints.tvdb_search_series(self.token, series)
+        entries = [entry['id'] for entry in series_data['data'][:5]]
+
+        for id_tvdb in entries:
+            try:
+                metadata += (self._search_id_tvdb(id_tvdb, season, episode))
+            except MapiNotFoundException:
+                pass  # Entry may not have requested episode or may be banned
+        if not metadata:
+            raise MapiNotFoundException
         return metadata

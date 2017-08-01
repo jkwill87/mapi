@@ -94,8 +94,8 @@ ENV/
 .mypy_cache/
 
 # other
-.idea
+*.monopic
 *.sqlite
+.idea
 .vscode
 playground.py
-scripts
