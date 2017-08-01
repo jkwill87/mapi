@@ -1,4 +1,11 @@
 language: python
 python:
-  - "3.6"
-install: "pip install -r requirements.txt"
+#  - '2.7'
+#  - '3.5'
+  - '3.6'
+#  - 'pypy3'
+install: pip install -r requirements.txt
+group: stable
+dist: trusty
+os: linux
+script: python -m unittest discover testing
