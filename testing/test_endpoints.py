@@ -17,6 +17,9 @@ LOST_IMDB_ID_SERIES = 'tt0411008'
 
 session.cache.clear()  # clear caches
 
+assert TVDB_API_KEY
+assert TMDB_API_KEY
+
 
 class TestImdbMainDetails(TestCase):
     def test_success(self):
@@ -595,4 +598,4 @@ class TestTvdbSearchSeries(TestCase):
         self.assertSetEqual(set(data[0].keys()), expected_top_level_keys)
 
     def test_success_series_id_zap2it(self):
-        pass  # TODO
+        pass  # TODO -- not currently used by mapi
