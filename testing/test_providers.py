@@ -42,39 +42,47 @@ television_meta = [{
     'season': '5',
     'episode': '11',
     'title': 'The Distance',
-    'id_imdb': 'tt3853916',
+    'id_imdb': 'tt1520211',
+    'id_tvdb': '153021'
 }, {
     'media': 'television',
     'series': 'Adventure Time',
     'season': '7',
     'episode': '39',
     'title': 'Reboot',
-    'id_imdb': 'tt6186786',
+    'id_imdb': 'tt1305826',
+    'id_tvdb': '152831'
 }, {
     'media': 'television',
-    'series': 'Downtown ',
+    'series': 'Downtown',
     'season': '1',
     'episode': '13',
     'title': 'Trip or Treat',
-    'id_imdb': 'tt1181685',
+    'id_imdb': 'tt0208616',
+    'id_tvdb': '78342'
 }, {
     'media': 'television',
     'series': 'Breaking Bad',
     'season': '3',
     'episode': '5',
     'title': 'Más',
-    'id_imdb': 'tt1615555',
+    'id_imdb': 'tt0903747',
+    'id_tvdb': '81189'
 }, {
     'media': 'television',
     'series': 'The Care Bears',
     'season': '2',
     'episode': '2',
     'title': "Grumpy's Three Wishes",
-    'id_imdb': 'tt0789891',
+    'id_imdb': 'tt0284713',
+    'id_tvdb': '76079'
 }]
 
 API_KEY_TMDB = environ.get(API_KEY_ENV_TMDB)
 API_KEY_TVDB = environ.get(API_KEY_ENV_TVDB)
+
+assert API_KEY_TMDB
+assert API_KEY_TVDB
 
 
 class TestProviderFactory(TestCase):
@@ -86,10 +94,13 @@ class TestProviderFactory(TestCase):
         client = provider_factory(PROVIDER_TMDB, api_key=API_KEY_TMDB)
         self.assertIsInstance(client, TMDb)
 
+    def test_tvdb(self):
+        client = provider_factory(PROVIDER_TMDB, api_key=API_KEY_TVDB)
+        self.assertIsInstance(client, TVDb)
+
     def test_non_existant(self):
         with self.assertRaises(MapiException):
             provider_factory('yolo')
-
 
 class TestImdb(TestCase):
     def test_registrations(self):
@@ -205,3 +216,104 @@ class TestTmdb(TestCase):
                 results = self.client.search(title=meta['title'])
                 has_id = any(meta['id_tmdb'] in r['id_tmdb'] for r in results)
                 self.assertTrue(has_id)
+
+
+class TestTvdb(TestCase):
+    def setUp(self):
+        self.client = TVDb(api_key=API_KEY_TVDB, max_hits=2)
+
+    def test_registrations(self):
+        self.assertTrue(PROVIDER_TVDB == 'tvdb')
+        self.assertTrue(PROVIDER_TVDB in API_ALL)
+        self.assertTrue(PROVIDER_TVDB in API_TELEVISION)
+        self.assertTrue(has_provider(PROVIDER_TVDB))
+
+    def test_television_support(self):
+        self.assertTrue(PROVIDER_TVDB in API_ALL)
+        self.assertTrue(has_provider_support(PROVIDER_TVDB, MEDIA_TELEVISION))
+
+    def test_search_id_tvdb(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):
+                results = self.client.search(id_tvdb=meta['id_tvdb'])
+                has_id = any(meta['id_tvdb'] in r['id_tvdb'] for r in results)
+                self.assertTrue(has_id)
+
+    def test_search_id_tvdb_season(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):
+                results = self.client.search(id_tvdb=meta['id_tvdb'], season=1)
+                all_season_1 = all(entry['season'] == '1' for entry in results)
+                self.assertTrue(all_season_1)
+
+    def test_search_id_tvdb_episode(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):
+                results = self.client.search(id_tvdb=meta['id_tvdb'], episode=2)
+                all_episode_2 = all(
+                    entry['episode'] == '2' for entry in results
+                )
+                self.assertTrue(all_episode_2)
+
+    def test_search_id_tvdb_season_episode(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):
+                results = self.client.search(id_tvdb=meta['id_tvdb'], season=1,
+                     episode=3)
+                self.assertEqual(len(results), 1)
+                self.assertEqual(results[0]['season'], '1')
+                self.assertEqual(results[0]['episode'], '3')
+
+    def test_search_id_imdb(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_imdb'], series=meta['series']):
+                results = self.client.search(id_imdb=meta['id_imdb'])
+                has_id = any(meta['id_tvdb'] in r['id_tvdb'] for r in results)
+                self.assertTrue(has_id)
+
+    def test_search_id_imdb_season(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_imdb'], series=meta['series']):
+                results = self.client.search(id_imdb=meta['id_imdb'], season=1)
+                all_season_1 = all(entry['season'] == '1' for entry in results)
+                self.assertTrue(all_season_1)
+
+    def test_search_id_imdb_episode(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_imdb'], series=meta['series']):
+                results = self.client.search(id_imdb=meta['id_imdb'], episode=2)
+                all_episode_2 = all(
+                    entry['episode'] == '2' for entry in results
+                )
+                self.assertTrue(all_episode_2)
+
+    def test_search_id_imdb_season_episode(self):
+        for meta in television_meta:
+            with self.subTest(id_tvdb=meta['id_imdb'], series=meta['series']):
+                results = self.client.search(id_imdb=meta['id_imdb'], season=1,
+                     episode=3)
+                self.assertEqual(results[0]['season'], '1')
+                self.assertEqual(results[0]['episode'], '3')
+
+    def test_search_series(self):
+        self.client.max_hits = 5
+        for meta in television_meta:
+            with self.subTest(series=meta['series']):
+                results = self.client.search(series=meta['series'])
+                has_id = any(meta['id_tvdb'] in r['id_tvdb'] for r in results)
+                self.assertTrue(has_id)
+
+    def test_search_title_season(self):
+        for meta in television_meta:
+            with self.subTest(series=meta['series']):
+                results = self.client.search(series=meta['series'], season=1)
+                all_season_1 = all(entry['season'] == '1' for entry in results)
+                self.assertTrue(all_season_1)
+
+    def test_search_title_season_episode(self):
+        for meta in television_meta:
+            with self.subTest(series=meta['series']):
+                results = self.client.search(series=meta['series'], season=1,
+                                             episode=3)
+                self.assertEqual(results[0]['season'], '1')
+                self.assertEqual(results[0]['episode'], '3')
