@@ -95,7 +95,7 @@ class TestProviderFactory(TestCase):
         self.assertIsInstance(client, TMDb)
 
     def test_tvdb(self):
-        client = provider_factory(PROVIDER_TMDB, api_key=API_KEY_TVDB)
+        client = provider_factory(PROVIDER_TVDB, api_key=API_KEY_TVDB)
         self.assertIsInstance(client, TVDb)
 
     def test_non_existant(self):
