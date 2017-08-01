@@ -189,7 +189,7 @@ def tvdb_login(api_key):
     body = {'apikey': api_key}
     status, content = request_json(url, body=body, cache=False)
     if status == 401:
-        raise MapiProviderException('invalid token')
+        raise MapiProviderException('invalid api key')
     assert status == 200 and content.get('token')
     return content['token']
 
@@ -365,6 +365,7 @@ def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
     Note: results a maximum of 100 entries per page, no option for pagination
+
     :param str token: TVDb JWT token; generate using login/ reload endpoints
     :param optional str series: Name of the series
     :param optional str id_imdb: IMDb series id code
