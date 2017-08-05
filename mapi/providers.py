@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import re
 from os import environ
 
 from mapi import *
@@ -73,7 +72,7 @@ class IMDb:
 
         # Perform query for metadata
         if id_imdb:
-            metadata = self._search_id_imdb(id_imdb)
+            metadata = [self._search_id_imdb(id_imdb)]
         elif title:
             metadata = self._search_title(title)
         else:
@@ -85,17 +84,18 @@ class IMDb:
     def _search_id_imdb(self, id_imdb):
         assert id_imdb
 
-        response = endpoints.imdb_main_details(id_imdb)
+        response = endpoints.imdb_main_details(id_imdb)['data']
         try:
-            metadata = [{
-                META_TITLE: response['data']['title'],
-                META_YEAR: response['data']['year'],
-                META_SYNOPSIS: response['data']['plot']['outline'],
+            metadata = {
+                META_TITLE: response['title'],
+                META_YEAR: response['year'],
+                META_SYNOPSIS: response['plot']['outline'],
                 META_MEDIA: 'movie',
-                META_ID_IMDB: response['data']['tconst']
-            }]
-        except KeyError:
-            raise MapiProviderException
+                META_ID_IMDB: response['tconst']
+            }
+            int(metadata[META_YEAR])
+        except (KeyError, ValueError):
+            raise MapiNotFoundException  # Ignore sketchy hits
         return metadata
 
     def _search_title(self, title):
@@ -103,19 +103,13 @@ class IMDb:
 
         metadata = list()
         response = endpoints.imdb_mobile_find(title)
-        entries = [entry for entries in response.values() for entry in entries]
+        ids = [entry['id'] for entries in response.values() for entry in entries]
 
-        for entry in entries:
-            year_match = re.search(r'(\d{4})', entry['title_description'])
-            if not year_match:
+        for id_imdb in ids:
+            try:
+                metadata.append(self._search_id_imdb(id_imdb))
+            except MapiNotFoundException:
                 continue
-            metadata.append({
-                META_TITLE: entry['title'],
-                META_YEAR: year_match.group(0),
-                META_SYNOPSIS: entry['title_description'],
-                META_MEDIA: 'movie',
-                META_ID_IMDB: entry['id']
-            })
         return metadata
 
 
