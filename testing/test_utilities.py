@@ -1,8 +1,16 @@
+import sys
 from json import loads
-from unittest import TestCase
-from unittest.mock import patch
+
 from requests import Session
+
 from mapi.utilities import *
+
+if sys.version_info.major == 3:
+    from unittest import TestCase
+    from unittest.mock import patch
+else:
+    from unittest2 import TestCase
+    from mock import patch
 
 
 class MockRequestResponse:
@@ -229,15 +237,14 @@ class TestCleanDict(TestCase):
     def test_all_falsy(self):
         dict_in = {
             'who': None,
-            'let': ...,
-            'the': 0,
-            'dogs': False,
-            'out': [],
-            '?': ()
+            'let': 0,
+            'the': False,
+            'dogs': [],
+            'out': ()
         }
         dict_want = {
-            'the': '0',
-            'dogs': 'False'
+            'let': '0',
+            'the': 'False'
         }
         dict_out = clean_dict(dict_in)
         self.assertDictEqual(dict_out, dict_want)
@@ -262,6 +269,7 @@ class TestCleanDict(TestCase):
 
     def test_not_a_dict(self):
         with self.assertRaises(AssertionError):
+            # noinspection PyTypeChecker
             clean_dict('mama mia pizza pie')
 
     def test_str_strip(self):

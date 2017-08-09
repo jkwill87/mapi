@@ -1,7 +1,7 @@
 language: python
 python:
   - '3.6'
-install: pip install -r requirements.txt
+install: pip install .
 dist: trusty
 os: linux
 script: python -m unittest discover -v testing

@@ -1,8 +1,11 @@
 # coding=utf-8
 
-from unittest import TestCase
-
 from mapi.providers import *
+
+if sys.version_info.major == 3:
+    from unittest import TestCase
+else:
+    from unittest2 import TestCase
 
 movie_meta = [{
     'media': 'movie',
@@ -85,6 +88,34 @@ assert API_KEY_TMDB
 assert API_KEY_TVDB
 
 
+class TestHasProvider(TestCase):
+    def test_has_provider(self):
+        self.assertTrue(has_provider(PROVIDER_IMDB))
+        self.assertTrue(has_provider(PROVIDER_TMDB))
+        self.assertTrue(has_provider(PROVIDER_TVDB))
+
+    def test_missing_provider(self):
+        self.assertFalse(has_provider('omdb'))
+
+
+class TestHasProviderSupport(TestCase):
+    def test_has_provider_has_support(self):
+        self.assertTrue(has_provider_support(PROVIDER_IMDB, MEDIA_MOVIE))
+        self.assertTrue(has_provider_support(PROVIDER_TMDB, MEDIA_MOVIE))
+        self.assertTrue(has_provider_support(PROVIDER_TVDB, MEDIA_TELEVISION))
+
+    def test_has_provider_missing_support(self):
+        self.assertFalse(has_provider_support(PROVIDER_IMDB, MEDIA_TELEVISION))
+        self.assertFalse(has_provider_support(PROVIDER_TMDB, MEDIA_TELEVISION))
+        self.assertFalse(has_provider_support(PROVIDER_TVDB, MEDIA_MOVIE))
+
+    def test_missing_provider_valid_mtype(self):
+        self.assertFalse(has_provider_support('omdb', MEDIA_MOVIE))
+
+    def test_missing_provider_invalid_mtype(self):
+        self.assertFalse(has_provider_support('omdb', 'media_type_subtitle'))
+
+
 class TestProviderFactory(TestCase):
     def test_imdb(self):
         client = provider_factory(PROVIDER_IMDB)
@@ -102,7 +133,11 @@ class TestProviderFactory(TestCase):
         with self.assertRaises(MapiException):
             provider_factory('yolo')
 
+
 class TestImdb(TestCase):
+    def setUp(self):
+        self.client = IMDb(api_key=API_KEY_TMDB, max_hits=5)
+
     def test_registrations(self):
         self.assertTrue(PROVIDER_IMDB == 'imdb')
         self.assertTrue(PROVIDER_IMDB in API_ALL)
@@ -114,39 +149,35 @@ class TestImdb(TestCase):
         self.assertTrue(has_provider_support(PROVIDER_IMDB, MEDIA_MOVIE))
 
     def test_search_id_imdb_implicit(self):
-        client = IMDb()
         for meta in movie_meta:
             with self.subTest(id_imdb=meta['id_imdb']):
-                results = client.search(**meta)
+                results = self.client.search(**meta)
                 self.assertTrue(results)
                 result = results[0]
                 self.assertEqual(meta['title'], result['title'])
                 self.assertEqual(meta['year'], result['year'])
 
     def test_search_id_imdb_explicit(self):
-        client = IMDb()
         for meta in movie_meta:
             with self.subTest(id_imdb=meta['id_imdb']):
-                results = client.search(id_imdb=meta['id_imdb'])
+                results = self.client.search(id_imdb=meta['id_imdb'])
                 self.assertTrue(results)
                 result = results[0]
                 self.assertEqual(meta['title'], result['title'])
                 self.assertEqual(meta['year'], result['year'])
 
     def test_search_title_implicit(self):
-        client = IMDb()
         for meta in movie_meta:
             meta_without_id = {k: v for k, v in meta.items() if k != 'id_imdb'}
             with self.subTest(title=meta['title']):
-                results = client.search(**meta_without_id)
+                results = self.client.search(**meta_without_id)
                 has_id = any(meta['id_imdb'] in r['id_imdb'] for r in results)
                 self.assertTrue(has_id)
 
     def test_search_title_explicit(self):
-        client = IMDb()
         for meta in movie_meta:
             with self.subTest(title=meta['title']):
-                results = client.search(title=meta['title'])
+                results = self.client.search(title=meta['title'])
                 has_id = any(meta['id_imdb'] in r['id_imdb'] for r in results)
                 self.assertTrue(has_id)
 
@@ -220,7 +251,7 @@ class TestTmdb(TestCase):
 
 class TestTvdb(TestCase):
     def setUp(self):
-        self.client = TVDb(api_key=API_KEY_TVDB, max_hits=2)
+        self.client = TVDb(api_key=API_KEY_TVDB, max_hits=5)
 
     def test_registrations(self):
         self.assertTrue(PROVIDER_TVDB == 'tvdb')
@@ -259,7 +290,7 @@ class TestTvdb(TestCase):
         for meta in television_meta:
             with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):
                 results = self.client.search(id_tvdb=meta['id_tvdb'], season=1,
-                     episode=3)
+                    episode=3)
                 self.assertEqual(len(results), 1)
                 self.assertEqual(results[0]['season'], '1')
                 self.assertEqual(results[0]['episode'], '3')
@@ -291,7 +322,7 @@ class TestTvdb(TestCase):
         for meta in television_meta:
             with self.subTest(id_tvdb=meta['id_imdb'], series=meta['series']):
                 results = self.client.search(id_imdb=meta['id_imdb'], season=1,
-                     episode=3)
+                    episode=3)
                 self.assertEqual(results[0]['season'], '1')
                 self.assertEqual(results[0]['episode'], '3')
 
@@ -314,6 +345,6 @@ class TestTvdb(TestCase):
         for meta in television_meta:
             with self.subTest(series=meta['series']):
                 results = self.client.search(series=meta['series'], season=1,
-                                             episode=3)
+                    episode=3)
                 self.assertEqual(results[0]['season'], '1')
                 self.assertEqual(results[0]['episode'], '3')

@@ -2,15 +2,17 @@
 
 """ A collection of internal utility functions used by the package
 """
-
 import random
-from contextlib import contextmanager as cm
+import sys
+import unicodedata
 
 import requests
 import requests_cache
 
 from mapi import log
 from mapi.constants import *
+
+s = str if sys.version_info.major == 3 else unicode
 
 # Setup requests caching
 session = requests_cache.CachedSession(
@@ -29,7 +31,7 @@ def clean_dict(target_dict, whitelist=None):
     """
     assert isinstance(target_dict, dict)
     return {
-        str(k).strip(): str(v).strip()
+        s(k).strip(): s(v).strip()
         for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
         and (not whitelist or k in whitelist)
@@ -87,7 +89,7 @@ def get_user_agent(platform=None):
 
     Valid platforms are listed in the constants module
 
-    :param optional str platform: the platform for the required user agent string
+    :param optional str platform: the platform for the required user agent
     :return: the user agent string
     :rtype: str
     """
@@ -101,7 +103,7 @@ def get_user_agent(platform=None):
 
 
 def request_json(url, parameters=None, body=None, headers=None, cache=True,
-                 agent=None):
+    agent=None):
     """ Queries a url for json data
 
     Essentially just wraps requests to abstract return values and exceptions
@@ -135,7 +137,7 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
         method = 'POST'
         headers['content-type'] = 'application/json'
         headers['user-agent'] = get_user_agent(agent)
-        headers['content-length'] = str(len(body))
+        headers['content-length'] = s(len(body))
     else:
         method = 'GET'
 
@@ -162,3 +164,8 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
     log.info("status: %d" % status)
     log.debug("content: %s" % content)
     return status, content
+
+
+def simplify_to_ascii(input_str):
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])

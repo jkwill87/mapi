@@ -1,12 +1,37 @@
 # coding=utf-8
 
 from os import environ
-
+import sys
 from mapi import *
 from mapi import endpoints
 from mapi.constants import *
 from mapi.exceptions import *
-from mapi.utilities import filter_meta, clean_dict
+from mapi.utilities import clean_dict, filter_meta
+
+s = str if sys.version_info.major == 3 else unicode
+
+def has_provider(provider):
+    """ Verifies that module has support for requested API provider
+
+    :param str provider: API constant or its corresponding value from API_ALL
+    :return bool: True if package supports specified db provider, else False
+    """
+    return provider.lower() in API_ALL
+
+
+def has_provider_support(provider, media_type):
+    """ Verifies if API provider has support for requested media type
+
+    :param str provider: API constant or its corresponding value from API_ALL
+    :param str media_type: Media type constant or its corresponding value from
+        MEDIA_TYPE_ALL
+    :return bool: True if api provider is available and package supports
+        media type, else False
+    """
+    if provider.lower() not in API_ALL:
+        return False
+    provider_const = 'API_' + media_type.upper()
+    return provider in globals().get(provider_const, {})
 
 
 def provider_factory(provider, **options):
@@ -50,7 +75,7 @@ class IMDb:
             the API provider.
         """
         self.year_delta = options.get('year_delta', 5)
-        self.max_hits = options.get('max_hits', 25)
+        self.max_hits = options.get('max_hits', 15)
 
     def search(self, **parameters):
         """ Searches IMDb for movie metadata
@@ -103,9 +128,12 @@ class IMDb:
 
         metadata = list()
         response = endpoints.imdb_mobile_find(title)
-        ids = [entry['id'] for entries in response.values() for entry in entries]
+        ids = [
+            entry['id'] for entries in response.values()
+            for entry in entries
+        ]
 
-        for id_imdb in ids:
+        for id_imdb in ids[:self.max_hits]:
             try:
                 metadata.append(self._search_id_imdb(id_imdb))
             except MapiNotFoundException:
@@ -132,7 +160,7 @@ class TMDb:
             the environment variables
         """
         self.year_delta = options.get('year_delta', 5)
-        self.max_hits = options.get('max_hits', 25)
+        self.max_hits = options.get('max_hits', 15)
         api_key = options.get('api_key') or environ.get(API_KEY_ENV_TMDB)
         if isinstance(api_key, str):
             self.api_key = api_key
@@ -186,7 +214,7 @@ class TMDb:
             META_YEAR: response['release_date'][:4],
             META_SYNOPSIS: response['overview'],
             META_MEDIA: 'movie',
-            META_ID_TMDB: str(id_tmdb),
+            META_ID_TMDB: s(id_tmdb),
         }]
 
     def _search_title(self, title, year):
@@ -204,7 +232,7 @@ class TMDb:
                     META_YEAR: entry['release_date'][:4],
                     META_SYNOPSIS: entry['overview'],
                     META_MEDIA: 'movie',
-                    META_ID_TMDB: str(entry['id']),
+                    META_ID_TMDB: s(entry['id']),
                 })
             if page == response['total_pages']:
                 break
@@ -233,7 +261,7 @@ class TVDb:
             the environment variables
         """
         self.year_delta = options.get('year_delta', 5)
-        self.max_hits = options.get('max_hits', 25)
+        self.max_hits = options.get('max_hits', 15)
         api_key = options.get('api_key') or environ.get(API_KEY_ENV_TVDB)
         if isinstance(api_key, str):
             self.token = endpoints.tvdb_login(api_key)
@@ -283,13 +311,13 @@ class TVDb:
             for entry in episode_data['data']:
                 metadata.append({
                     META_SERIES: series_data['data']['seriesName'],
-                    META_SEASON: str(entry['airedSeason']),
-                    META_EPISODE: str(entry['airedEpisodeNumber']),
+                    META_SEASON: s(entry['airedSeason']),
+                    META_EPISODE: s(entry['airedEpisodeNumber']),
                     META_TITLE: entry['episodeName'],
-                    META_SYNOPSIS: str(entry['overview'])
+                    META_SYNOPSIS: s(entry['overview'])
                         .replace('\r\n', '').replace('  ', '').strip(),
                     META_MEDIA: MEDIA_TELEVISION,
-                    META_ID_TVDB: str(id_tvdb),
+                    META_ID_TVDB: s(id_tvdb),
                 })
             if page == episode_data['links']['last']:
                 break

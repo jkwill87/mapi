@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import sys
 from re import match
 from time import sleep
 
@@ -7,9 +8,14 @@ from mapi.constants import PLATFORM_IOS, TVDB_LANGUAGE_CODES
 from mapi.exceptions import *
 from mapi.utilities import request_json
 
+s = str if sys.version_info.major == 3 else unicode
+
 
 def imdb_main_details(id_imdb):
     """ Lookup a media item using the Internet Movie Database's internal API
+
+    This endpoint is more detailed than the mobile endpoint but has a tenancy to
+    unpredictably return 503 status codes when hit frequently
 
     :param str id_imdb: Internet Movie Database's primary key; prefixed w/ 'tt'
     :return: dict
@@ -33,7 +39,7 @@ def imdb_main_details(id_imdb):
     return content
 
 
-def imdb_mobile_find(title, nr=True, tt=True):
+def imdb_mobile_find(title, nr=False, tt=False):
     """ Search the Internet Movie Database using its undocumented iOS API
 
     :param str title: Movie title used for searching
@@ -136,7 +142,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
 
 def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
-        page=1):
+    page=1):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
@@ -316,7 +322,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
 
 
 def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
-        page=1, lang='en'):
+    page=1, lang='en'):
     """ This route allows the user to query against episodes for the given series
 
     Note: Paginated with 100 results per page; omitted imdbId, when would you
@@ -360,7 +366,7 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
 
 
 def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
-        lang='en'):
+    lang='en'):
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
@@ -399,4 +405,3 @@ def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
         raise MapiNotFoundException
     assert status == 200
     return content
-
