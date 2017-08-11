@@ -8,6 +8,7 @@ import unicodedata
 
 import requests
 import requests_cache
+from appdirs import user_cache_dir
 
 from mapi import log
 from mapi.constants import *
@@ -16,7 +17,7 @@ s = str if sys.version_info.major == 3 else unicode
 
 # Setup requests caching
 session = requests_cache.CachedSession(
-    cache_name='.mapi',
+    cache_name=user_cache_dir() + '/mapi',
     expire_after=604800,
 )
 

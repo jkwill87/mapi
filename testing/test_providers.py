@@ -136,7 +136,7 @@ class TestProviderFactory(TestCase):
 
 class TestImdb(TestCase):
     def setUp(self):
-        self.client = IMDb(api_key=API_KEY_TMDB, max_hits=5)
+        self.client = IMDb(api_key=API_KEY_TMDB, max_hits=10)
 
     def test_registrations(self):
         self.assertTrue(PROVIDER_IMDB == 'imdb')

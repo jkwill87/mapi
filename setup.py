@@ -13,6 +13,7 @@ setup(
     install_requires=[
         'mock;python_version<"3"',
         'unittest2;python_version<"3"',
+        'appdirs',
         'requests',
         'requests_cache'
     ],
