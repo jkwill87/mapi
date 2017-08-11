@@ -1,6 +1,7 @@
 language: python
 python:
   - '3.6'
+  - 'pypy3'
 install: pip install .
 dist: trusty
 os: linux
