@@ -3,7 +3,6 @@
 """ A collection of internal utility functions used by the package
 """
 import random
-import sys
 import unicodedata
 
 import requests
@@ -12,8 +11,6 @@ from appdirs import user_cache_dir
 
 from mapi import log
 from mapi.constants import *
-
-s = str if sys.version_info.major == 3 else unicode
 
 # Setup requests caching
 session = requests_cache.CachedSession(
@@ -32,7 +29,7 @@ def clean_dict(target_dict, whitelist=None):
     """
     assert isinstance(target_dict, dict)
     return {
-        s(k).strip(): s(v).strip()
+        str(k).strip(): str(v).strip()
         for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
         and (not whitelist or k in whitelist)
@@ -104,7 +101,7 @@ def get_user_agent(platform=None):
 
 
 def request_json(url, parameters=None, body=None, headers=None, cache=True,
-    agent=None):
+        agent=None):
     """ Queries a url for json data
 
     Essentially just wraps requests to abstract return values and exceptions
@@ -138,9 +135,10 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
         method = 'POST'
         headers['content-type'] = 'application/json'
         headers['user-agent'] = get_user_agent(agent)
-        headers['content-length'] = s(len(body))
+        headers['content-length'] = str(len(body))
     else:
         method = 'GET'
+        headers['user-agent'] = get_user_agent(agent)
 
     try:
         session._is_cache_disabled = not cache  # yes, i'm a bad person

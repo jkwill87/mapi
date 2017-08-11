@@ -1,14 +1,18 @@
 # coding=utf-8
 
 from os import environ
-import sys
+
 from mapi import *
 from mapi import endpoints
 from mapi.constants import *
 from mapi.exceptions import *
 from mapi.utilities import clean_dict, filter_meta
 
-s = str if sys.version_info.major == 3 else unicode
+from sys import version_info
+
+if version_info.major == 3:
+    unicode = str
+
 
 def has_provider(provider):
     """ Verifies that module has support for requested API provider
@@ -214,7 +218,7 @@ class TMDb:
             META_YEAR: response['release_date'][:4],
             META_SYNOPSIS: response['overview'],
             META_MEDIA: 'movie',
-            META_ID_TMDB: s(id_tmdb),
+            META_ID_TMDB: unicode(id_tmdb),
         }]
 
     def _search_title(self, title, year):
@@ -232,7 +236,7 @@ class TMDb:
                     META_YEAR: entry['release_date'][:4],
                     META_SYNOPSIS: entry['overview'],
                     META_MEDIA: 'movie',
-                    META_ID_TMDB: s(entry['id']),
+                    META_ID_TMDB: unicode(entry['id']),
                 })
             if page == response['total_pages']:
                 break
@@ -284,11 +288,11 @@ class TVDb:
         :rtype: dict
         """
         parameters = clean_dict(parameters, PARAMS_TELEVISION)
-        id_tvdb = parameters.get('id_tvdb')
-        id_imdb = parameters.get('id_imdb')
-        series = parameters.get('series')
-        season = parameters.get('season')
         episode = parameters.get('episode')
+        id_imdb = parameters.get('id_imdb')
+        id_tvdb = parameters.get('id_tvdb')
+        season = parameters.get('season')
+        series = parameters.get('series')
 
         if id_tvdb:
             metadata = self._search_id_tvdb(id_tvdb, season, episode)
@@ -311,13 +315,13 @@ class TVDb:
             for entry in episode_data['data']:
                 metadata.append({
                     META_SERIES: series_data['data']['seriesName'],
-                    META_SEASON: s(entry['airedSeason']),
-                    META_EPISODE: s(entry['airedEpisodeNumber']),
+                    META_SEASON: unicode(entry['airedSeason']),
+                    META_EPISODE: unicode(entry['airedEpisodeNumber']),
                     META_TITLE: entry['episodeName'],
-                    META_SYNOPSIS: s(entry['overview'])
+                    META_SYNOPSIS: unicode(entry['overview'])
                         .replace('\r\n', '').replace('  ', '').strip(),
                     META_MEDIA: MEDIA_TELEVISION,
-                    META_ID_TVDB: s(id_tvdb),
+                    META_ID_TVDB: unicode(id_tvdb),
                 })
             if page == episode_data['links']['last']:
                 break

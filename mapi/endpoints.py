@@ -1,14 +1,10 @@
 # coding=utf-8
 
-import sys
 from re import match
 from time import sleep
-
-from mapi.constants import PLATFORM_IOS, TVDB_LANGUAGE_CODES
+from mapi.constants import TVDB_LANGUAGE_CODES
 from mapi.exceptions import *
 from mapi.utilities import request_json
-
-s = str if sys.version_info.major == 3 else unicode
 
 
 def imdb_main_details(id_imdb):
@@ -22,11 +18,13 @@ def imdb_main_details(id_imdb):
     """
     if not match(r'tt\d+', id_imdb):
         raise MapiProviderException('invalid imdb tt-const value')
-    url = 'http://app.imdb.com/title/maindetails'
-    parameters = {'tconst': id_imdb}
+    url = 'https://app.imdb.com/title/maindetails'
+    parameters = {
+        'tconst': id_imdb,
+    }
     status = content = None
     for i in range(50):  # retry when service unavailable
-        status, content = request_json(url, parameters, agent=PLATFORM_IOS)
+        status, content = request_json(url, parameters)
         if status == 503:
             sleep((i + 1) * .025)  # .025 to 1.25 secs, total ~32
         else:
@@ -142,7 +140,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
 
 def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
-    page=1):
+        page=1):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
@@ -322,7 +320,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
 
 
 def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
-    page=1, lang='en'):
+        page=1, lang='en'):
     """ This route allows the user to query against episodes for the given series
 
     Note: Paginated with 100 results per page; omitted imdbId, when would you
@@ -366,7 +364,7 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
 
 
 def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
-    lang='en'):
+        lang='en'):
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series

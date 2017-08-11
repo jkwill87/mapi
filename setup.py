@@ -6,16 +6,16 @@ setup(
     author='Jessy Williams',
     author_email='jessy@jessywilliams.com',
     description='An API for media database APIs which allows you to search ' +
-                'for metadata using a simple, common interface',
+        'for metadata using a simple, common interface',
     license='MIT',
     name='mapi',
     packages=['mapi'],
     install_requires=[
-        'mock;python_version<"3"',
-        'unittest2;python_version<"3"',
         'appdirs',
         'requests',
-        'requests_cache'
+        'requests_cache',
+        'mock;python_version<"3"',
+        'unittest2;python_version<"3"'
     ],
     url='https://github.com/jkwill87/mapi',
     version='0.1'

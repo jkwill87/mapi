@@ -1,8 +1,9 @@
 # coding=utf-8
 
 from mapi.providers import *
+from sys import version_info
 
-if sys.version_info.major == 3:
+if version_info.major == 3:
     from unittest import TestCase
 else:
     from unittest2 import TestCase
