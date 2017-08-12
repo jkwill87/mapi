@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from mapi.constants import *
 from mapi.endpoints import *
-from mapi.utilities import session
 
 JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'
@@ -15,7 +14,6 @@ LOST_TVDB_ID_EPISODE = 127131
 LOST_TVDB_ID_SERIES = 73739
 LOST_IMDB_ID_SERIES = 'tt0411008'
 
-session.cache.clear()  # clear caches
 
 assert TVDB_API_KEY
 assert TMDB_API_KEY

@@ -1,12 +1,16 @@
 # coding=utf-8
 
+import sys
 from mapi.providers import *
-from sys import version_info
 
-if version_info.major == 3:
+if sys.version_info.major == 3:
     from unittest import TestCase
 else:
+    # Sidesteps python2 str/unicode/encode/decode stupidity
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
     from unittest2 import TestCase
+
 
 movie_meta = [{
     'media': 'movie',
@@ -185,7 +189,7 @@ class TestImdb(TestCase):
 
 class TestTmdb(TestCase):
     def setUp(self):
-        self.client = TMDb(api_key=API_KEY_TMDB)
+        self.client = TMDb(api_key=API_KEY_TMDB, max_hits=5)
 
     def test_registrations(self):
         self.assertTrue(PROVIDER_TMDB == 'tmdb')

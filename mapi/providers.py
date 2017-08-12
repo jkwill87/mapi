@@ -8,11 +8,6 @@ from mapi.constants import *
 from mapi.exceptions import *
 from mapi.utilities import clean_dict, filter_meta
 
-from sys import version_info
-
-if version_info.major == 3:
-    unicode = str
-
 
 def has_provider(provider):
     """ Verifies that module has support for requested API provider
@@ -218,7 +213,7 @@ class TMDb:
             META_YEAR: response['release_date'][:4],
             META_SYNOPSIS: response['overview'],
             META_MEDIA: 'movie',
-            META_ID_TMDB: unicode(id_tmdb),
+            META_ID_TMDB: str(id_tmdb),
         }]
 
     def _search_title(self, title, year):
@@ -236,7 +231,7 @@ class TMDb:
                     META_YEAR: entry['release_date'][:4],
                     META_SYNOPSIS: entry['overview'],
                     META_MEDIA: 'movie',
-                    META_ID_TMDB: unicode(entry['id']),
+                    META_ID_TMDB: str(entry['id']),
                 })
             if page == response['total_pages']:
                 break
@@ -315,13 +310,13 @@ class TVDb:
             for entry in episode_data['data']:
                 metadata.append({
                     META_SERIES: series_data['data']['seriesName'],
-                    META_SEASON: unicode(entry['airedSeason']),
-                    META_EPISODE: unicode(entry['airedEpisodeNumber']),
+                    META_SEASON: str(entry['airedSeason']),
+                    META_EPISODE: str(entry['airedEpisodeNumber']),
                     META_TITLE: entry['episodeName'],
-                    META_SYNOPSIS: unicode(entry['overview'])
+                    META_SYNOPSIS: str(entry['overview'])
                         .replace('\r\n', '').replace('  ', '').strip(),
                     META_MEDIA: MEDIA_TELEVISION,
-                    META_ID_TVDB: unicode(id_tvdb),
+                    META_ID_TVDB: str(id_tvdb),
                 })
             if page == episode_data['links']['last']:
                 break
