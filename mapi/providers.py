@@ -127,10 +127,13 @@ class IMDb:
 
         metadata = list()
         response = endpoints.imdb_mobile_find(title)
-        ids = [
-            entry['id'] for entries in response.values()
-            for entry in entries
-        ]
+
+        # Ranking: popular, exact, then approx substring; not intuitive, I know
+        ids = list()
+        ids += [entry['id'] for entry in response.get('title_popular', [])]
+        ids += [entry['id'] for entry in response.get('title_exec', [])]
+        ids += [entry['id'] for entry in response.get('title_approx', [])]
+        ids += [entry['id'] for entry in response.get('title_substring', [])]
 
         for id_imdb in ids[:self.max_hits]:
             try:
