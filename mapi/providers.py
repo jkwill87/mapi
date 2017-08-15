@@ -1,5 +1,8 @@
 # coding=utf-8
 
+""" Provides a high-level interface for metadata media providers
+"""
+
 from os import environ
 
 from mapi import *
@@ -103,7 +106,7 @@ class IMDb:
             raise MapiNotFoundException
         if not metadata:
             raise MapiNotFoundException
-        return filter_meta(metadata, self.max_hits, self.year_delta, year)
+        return filter_meta(metadata, self.max_hits, year, self.year_delta)
 
     def _search_id_imdb(self, id_imdb):
         assert id_imdb
@@ -195,7 +198,7 @@ class TMDb:
             metadata = self._search_title(title, year)
         else:
             raise MapiNotFoundException
-        return filter_meta(metadata, self.max_hits, self.year_delta, year)
+        return filter_meta(metadata, self.max_hits, year, self.year_delta)
 
     def _search_id_imdb(self, id_imdb):
         response = endpoints.tmdb_find(

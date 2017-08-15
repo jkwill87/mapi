@@ -2,8 +2,8 @@
 
 """ A collection of internal utility functions used by the package
 """
+
 import random
-import unicodedata
 
 import requests
 import requests_cache
@@ -32,7 +32,7 @@ def clean_dict(target_dict, whitelist=None):
         str(k).strip(): str(v).strip()
         for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
-        and (not whitelist or k in whitelist)
+           and (not whitelist or k in whitelist)
     }
 
 
@@ -62,7 +62,7 @@ def filter_meta(entries, max_hits=None, year=None, year_delta=None):
     assert isinstance(entries, list)
 
     def year_diff(x):
-        return abs(int(x['year']) - int(year))
+        return abs(int(x['year']) - year)
 
     # Remove duplicate entries
     unique_entries = list()
@@ -70,7 +70,9 @@ def filter_meta(entries, max_hits=None, year=None, year_delta=None):
     entries = unique_entries
 
     # Remove entries outside of year delta for target year, if available
-    if year and isinstance(year_delta, int):
+    if year and year_delta:
+        year = int(year)
+        year_delta = int(year_delta)
         entries = [entry for entry in entries if year_diff(entry) <= year_delta]
 
         # Sort entries around year
@@ -163,8 +165,3 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
     log.info("status: %d" % status)
     log.debug("content: %s" % content)
     return status, content
-
-
-def simplify_to_ascii(input_str):
-    nfkd_form = unicodedata.normalize('NFKD', input_str)
-    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)])
