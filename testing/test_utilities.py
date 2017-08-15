@@ -1,4 +1,8 @@
 import sys
+
+""" Unit tests for utilities.py
+"""
+
 from json import loads
 
 from requests import Session
@@ -7,9 +11,12 @@ from mapi.utilities import *
 
 if sys.version_info.major == 3:
     from unittest import TestCase
+    # noinspection PyCompatibility
     from unittest.mock import patch
 else:
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from unittest2 import TestCase
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from mock import patch
 
 

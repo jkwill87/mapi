@@ -1,5 +1,8 @@
 # coding=utf-8
 
+""" Stand-alone functions which have a 1:1 mapping to that of API endpoints
+"""
+
 from re import match
 from time import sleep
 from mapi.constants import TVDB_LANGUAGE_CODES

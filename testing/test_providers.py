@@ -1,5 +1,8 @@
 # coding=utf-8
 
+""" Unit tests for providers.py
+"""
+
 import sys
 from mapi.providers import *
 
@@ -8,7 +11,9 @@ if sys.version_info.major == 3:
 else:
     # Sidesteps python2 str/unicode/encode/decode stupidity
     reload(sys)
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     sys.setdefaultencoding('utf-8')
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
     from unittest2 import TestCase
 
 

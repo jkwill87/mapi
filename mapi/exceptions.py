@@ -1,5 +1,8 @@
 # coding=utf-8
 
+""" Exceptions used by mapi
+"""
+
 
 class MapiException(Exception):
     """ Base exception for the mapi package.

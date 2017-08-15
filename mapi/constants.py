@@ -1,5 +1,8 @@
 # coding=utf-8
 
+""" Constants used by mapi
+"""
+
 MEDIA_MOVIE = 'movie'
 MEDIA_TELEVISION = 'television'
 MEDIA_ALL = {MEDIA_MOVIE, MEDIA_TELEVISION}
