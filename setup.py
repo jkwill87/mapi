@@ -1,16 +1,26 @@
+# coding=utf-8
+
 from distutils.core import setup
+from io import open
 
-from mapi.constants import *
+about = {
+    'author': 'Jessy Williams',
+    'author_email': 'jessy@jessywilliams.com',
+    'description': 'An API for media database APIs which allows you to search '
+        + 'for metadata using a simple, common interface',
+    'license': 'MIT',
+    'long_description': open('readme.rst', 'r').read(),
+    'name': 'mapi',
+    'packages': ['mapi'],
+    'install_requires': [
+        'appdirs',
+        'requests',
+        'requests_cache',
+        'mock;python_version<"3"',
+        'unittest2;python_version<"3"'
+    ],
+    'url': 'https://github.com/jkwill87/mapi',
+    'version': '1.0.2'
+}
 
-setup(
-    name=ABOUT_TITLE,
-    version=ABOUT_VERSION,
-    packages=[ABOUT_TITLE],
-    url=ABOUT_URL,
-    license=ABOUT_LICENSE,
-    author=ABOUT_AUTHOR,
-    author_email=ABOUT_EMAIL,
-    description=ABOUT_DESCRIPTION,
-    requires=['requests', 'requests_cache'],
-    copyright=ABOUT_COPYRIGHT
-)
+setup(**about)

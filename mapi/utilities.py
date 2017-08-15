@@ -4,17 +4,17 @@
 """
 
 import random
-from contextlib import contextmanager as cm
 
 import requests
 import requests_cache
+from appdirs import user_cache_dir
 
 from mapi import log
 from mapi.constants import *
 
 # Setup requests caching
 session = requests_cache.CachedSession(
-    cache_name='.mapi',
+    cache_name=user_cache_dir() + '/mapi',
     expire_after=604800,
 )
 
@@ -32,7 +32,7 @@ def clean_dict(target_dict, whitelist=None):
         str(k).strip(): str(v).strip()
         for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
-        and (not whitelist or k in whitelist)
+           and (not whitelist or k in whitelist)
     }
 
 
@@ -62,7 +62,7 @@ def filter_meta(entries, max_hits=None, year=None, year_delta=None):
     assert isinstance(entries, list)
 
     def year_diff(x):
-        return abs(int(x['year']) - int(year))
+        return abs(int(x['year']) - year)
 
     # Remove duplicate entries
     unique_entries = list()
@@ -70,7 +70,9 @@ def filter_meta(entries, max_hits=None, year=None, year_delta=None):
     entries = unique_entries
 
     # Remove entries outside of year delta for target year, if available
-    if year and isinstance(year_delta, int):
+    if year and year_delta:
+        year = int(year)
+        year_delta = int(year_delta)
         entries = [entry for entry in entries if year_diff(entry) <= year_delta]
 
         # Sort entries around year
@@ -87,7 +89,7 @@ def get_user_agent(platform=None):
 
     Valid platforms are listed in the constants module
 
-    :param optional str platform: the platform for the required user agent string
+    :param optional str platform: the platform for the required user agent
     :return: the user agent string
     :rtype: str
     """
@@ -101,7 +103,7 @@ def get_user_agent(platform=None):
 
 
 def request_json(url, parameters=None, body=None, headers=None, cache=True,
-                 agent=None):
+        agent=None):
     """ Queries a url for json data
 
     Essentially just wraps requests to abstract return values and exceptions
@@ -138,6 +140,7 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
         headers['content-length'] = str(len(body))
     else:
         method = 'GET'
+        headers['user-agent'] = get_user_agent(agent)
 
     try:
         session._is_cache_disabled = not cache  # yes, i'm a bad person

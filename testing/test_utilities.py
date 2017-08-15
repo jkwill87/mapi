@@ -1,8 +1,23 @@
+import sys
+
+""" Unit tests for utilities.py
+"""
+
 from json import loads
-from unittest import TestCase
-from unittest.mock import patch
+
 from requests import Session
+
 from mapi.utilities import *
+
+if sys.version_info.major == 3:
+    from unittest import TestCase
+    # noinspection PyCompatibility
+    from unittest.mock import patch
+else:
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
+    from unittest2 import TestCase
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
+    from mock import patch
 
 
 class MockRequestResponse:
@@ -18,26 +33,26 @@ class TestRequestJson(TestCase):
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_2xx_status(self, mock_request):
         with self.subTest(code=200):
-            mock_response = MockRequestResponse(200, b'{}')
+            mock_response = MockRequestResponse(200, '{}')
             mock_request.return_value = mock_response
             status, _ = request_json('http://...')
             self.assertEqual(status, 200)
         with self.subTest(code=299):
-            mock_response = MockRequestResponse(299, b'{}')
+            mock_response = MockRequestResponse(299, '{}')
             mock_request.return_value = mock_response
             status, _ = request_json('http://...')
             self.assertEqual(status, 299)
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_4xx_status(self, mock_request):
-        mock_response = MockRequestResponse(400, b'{}')
+        mock_response = MockRequestResponse(400, '{}')
         mock_request.return_value = mock_response
         status, _ = request_json('http://...')
         self.assertEqual(status, 400)
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_5xx_status(self, mock_request):
-        mock_response = MockRequestResponse(500, b'{}')
+        mock_response = MockRequestResponse(500, '{}')
         mock_request.return_value = mock_response
         status, _ = request_json('http://...')
         self.assertEqual(status, 500)
@@ -45,33 +60,33 @@ class TestRequestJson(TestCase):
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_2xx_data(self, mock_request):
         with self.subTest(code=200):
-            mock_response = MockRequestResponse(200, b'{"status":true}')
+            mock_response = MockRequestResponse(200, '{"status":true}')
             mock_request.return_value = mock_response
             _, content = request_json('http://...')
             self.assertTrue(content)
         with self.subTest(code=299):
-            mock_response = MockRequestResponse(299, b'{"status":true}')
+            mock_response = MockRequestResponse(299, '{"status":true}')
             mock_request.return_value = mock_response
             _, content = request_json('http://...')
             self.assertTrue(content)
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_4xx_data(self, mock_request):
-        mock_response = MockRequestResponse(400, b'{"status":false}')
+        mock_response = MockRequestResponse(400, '{"status":false}')
         mock_request.return_value = mock_response
         _, content = request_json('http://...')
         self.assertIsNone(content)
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_5xx_data(self, mock_request):
-        mock_response = MockRequestResponse(500, b'{"status":false}')
+        mock_response = MockRequestResponse(500, '{"status":false}')
         mock_request.return_value = mock_response
         _, content = request_json('http://...')
         self.assertIsNone(content)
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_json_data(self, mock_request):
-        json_data = b"""{
+        json_data = """{
             "status": true,
             "data": {
                 "title": "The Matrix",
@@ -95,7 +110,7 @@ class TestRequestJson(TestCase):
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_xml_data(self, mock_request):
-        xml_data = b"""
+        xml_data = """
             <?xml version="1.0" encoding="UTF-8" ?>
             <status>true</status>
             <data>
@@ -113,7 +128,7 @@ class TestRequestJson(TestCase):
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_html_data(self, mock_request):
-        html_data = b"""
+        html_data = """
             <!DOCTYPE html>
             <html>
                 <body>   
@@ -141,7 +156,9 @@ class TestRequestJson(TestCase):
         )
         _, kwargs = mock_request.call_args
         self.assertEqual(kwargs['method'], 'GET')
-        self.assertEqual(kwargs['headers'], {'apple': 'pie'})
+        self.assertEqual(len(kwargs['headers']), 2)
+        self.assertEqual(kwargs['headers']['apple'], 'pie')
+        self.assertIn('user-agent', kwargs['headers'])
 
     @patch('mapi.utilities.requests_cache.CachedSession.request')
     def test_get_parameters(self, mock_request):
@@ -229,15 +246,14 @@ class TestCleanDict(TestCase):
     def test_all_falsy(self):
         dict_in = {
             'who': None,
-            'let': ...,
-            'the': 0,
-            'dogs': False,
-            'out': [],
-            '?': ()
+            'let': 0,
+            'the': False,
+            'dogs': [],
+            'out': ()
         }
         dict_want = {
-            'the': '0',
-            'dogs': 'False'
+            'let': '0',
+            'the': 'False'
         }
         dict_out = clean_dict(dict_in)
         self.assertDictEqual(dict_out, dict_want)
@@ -262,6 +278,7 @@ class TestCleanDict(TestCase):
 
     def test_not_a_dict(self):
         with self.assertRaises(AssertionError):
+            # noinspection PyTypeChecker
             clean_dict('mama mia pizza pie')
 
     def test_str_strip(self):
