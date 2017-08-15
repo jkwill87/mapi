@@ -163,25 +163,6 @@ so desire.
 +----------+------------+--------------------------------------------+
 
 
-Exceptions
-----------
-
-When bad things happen, mapi raises exception derived from the MapiException
-class.
-
-+-----------------------+--------------------------------------------------------------------------------+
-| Exception             | Description                                                                    |
-+=======================+================================================================================+
-| MapiException         | Base exception for the mapi package                                            |
-+-----------------------+--------------------------------------------------------------------------------+
-| MapiNetworkException  | Raised when a network request is unaccepted; ie. no internet connection        |
-+-----------------------+--------------------------------------------------------------------------------+
-| MapiNotFoundException | Raised when a lookup or search works as expected yet yields no results.        |
-+-----------------------+--------------------------------------------------------------------------------+
-| MapiProviderException | Invalid provider use, i.e. invalid API key, missing or conflicting parameters. |
-+-----------------------+--------------------------------------------------------------------------------+
-
-
 Notes
 =====
 .. [1] required for TMDb and TVDb; alternatively, can be set by API_KEY_TMDB
