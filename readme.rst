@@ -4,10 +4,7 @@
 mapi
 ====
 
-mapi (**M**\ etadata **API**) is an is a pure python library which
-provides a high-level interface for media database providers, allowing
-users to lookup and search for television and movie metadata using a
-simple and consistent interface.
+mapi (**M**\ etadata **API**) is a python library which provides a high-level interface for media database providers, allowing users to search for television and movie metadata using a simple interface.
 
 
 Examples
