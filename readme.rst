@@ -13,19 +13,6 @@ simple and consistent interface.
 Examples
 ========
 
-Provider Configuration
-----------------------
-
-+-------------+--------------------------------------------------------+---------+-------+
-| Parameter   | Description                                            | Default | Notes |
-+=============+========================================================+=========+=======+
-| api_key     | Developer API key                                      | None    | [1]_  |
-+-------------+--------------------------------------------------------+---------+-------+
-| max_hits    | Restricts the maximum number of responses for a search | 15      |       |
-+-------------+--------------------------------------------------------+---------+-------+
-| year_delta  | Filters results around this value inclusively          | 5       |       |
-+-------------+--------------------------------------------------------+---------+-------+
-
 Searching for a television show by series using TVDb
 ----------------------------------------------------
 
@@ -97,6 +84,14 @@ None found :(
 Usage
 =====
 
+Installing
+----------
+
+- ``pip3 install .``
+- ``pip2 install .``
+- ``pypy3 -m pip install .``
+
+
 Provider Configuration
 ----------------------
 
@@ -159,9 +154,9 @@ so desire.
 +----------+------------+--------------------------------------------+
 | year     | IMDb, TMDb | Feature's release year                     |
 +----------+------------+--------------------------------------------+
-| synopsis | all        | Media synopsis                             |
+| synopsis | ALL        | Media synopsis                             |
 +----------+------------+--------------------------------------------+
-| media    | all        | Media type; either 'movie' or 'television' |
+| media    | ALL        | Media type; either 'movie' or 'television' |
 +----------+------------+--------------------------------------------+
 | series   | TVDb       | Series' name                               |
 +----------+------------+--------------------------------------------+
@@ -201,7 +196,7 @@ Notes
 .. [4] If this field is passed as a string it must be numeric.
 
 .. |licence| image:: https://img.shields.io/github/license/jkwill87/mapi.svg
-   :target: https://travis-ci.org/jkwill87/mapi
+   :target: https://en.wikipedia.org/wiki/MIT_License
 .. |travis_ci| image:: https://img.shields.io/travis/jkwill87/mapi/develop.svg
    :target: https://travis-ci.org/jkwill87/mapi
 .. |python| image:: https://img.shields.io/badge/python-2.7/3/PyPy3-ABD800.svg
