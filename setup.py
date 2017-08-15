@@ -20,7 +20,7 @@ about = {
         'unittest2;python_version<"3"'
     ],
     'url': 'https://github.com/jkwill87/mapi',
-    'version': '1.0'
+    'version': '1.0.2'
 }
 
 setup(**about)

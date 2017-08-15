@@ -1,10 +1,10 @@
-|licence| |travis_ci| |python| |api|
+|licence| |pypi| |travis_ci| |api|
 
 
 mapi
 ====
 
-mapi (**M**\ etadata **API**) is a python library which provides a high-level interface for media database providers, allowing users to search for television and movie metadata using a simple interface.
+mapi (**M**\ etadata **API**) is a python library which provides a high-level interface for media database providers, allowing users to search for television and movie metadata using a simple interface. Supports and tested against Python 2.7, Python 3, and PyPy3.
 
 
 Examples
@@ -84,9 +84,8 @@ Usage
 Installing
 ----------
 
-- ``pip3 install .``
-- ``pip2 install .``
-- ``pypy3 -m pip install .``
+- **pip:** ``pip install mapi``
+- **source:** ``pip install .``
 
 
 Provider Configuration
@@ -177,5 +176,6 @@ Notes
    :target: https://en.wikipedia.org/wiki/MIT_License
 .. |travis_ci| image:: https://img.shields.io/travis/jkwill87/mapi/develop.svg
    :target: https://travis-ci.org/jkwill87/mapi
-.. |python| image:: https://img.shields.io/badge/python-2.7/3/PyPy3-ABD800.svg
+.. |pypi| image:: https://img.shields.io/pypi/v/mapi.svg
+   :target: https://pypi.python.org/pypi/mapi
 .. |api| image:: https://img.shields.io/badge/api-IMDb/TMDb/TVDb-D8D200.svg
