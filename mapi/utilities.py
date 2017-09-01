@@ -4,6 +4,7 @@
 """
 
 import random
+from sys import version_info
 
 import requests
 import requests_cache
@@ -13,8 +14,8 @@ from mapi import log
 from mapi.constants import *
 
 # Setup requests caching
-session = requests_cache.CachedSession(
-    cache_name=user_cache_dir() + '/mapi',
+SESSION = requests_cache.CachedSession(
+    cache_name=user_cache_dir() + '/mapi-py%d' % version_info.major,
     expire_after=604800,
 )
 
@@ -32,7 +33,7 @@ def clean_dict(target_dict, whitelist=None):
         str(k).strip(): str(v).strip()
         for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
-           and (not whitelist or k in whitelist)
+        and (not whitelist or k in whitelist)
     }
 
 
@@ -143,8 +144,8 @@ def request_json(url, parameters=None, body=None, headers=None, cache=True,
         headers['user-agent'] = get_user_agent(agent)
 
     try:
-        session._is_cache_disabled = not cache  # yes, i'm a bad person
-        response = session.request(
+        SESSION._is_cache_disabled = not cache  # yes, i'm a bad person
+        response = SESSION.request(
             url=url,
             params=parameters,
             json=body,
