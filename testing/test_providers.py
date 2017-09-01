@@ -146,7 +146,7 @@ class TestProviderFactory(TestCase):
 
 class TestImdb(TestCase):
     def setUp(self):
-        self.client = IMDb(api_key=API_KEY_TMDB, max_hits=10)
+        self.client = IMDb(api_key=API_KEY_TMDB)
 
     def test_registrations(self):
         self.assertTrue(PROVIDER_IMDB == 'imdb')
@@ -194,7 +194,7 @@ class TestImdb(TestCase):
 
 class TestTmdb(TestCase):
     def setUp(self):
-        self.client = TMDb(api_key=API_KEY_TMDB, max_hits=5)
+        self.client = TMDb(api_key=API_KEY_TMDB)
 
     def test_registrations(self):
         self.assertTrue(PROVIDER_TMDB == 'tmdb')
@@ -261,7 +261,7 @@ class TestTmdb(TestCase):
 
 class TestTvdb(TestCase):
     def setUp(self):
-        self.client = TVDb(api_key=API_KEY_TVDB, max_hits=5)
+        self.client = TVDb(api_key=API_KEY_TVDB)
 
     def test_registrations(self):
         self.assertTrue(PROVIDER_TVDB == 'tvdb')
@@ -337,7 +337,6 @@ class TestTvdb(TestCase):
                 self.assertEqual(results[0]['episode'], '3')
 
     def test_search_series(self):
-        self.client.max_hits = 5
         for meta in television_meta:
             with self.subTest(series=meta['series']):
                 results = self.client.search(series=meta['series'])

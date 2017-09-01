@@ -47,44 +47,6 @@ def d2l(d):
     return sorted([(k, v) for k, v in d.items()])
 
 
-def filter_meta(entries, max_hits=None, year=None, year_delta=None):
-    """ Filters a list of metadata dicts
-
-    Note: this might be a good candidate for future refactoring, perhaps to
-    split them up?
-
-    :param list entries: the list of metadata dicts
-    :param int max_hits: the maximum number of entries to include in the list
-    :param int or str year: the target year to filter around
-    :param int year_delta: results are filtered around this value inclusively
-    :return: the filtered list of entries
-    :rtype: dict
-    """
-    assert isinstance(entries, list)
-
-    def year_diff(x):
-        return abs(int(x['year']) - year)
-
-    # Remove duplicate entries
-    unique_entries = list()
-    [unique_entries.append(e) for e in entries if e not in unique_entries]
-    entries = unique_entries
-
-    # Remove entries outside of year delta for target year, if available
-    if year and year_delta:
-        year = int(year)
-        year_delta = int(year_delta)
-        entries = [entry for entry in entries if year_diff(entry) <= year_delta]
-
-        # Sort entries around year
-        entries.sort(key=year_diff)
-
-    # Cut off entries after max_hits, if set
-    if max_hits:
-        entries = entries[:max_hits]
-    return entries
-
-
 def get_user_agent(platform=None):
     """ Convenience function that looks up a user agent string, random if N/A
 

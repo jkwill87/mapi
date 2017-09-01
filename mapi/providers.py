@@ -46,9 +46,6 @@ def provider_factory(provider, **options):
         service
     :keyword int year_delta:  If set and a year is provided for a movie query,
         results will be filtered around this value inclusively
-    :keyword int max_hits: Will restrict the maximum number of responses for a
-        search. If unset or None, searches yield as many as possible from the
-        API provider
     :return: One of this module's provider objects
     """
     if not has_provider(provider):
@@ -72,12 +69,8 @@ class IMDb:
         :param options: Optional kwargs; see below..
         :keyword int year_delta: If set and a year is provided for a movie
             query, results will be filtered around this value inclusively.
-        :keyword int max_hits: Will restrict the maximum number of responses for
-            a search. If unset or None, searches yield as many as possible from
-            the API provider.
         """
         self.year_delta = options.get('year_delta', 5)
-        self.max_hits = options.get('max_hits', 15)
 
     def search(self, **parameters):
         """ Searches IMDb for movie metadata
@@ -106,7 +99,7 @@ class IMDb:
             raise MapiNotFoundException
         if not metadata:
             raise MapiNotFoundException
-        return filter_meta(metadata, self.max_hits, year, self.year_delta)
+        return metadata
 
     def _search_id_imdb(self, id_imdb):
         assert id_imdb
@@ -138,7 +131,7 @@ class IMDb:
         ids += [entry['id'] for entry in response.get('title_approx', [])]
         ids += [entry['id'] for entry in response.get('title_substring', [])]
 
-        for id_imdb in ids[:self.max_hits]:
+        for id_imdb in ids:
             try:
                 metadata.append(self._search_id_imdb(id_imdb))
             except MapiNotFoundException:
@@ -156,16 +149,12 @@ class TMDb:
         :param options: Optional kwargs; see below..
         :keyword int year_delta: If set and a year is provided for a movie
             query, results will be filtered around this value inclusively.
-        :keyword int max_hits: Will restrict the maximum number of responses for
-            a search. If unset or None, searches yield as many as possible from
-            the API provider.
         :keyword str api_key: TMDb developer API key; required to either be
             provided or available from the TMDb_API_KEY environment variable
         :raises MapiProviderException: If a TMDb key is not provided or found in
             the environment variables
         """
         self.year_delta = options.get('year_delta', 5)
-        self.max_hits = options.get('max_hits', 15)
         api_key = options.get('api_key') or environ.get(API_KEY_ENV_TMDB)
         if isinstance(api_key, str):
             self.api_key = api_key
@@ -198,7 +187,7 @@ class TMDb:
             metadata = self._search_title(title, year)
         else:
             raise MapiNotFoundException
-        return filter_meta(metadata, self.max_hits, year, self.year_delta)
+        return metadata
 
     def _search_id_imdb(self, id_imdb):
         response = endpoints.tmdb_find(
@@ -226,7 +215,7 @@ class TMDb:
         metadata = list()
         page = 1
         # each page yields max of 20 results
-        page_max = -(-self.max_hits // 20) if self.max_hits else 10
+        page_max = 10
         while True:
             response = endpoints.tmdb_search_movies(
                 self.api_key, title, year, page=page
@@ -257,16 +246,12 @@ class TVDb:
         :param options: Optional kwargs; see below..
         :keyword int year_delta: If set and a year is provided for a movie
             query, results will be filtered around this value inclusively.
-        :keyword int max_hits: Will restrict the maximum number of responses for
-            a search. If unset or None, searches yield as many as possible from
-            the API provider.
         :keyword str api_key: TVDb developer API key; required to either be
             provided or available from the TVDb_API_KEY environment variable
         :raises MapiProviderException: If a TVDb key is not provided or found in
             the environment variables
         """
         self.year_delta = options.get('year_delta', 5)
-        self.max_hits = options.get('max_hits', 15)
         api_key = options.get('api_key') or environ.get(API_KEY_ENV_TVDB)
         if isinstance(api_key, str):
             self.token = endpoints.tvdb_login(api_key)
@@ -303,13 +288,13 @@ class TVDb:
             metadata = self._search_series(series, season, episode)
         else:
             raise MapiNotFoundException
-        return filter_meta(metadata, self.max_hits)
+        return metadata
 
     def _search_id_tvdb(self, id_tvdb, season, episode):
         metadata = list()
         series_data = endpoints.tvdb_series_id(self.token, id_tvdb)
         page = 1
-        page_max = -(-self.max_hits // 100) if self.max_hits else 5
+        page_max = 5
         while True:
             episode_data = endpoints.tvdb_series_episodes_query(self.token,
                 id_tvdb, episode, season)

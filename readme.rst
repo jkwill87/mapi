@@ -15,7 +15,7 @@ Searching for a television show by series using TVDb
 
 >>> from pprint import pprint
 >>> from mapi.providers import TVDb
->>> client = TVDb(max_hits=3)
+>>> client = TVDb()
 >>> hits = client.search(series='Rick and Morty', season=2)
 >>> pprint(hit)
 [{'episode': '1',
@@ -95,8 +95,6 @@ Provider Configuration
 | Parameter   | Description                                            | Default | Notes |
 +=============+========================================================+=========+=======+
 | api_key     | Developer API key                                      | None    | [1]_  |
-+-------------+--------------------------------------------------------+---------+-------+
-| max_hits    | Restricts the maximum number of responses for a search | 15      |       |
 +-------------+--------------------------------------------------------+---------+-------+
 | year_delta  | Filters results around this value inclusively          | 5       |       |
 +-------------+--------------------------------------------------------+---------+-------+
