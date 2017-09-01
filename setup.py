@@ -20,7 +20,7 @@ about = {
     'packages': ['mapi'],
     'install_requires': required,
     'url': 'https://github.com/jkwill87/mapi',
-    'version': '1.0.2'
+    'version': '1.0.3'
 }
 
 setup(**about)
