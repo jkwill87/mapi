@@ -318,6 +318,7 @@ class TVDb:
                     META_SERIES: series_data['data']['seriesName'],
                     META_SEASON: str(entry['airedSeason']),
                     META_EPISODE: str(entry['airedEpisodeNumber']),
+                    META_AIRDATE: entry['firstAired'],
                     META_TITLE: entry['episodeName'],
                     META_SYNOPSIS: str(entry['overview'])
                         .replace('\r\n', '').replace('  ', '').strip(),
