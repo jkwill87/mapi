@@ -51,7 +51,6 @@ class Provider(_AbstractClass):
             query, results will be filtered around this value inclusively.
         """
         cls_name = self.__class__.__name__
-        self._hits = 0
         self._api_key = options.get(
             'api_key',
             environ.get('API_KEY_%s' % cls_name.upper())
@@ -83,10 +82,6 @@ class Provider(_AbstractClass):
     @property
     def api_key(self):
         return self._api_key
-
-    @property
-    def hits(self):
-        return self._hits
 
 
 class IMDb(Provider):
