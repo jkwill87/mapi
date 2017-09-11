@@ -32,13 +32,13 @@ class Metadata(_AbstractClass, MutableMapping):
             self.template = params['template']
 
     def __iter__(self):
-        return self._dict.__iter__()
+        return {k: v for k, v in self._dict.items() if v}.__iter__()
 
     def __len__(self):
-        return self._dict.__len__()
+        return {k: v for k, v in self._dict.items() if v}.__len__()
 
     def __repr__(self):
-        return repr(dict(self))
+        return {k: v for k, v in self._dict.items() if v}.__repr__()
 
     def __setitem__(self, key, value):
 
