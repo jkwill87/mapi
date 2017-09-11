@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from collections import MutableMapping
 from datetime import datetime as dt
 from re import sub
@@ -8,23 +8,8 @@ _AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 
 class Metadata(_AbstractClass, MutableMapping):
-    @property
-    @abstractmethod
-    def fields(self):
-        """ The valid fields for which the overridden class can get and set
-
-        :rtype: dict
-        """
-        return {}
-
-    @property
-    @abstractmethod
-    def template(self):
-        """
-
-        :rtype: str
-        """
-        return ''
+    template = ''
+    fields = {}
 
     def __delitem__(self, key):
         raise NotImplementedError('values can be modified but keys are static')
@@ -43,6 +28,7 @@ class Metadata(_AbstractClass, MutableMapping):
     def __init__(self, **params):
         self._dict = {k: None for k in self.fields}
         self.update(params)
+        self.template = self.template or params.get('template')
 
     def __iter__(self):
         return self._dict.__iter__()
@@ -111,7 +97,6 @@ class Metadata(_AbstractClass, MutableMapping):
             brackets will be omitted as well.
         :rtype: str
         """
-        template = template or self.template
         s = sub(
             r'(?:<([^<]*?)\$(\w+)([^>]*?)>)',
             self._str_replace,
@@ -123,35 +108,25 @@ class Metadata(_AbstractClass, MutableMapping):
 
 # noinspection PyAbstractClass
 class MetadataTelevision(Metadata):
+    template = '<$series - >< - $season><x$episode - >< - $title>'
+    fields = {
+        'id_imdb',
+        'id_tvdb',
+        'media',
+        'series',
+        'season',
+        'episode',
+        'title',
+        'date',
+        'synopsis',
+    }
+
     @staticmethod
     def _str_pad_episode(s):
         s = sub(r'(?<=\s)(\d)(?=x\d)', r'0\1', s)
         s = sub(r'(?<=\dx)(\d)(?=\s)', r'0\1', s)
         s = sub(r'([S|E])(\d)(?=\s|$|E)', r'\g<1>0\g<2>', s)
         return s
-
-    @property
-    def fields(self):
-        return {
-            'id_imdb',
-            'id_tvdb',
-            'media',
-            'series',
-            'season',
-            'episode',
-            'title',
-            'date',
-            'synopsis',
-        }
-
-    @property
-    def template(self):
-        return (
-            '<$series - >'
-            '< - $season>'
-            '<x$episode - >'
-            '< - $title>'
-        )
 
     def format(self, template=None):
         s = super(MetadataTelevision, self).format(template)
@@ -160,20 +135,12 @@ class MetadataTelevision(Metadata):
 
 # noinspection PyAbstractClass
 class MetadataMovie(Metadata):
-    @property
-    def fields(self):
-        return {
-            'id_imdb',
-            'id_tmdb',
-            'media',
-            'title',
-            'date',
-            'synopsis',
-        }
-
-    @property
-    def template(self):
-        return (
-            '<$title >'
-            '<($year)>'
-        )
+    template = '<$title ><($year)>'
+    fields = {
+        'id_imdb',
+        'id_tmdb',
+        'media',
+        'title',
+        'date',
+        'synopsis',
+    }
