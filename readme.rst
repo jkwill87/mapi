@@ -19,7 +19,7 @@ Examples
 Searching for a television show by series using TVDb
 ----------------------------------------------------
 
-Here is a fairly straight forward example, lets say we just want to get a listing of episodes from
+Here is a fairly straight forward example, say we just want to get a listing of episodes from
 Rick and Morty season 2:
 
 >>> from mapi.providers import TVDb
@@ -38,7 +38,7 @@ Rick and Morty - 02x08 - Interdimensional Cable 2: Tempting Fate
 Rick and Morty - 02x09 - Look Who's Purging Now
 Rick and Morty - 02x10 - The Wedding Squanchers
 
-Mapi searches yield Metadata objects, which themselves are just MutableMappings which can be treated like regular old Python dictionaries. That being said, they overrite `__str__` so that they get prettily printed as is seen above. This can easily be overridden, however. Say we would rather use a SxxExx format:
+Mapi searches yield Metadata objects, which themselves are just MutableMappings which can be treated like regular old Python dictionaries. That being said, they overwrite `__str__` so that they get prettily printed as is seen above. This can easily be overridden, however. Say we would rather use a SxxExx format:
 
 >>> from mapi.providers import TVDb
 >>> client = TVDb()  # API Key taken from environment variables
@@ -47,13 +47,13 @@ Mapi searches yield Metadata objects, which themselves are just MutableMappings 
 Adventure Time - S05E03 - Five More Short Graybles
 
 
-You can read more about the `format` method in the source doucmentation.
+You can read more about the `format` method in the source documentation.
 
 
 Searching for a movie by title and year using IMDb
 --------------------------------------------------
 
-Okay, so no we want to look up some movies. We can search for using a specific year, by an upper range using '-year', by a lower range using 'year-', or between a range of years using 'year-year'. Lets use the latter to get a listing of Star Trek movies from the 90s. As it turns out, theres a lot.
+Okay, so no we want to look up some movies. We can search for using a specific year, by an upper range using '-year', by a lower range using 'year-', or between a range of years using 'year-year'. Lets use the latter to get a listing of Star Trek movies from the 90s. As it turns out, there's a lot.
 
 >>> from mapi.providers import IMDb
 >>> client = IMDb()
@@ -79,7 +79,7 @@ Looking up by ID
 ----------------
 
 If you just want to lookup metadata using an API Provider's ID code, you can do that too. Some APIs,
-like the TMDb allow you to seach by an IMDb 'tt-const' in addition to their own ID code. Below shows
+like the TMDb allow you to search by an IMDb 'tt-const' in addition to their own ID code. Below shows
 an example of using both to retrieve metadata for the same movie:
 
 >>> from pprint import pprint
@@ -132,7 +132,7 @@ Provider Configuration
 
 - TVDb and TMDb require an API key to successfully be initialized
 - These can be provided using environment variables; API_KEY_TMDB and API_KEY_TVDB, respectively
-- These can also be provided as `api_key`, a parameter to the prodiver classes.
+- These can also be provided as `api_key`, a parameter to the provider classes.
 
 
 Searching
@@ -198,7 +198,7 @@ so desire.
 License
 =======
 
-MIT. See lisense.txt for details.
+MIT. See license.txt for details.
 
 
 Notes
