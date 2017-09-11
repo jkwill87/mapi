@@ -50,9 +50,9 @@ class Metadata(_AbstractClass, MutableMapping):
             )
 
         # Validate value
-        elif key == 'mtype' and value not in ['movie', 'television']:
+        elif key == 'media' and value not in ['movie', 'television', None]:
             raise ValueError()
-        elif key == 'date':
+        elif key == 'date' and value is not None:
             dt.strptime(value, '%Y-%m-%d')
 
         # If its gotten this far, looks good
@@ -60,6 +60,50 @@ class Metadata(_AbstractClass, MutableMapping):
 
     def __str__(self):
         return self.format()
+
+    def _str_replace(self, mobj):
+        try:
+            prefix, key, suffix = mobj.groups()
+            value = self[key]
+            assert value
+            value = self._str_title_case(value)
+            return '%s%s%s' % (prefix, value, suffix)
+        except (IndexError, KeyError, AssertionError):
+            # log.warning("couldn't sub for %s" % mobj.group())
+            return ''
+
+    @staticmethod
+    def _str_title_case(s):
+        if not s:
+            return s
+        else:
+            s = str(s)
+
+        uppercase = [
+            'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
+            '2d', '3d', 'aka', 'atm', 'bbc', 'bff', 'cia', 'csi', 'dc', 'doa',
+            'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk', 'mtv',
+            'nba', 'nfl', 'nhl', 'nsfw', 'nyc', 'omg', 'pga', 'rsvp', 'tnt',
+            'tv', 'ufc', 'ufo', 'uk', 'usa', 'vip', 'wtf', 'wwe', 'wwi',
+            'wwii', 'yolo'
+        ]
+        lowercase = [
+            'a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'ces', 'de',
+            'des', 'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on',
+            'or',
+            'the', 'to', 'un', 'une' 'via',
+            'h264', 'h265'
+        ]
+
+        s_list = s.lower().split(' ')
+
+        for i in range(len(s_list)):
+            if s_list[i] in uppercase:
+                s_list[i] = s_list[i].upper()
+            elif s_list[i] not in lowercase or i == 0:
+                s_list[i] = s_list[i].capitalize()
+
+        return ' '.join(x for x in s_list)
 
     @staticmethod
     def _str_fix_whitespace(s):
@@ -72,20 +116,6 @@ class Metadata(_AbstractClass, MutableMapping):
         # Strip leading/ trailing whitespace
         s = s.strip()
         return s
-
-    def _str_replace(self, mobj):
-        try:
-            prefix, key, suffix = mobj.groups()
-            value = self[key]
-            # log.debug(
-            #     "sub for '%s' - key='%s',value='%s',prefix='%s',suffix='%s'"
-            #     % (mobj.group(), key, value, prefix, suffix)
-            # )
-            assert value
-            return '%s%s%s' % (prefix, value, suffix)
-        except (IndexError, KeyError, AssertionError):
-            # log.warning("couldn't sub for %s" % mobj.group())
-            return ''
 
     def format(self, template=None):
         """ Substitutes variables within template with that of fields'
