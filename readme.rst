@@ -19,10 +19,14 @@ Examples
 Searching for a television show by series using TVDb
 ----------------------------------------------------
 
+Here is a fairly straight forward example, lets say we just want to get a listing of episodes from
+Rick and Morty season 2:
+
 >>> from mapi.providers import TVDb
 >>> client = TVDb()  # API Key taken from environment variables
 >>> results = client.search(series='Rick and Morty', season=2)
->>> for result in results: print(result)
+>>> for result in results:
+>>>     print(result)
 Rick and Morty - 02x01 - A Rickle in Time
 Rick and Morty - 02x02 - Mortynight Run
 Rick and Morty - 02x03 - Auto Erotic Assimilation
@@ -34,30 +38,49 @@ Rick and Morty - 02x08 - Interdimensional Cable 2: Tempting Fate
 Rick and Morty - 02x09 - Look Who's Purging Now
 Rick and Morty - 02x10 - The Wedding Squanchers
 
+Mapi searches yield Metadata objects, which themselves are just MutableMappings which can be treated like regular old Python dictionaries. That being said, they overrite `__str__` so that they get prettily printed as is seen above. This can easily be overridden, however. Say we would rather use a SxxExx format:
+
+>>> from mapi.providers import TVDb
+>>> client = TVDb()  # API Key taken from environment variables
+>>> result = client.search(series='Adventure Time', season=5, episode=3)
+>>> print(next(result).format('<$series - >< - S$season><E$episode - >< - $title>'))
+Adventure Time - S05E03 - Five More Short Graybles
+
+
+You can read more about the `format` method in the source doucmentation.
+
 
 Searching for a movie by title and year using IMDb
 --------------------------------------------------
+
+Okay, so no we want to look up some movies. We can search for using a specific year, by an upper range using '-year', by a lower range using 'year-', or between a range of years using 'year-year'. Lets use the latter to get a listing of Star Trek movies from the 90s. As it turns out, theres a lot.
 
 >>> from mapi.providers import IMDb
 >>> client = IMDb()
 >>> results = client.search(title='Star Trek', year='1990-1999')
 >>> for i, result in enumerate(results, 1):
->>>     print('%d)\t%s' % (i, result))
+>>>     print('%d) %s' % (i, result))
 >>>     if i > 9: break
-1)	Star Trek: Voyager (1995)
-2)	Star Trek: First Contact (1996)
-3)	Star Trek VI: The Undiscovered Country (1991)
-4)	Star Trek: Generations (1994)
-5)	Star Trek: Insurrection (1998)
-6)	Star Trek: The Experience - The Klingon Encounter (1998)
-7)	Journey's End: The Saga of Star Trek - The Next Generation (1994)
-8)	Star Trek: 30 Years and Beyond (1996)
-9)	Ultimate Trek: Star Trek's Greatest Moments (1999)
-10)	Star Trek: A Captain's Log (1994)
+1) Star Trek: Voyager (1995)
+2) Star Trek: First Contact (1996)
+3) Star Trek VI: The Undiscovered Country (1991)
+4) Star Trek: Generations (1994)
+5) Star Trek: Insurrection (1998)
+6) Star Trek: The Experience - The Klingon Encounter (1998)
+7) Journey's End: The Saga of Star Trek - The Next Generation (1994)
+8) Star Trek: 30 Years and Beyond (1996)
+9) Ultimate Trek: Star Trek's Greatest Moments (1999)
+10) Star Trek: A Captain's Log (1994)
+
+Searches return a generator, so by breaking on 10, we only ask for what we need, reducing the bandwidth and time required for the request.
 
 
 Looking up by ID
 ----------------
+
+If you just want to lookup metadata using an API Provider's ID code, you can do that too. Some APIs,
+like the TMDb allow you to seach by an IMDb 'tt-const' in addition to their own ID code. Below shows
+an example of using both to retrieve metadata for the same movie:
 
 >>> from pprint import pprint
 >>> from mapi.providers import TMDb
@@ -88,6 +111,9 @@ Looking up by ID
 
 Handling a search gone awry
 ---------------------------
+
+Not all searches yield results; maybe you had a typo, maybe the data just isn't there, either way 
+theres no need to fret, this can be handled gracefully using exception handling:
 
 >>> from mapi.providers import TMDb
 >>> client = TMDb()
