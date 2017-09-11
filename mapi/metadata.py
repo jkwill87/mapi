@@ -28,7 +28,8 @@ class Metadata(_AbstractClass, MutableMapping):
     def __init__(self, **params):
         self._dict = {k: None for k in self.fields}
         self.update(params)
-        self.template = self.template or params.get('template')
+        if 'template' in params:
+            self.template = params['template']
 
     def __iter__(self):
         return self._dict.__iter__()
@@ -100,7 +101,7 @@ class Metadata(_AbstractClass, MutableMapping):
         s = sub(
             r'(?:<([^<]*?)\$(\w+)([^>]*?)>)',
             self._str_replace,
-            template
+            template or self.template
         )
         s = self._str_fix_whitespace(s)
         return s
