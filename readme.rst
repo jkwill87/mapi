@@ -38,7 +38,7 @@ Rick and Morty - 02x08 - Interdimensional Cable 2: Tempting Fate
 Rick and Morty - 02x09 - Look Who's Purging Now
 Rick and Morty - 02x10 - The Wedding Squanchers
 
-Mapi searches yield Metadata objects, which themselves are just MutableMappings which can be treated like regular old Python dictionaries. That being said, they overwrite `__str__` so that they get prettily printed as is seen above. This can easily be overridden, however. Say we would rather use a SxxExx format:
+Mapi searches yield Metadata objects, which themselves are just MutableMappings which can be treated like regular old Python dictionaries. That being said, they overwrite `__str__` so that they get prettily printed as seen above. This can easily be overridden, however. Say we would rather use a SxxExx format:
 
 >>> from mapi.providers import TVDb
 >>> client = TVDb()  # API Key taken from environment variables
@@ -78,9 +78,7 @@ Searches return a generator, so by breaking on 10, we only ask for what we need,
 Looking up by ID
 ----------------
 
-If you just want to lookup metadata using an API Provider's ID code, you can do that too. Some APIs,
-like the TMDb allow you to search by an IMDb 'tt-const' in addition to their own ID code. Below shows
-an example of using both to retrieve metadata for the same movie:
+If you just want to lookup metadata using an API Provider's ID code, you can do that too:
 
 >>> from pprint import pprint
 >>> from mapi.providers import TMDb
@@ -96,6 +94,8 @@ an example of using both to retrieve metadata for the same movie:
              'Devereaux run off on a big quest to find the secret stash of '
              'Pirate One-Eyed Willie.',
  'title': 'The Goonies'}
+
+Some APIs, like TMDb, allow you to search by an IMDb 'tt-const' as well:
 >>> results = client.search(id_imdb='tt0089218')  # Using IMDb ID
 >>> pprint(dict(next(results)))
 {'date': '1985-06-06',
