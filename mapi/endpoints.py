@@ -2,12 +2,154 @@
 
 """ Stand-alone functions which have a 1:1 mapping to that of API endpoints
 """
-
+import random
 from re import match
+from sys import version_info
 from time import sleep
-from mapi.constants import TVDB_LANGUAGE_CODES
+
+import requests
+import requests_cache
+from appdirs import user_cache_dir
+
+from mapi import log
 from mapi.exceptions import *
-from mapi.utilities import request_json
+
+TVDB_LANGUAGE_CODES = [
+    'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it',
+    'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'ru', 'sl', 'sv', 'tr', 'zh'
+]
+
+# User agent constants
+AGENT_CHROME = (
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/601.1'
+    ' (KHTML, like Gecko) CriOS/53.0.2785.86 Mobile/14A403 Safari/601.1.46'
+)
+AGENT_EDGE = (
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like '
+    'Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393'
+)
+AGENT_IOS = (
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) '
+    'AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 '
+    'Safari/602.1'
+)
+AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
+
+# Setup requests caching
+SESSION = requests_cache.CachedSession(
+    cache_name=user_cache_dir() + '/mapi-py%d' % version_info.major,
+    expire_after=604800,
+)
+
+
+def _clean_dict(target_dict, whitelist=None):
+    """ Convenience function that removes a dicts keys that have falsy values
+
+    :param dict target_dict: the dict to clean
+    :param optional set whitelist: if set, will filter keys outside of whitelist
+    :return: the cleaned dict
+    :rtype: dict
+    """
+    assert isinstance(target_dict, dict)
+    return {
+        str(k).strip(): str(v).strip()
+        for k, v in target_dict.items()
+        if v not in (None, Ellipsis, [], (), '')
+        and (not whitelist or k in whitelist)
+    }
+
+
+def _d2l(d):
+    """ Convenience function that converts a dict into a sorted list of tuples
+
+    :param dict d: dictionary
+    :return: list of sorted tuples
+    :rtype: list of tuple
+    """
+    return sorted([(k, v) for k, v in d.items()])
+
+
+def _get_user_agent(platform=None):
+    """ Convenience function that looks up a user agent string, random if N/A
+
+    Valid platforms are listed in the constants module
+
+    :param optional str platform: the platform for the required user agent
+    :return: the user agent string
+    :rtype: str
+    """
+    if isinstance(platform, str):
+        platform = platform.upper()
+    return {
+        'chrome': AGENT_CHROME,
+        'edge': AGENT_EDGE,
+        'ios': AGENT_IOS
+    }.get(platform, random.choice(AGENT_ALL))
+
+
+def _request_json(url, parameters=None, body=None, headers=None, cache=True,
+        agent=None):
+    """ Queries a url for json data
+
+    Essentially just wraps requests to abstract return values and exceptions
+
+    Note: Requests are cached using requests_cached for a week, this is done
+    transparently by using the package's monkey patching
+
+    :param str url: The url to query
+    :param dict parameters: Query string parameters
+    :param dict body: JSON body parameters; if set implicitly POSTs
+    :param optional dict headers: HTTP headers; content type, length, and user
+        agent already get set internally
+    :param str agent: User agent handle to include in headers; must be one
+        specified in the constants module; if unset on will be chosen randomly
+    :param bool cache: Use requests_cache cached session; default True
+    :return: a list where the first item is the numeric status code and the
+        second is a dict containing the JSON data retrieved
+    :rtype: list
+    """
+    assert url
+    status = 400
+    log.info("url: %s" % url)
+
+    if isinstance(headers, dict):
+        headers = _clean_dict(headers)
+    else:
+        headers = dict()
+    if isinstance(parameters, dict):
+        parameters = _d2l(_clean_dict(parameters))
+    if body:
+        method = 'POST'
+        headers['content-type'] = 'application/json'
+        headers['user-agent'] = _get_user_agent(agent)
+        headers['content-length'] = str(len(body))
+    else:
+        method = 'GET'
+        headers['user-agent'] = _get_user_agent(agent)
+
+    try:
+        SESSION._is_cache_disabled = not cache  # yes, i'm a bad person
+        response = SESSION.request(
+            url=url,
+            params=parameters,
+            json=body,
+            headers=headers,
+            method=method,
+        )
+        status = response.status_code
+        content = response.json() if status // 100 == 2 else None
+        cache = getattr(response, 'from_cache', False)
+    except (requests.RequestException, AttributeError, ValueError) as e:
+        log.debug(e, exc_info=True)
+        content = None
+
+    log.info("method: %s" % method)
+    log.info("headers: %r" % headers)
+    log.info("parameters: %r" % parameters)
+    log.info("cache: %r" % cache)
+    log.info("status: %d" % status)
+    log.debug("content: %s" % content)
+    return status, content
 
 
 def imdb_main_details(id_imdb):
@@ -27,7 +169,7 @@ def imdb_main_details(id_imdb):
     }
     status = content = None
     for i in range(50):  # retry when service unavailable
-        status, content = request_json(url, parameters)
+        status, content = _request_json(url, parameters)
         if status == 503:
             sleep((i + 1) * .025)  # .025 to 1.25 secs, total ~32
         else:
@@ -53,7 +195,7 @@ def imdb_mobile_find(title, nr=False, tt=False):
     parameters = {'json': True, 'nr': nr, 'tt': tt, 'q': title}
     status = content = None
     for i in range(50):  # retry when service unavailable
-        status, content = request_json(url, parameters)
+        status, content = _request_json(url, parameters)
         if status == 503:
             sleep((i + 1) * .025)  # wait from .025 to 1.25 secs
         else:
@@ -102,7 +244,7 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
         'tv_results',
         'tv_season_results'
     ]
-    status, content = request_json(url, parameters)
+    status, content = _request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
     if status == 404 or not any(content.get(k, {}) for k in keys):
@@ -132,7 +274,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
         'api_key': api_key,
         'language': language
     }
-    status, content = request_json(url, parameters)
+    status, content = _request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
     if status == 404:
@@ -172,7 +314,7 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
         'region': region,
         'year': year,
     }
-    status, content = request_json(url, parameters)
+    status, content = _request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
     if status == 404 or status == 422 or not content.get('total_results'):
@@ -194,7 +336,7 @@ def tvdb_login(api_key):
     """
     url = 'https://api.thetvdb.com/login'
     body = {'apikey': api_key}
-    status, content = request_json(url, body=body, cache=False)
+    status, content = _request_json(url, body=body, cache=False)
     if status == 401:
         raise MapiProviderException('invalid api key')
     assert status == 200 and content.get('token')
@@ -212,7 +354,7 @@ def tvdb_refresh_token(token):
     """
     url = 'https://api.thetvdb.com/refresh_token'
     headers = {'Authorization': 'Bearer %s' % token}
-    status, content = request_json(url, headers=headers, cache=False)
+    status, content = _request_json(url, headers=headers, cache=False)
     if status == 401:
         raise MapiProviderException('invalid token')
     assert status == 200 and content.get('token')
@@ -243,7 +385,7 @@ def tvdb_episodes_id(token, id_tvdb, lang='en'):
         'Accept-Language': lang,
         'Authorization': 'Bearer %s' % token
     }
-    status, content = request_json(url, headers=headers)
+    status, content = _request_json(url, headers=headers)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -277,7 +419,7 @@ def tvdb_series_id(token, id_tvdb, lang='en'):
         'Accept-Language': lang,
         'Authorization': 'Bearer %s' % token
     }
-    status, content = request_json(url, headers=headers)
+    status, content = _request_json(url, headers=headers)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -313,7 +455,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
         'Authorization': 'Bearer %s' % token
     }
     parameters = {'page': page}
-    status, content = request_json(url, parameters, headers=headers)
+    status, content = _request_json(url, parameters, headers=headers)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -357,7 +499,7 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
         'airedEpisode': episode,
         'page': page
     }
-    status, content = request_json(url, parameters, headers=headers)
+    status, content = _request_json(url, parameters, headers=headers)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -396,7 +538,7 @@ def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
         'Accept-Language': lang,
         'Authorization': 'Bearer %s' % token
     }
-    status, content = request_json(url, parameters, headers=headers)
+    status, content = _request_json(url, parameters, headers=headers)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 405:
