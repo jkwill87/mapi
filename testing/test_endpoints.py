@@ -1,16 +1,31 @@
+import sys
+from json import loads
 from os import environ
-from unittest import TestCase
 
-from mapi.constants import *
+from requests import Session
+
 from mapi.endpoints import *
+# noinspection PyProtectedMember
+from mapi.endpoints import _clean_dict, _d2l, _get_user_agent, _request_json
+from mapi.exceptions import *
+
+if sys.version_info.major == 3:
+    from unittest import TestCase
+    # noinspection PyCompatibility
+    from unittest.mock import patch
+else:
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
+    from unittest2 import TestCase
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
+    from mock import patch
 
 """ Unit tests for endpoints.py
 """
 
 JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'
-TMDB_API_KEY = environ.get(API_KEY_ENV_TMDB)
-TVDB_API_KEY = environ.get(API_KEY_ENV_TVDB)
+TMDB_API_KEY = environ.get('API_KEY_TMDB')
+TVDB_API_KEY = environ.get('API_KEY_TVDB')
 GOONIES_IMDB_ID = 'tt0089218'
 GOONIES_TMDB_ID = 9340
 LOST_TVDB_ID_EPISODE = 127131
@@ -19,6 +34,301 @@ LOST_IMDB_ID_SERIES = 'tt0411008'
 
 assert TVDB_API_KEY
 assert TMDB_API_KEY
+
+
+class MockRequestResponse:
+    def __init__(self, status, content):
+        self.status_code = status
+        self.content = content
+
+    def json(self):
+        return loads(self.content)
+
+
+class TestRequestJson(TestCase):
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_2xx_status(self, mock_request):
+        with self.subTest(code=200):
+            mock_response = MockRequestResponse(200, '{}')
+            mock_request.return_value = mock_response
+            status, _ = _request_json('http://...')
+            self.assertEqual(status, 200)
+        with self.subTest(code=299):
+            mock_response = MockRequestResponse(299, '{}')
+            mock_request.return_value = mock_response
+            status, _ = _request_json('http://...')
+            self.assertEqual(status, 299)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_4xx_status(self, mock_request):
+        mock_response = MockRequestResponse(400, '{}')
+        mock_request.return_value = mock_response
+        status, _ = _request_json('http://...')
+        self.assertEqual(status, 400)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_5xx_status(self, mock_request):
+        mock_response = MockRequestResponse(500, '{}')
+        mock_request.return_value = mock_response
+        status, _ = _request_json('http://...')
+        self.assertEqual(status, 500)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_2xx_data(self, mock_request):
+        with self.subTest(code=200):
+            mock_response = MockRequestResponse(200, '{"status":true}')
+            mock_request.return_value = mock_response
+            _, content = _request_json('http://...')
+            self.assertTrue(content)
+        with self.subTest(code=299):
+            mock_response = MockRequestResponse(299, '{"status":true}')
+            mock_request.return_value = mock_response
+            _, content = _request_json('http://...')
+            self.assertTrue(content)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_4xx_data(self, mock_request):
+        mock_response = MockRequestResponse(400, '{"status":false}')
+        mock_request.return_value = mock_response
+        _, content = _request_json('http://...')
+        self.assertIsNone(content)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_5xx_data(self, mock_request):
+        mock_response = MockRequestResponse(500, '{"status":false}')
+        mock_request.return_value = mock_response
+        _, content = _request_json('http://...')
+        self.assertIsNone(content)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_json_data(self, mock_request):
+        json_data = """{
+            "status": true,
+            "data": {
+                "title": "The Matrix",
+                "year": 1999,
+                "genre": null
+            }
+        }"""
+        json_dict = {
+            'status': True,
+            'data': {
+                'title': 'The Matrix',
+                'year': 1999,
+                'genre': None
+            }
+        }
+        mock_response = MockRequestResponse(200, json_data)
+        mock_request.return_value = mock_response
+        status, content = _request_json('http://...')
+        self.assertEqual(status, 200)
+        self.assertDictEqual(content, json_dict)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_xml_data(self, mock_request):
+        xml_data = """
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <status>true</status>
+            <data>
+                <title>The Matrix</title>
+                <year>1999</year>
+                <genre />
+            </data>
+        """
+
+        mock_response = MockRequestResponse(200, xml_data)
+        mock_request.return_value = mock_response
+        status, content = _request_json('http://...')
+        self.assertEqual(status, 200)
+        self.assertIsNone(content)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_html_data(self, mock_request):
+        html_data = """
+            <!DOCTYPE html>
+            <html>
+                <body>   
+                    <h1>Data</h1>
+                    <ul>
+                    <li>Title: The Matrix</li>
+                    <li>Year: 1999</li>
+                    <li>Genre: ???</li>
+                    </ul>
+                </body>
+            </html>
+        """
+        mock_response = MockRequestResponse(200, html_data)
+        mock_request.return_value = mock_response
+        status, content = _request_json('http://...')
+        self.assertEqual(status, 200)
+        self.assertIsNone(content)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_get_headers(self, mock_request):
+        mock_request.side_effect = Session().request
+        _request_json(
+            url='http://google.com',
+            headers={'apple': 'pie', 'orange': None}
+        )
+        _, kwargs = mock_request.call_args
+        self.assertEqual(kwargs['method'], 'GET')
+        self.assertEqual(len(kwargs['headers']), 2)
+        self.assertEqual(kwargs['headers']['apple'], 'pie')
+        self.assertIn('user-agent', kwargs['headers'])
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_get_parameters(self, mock_request):
+        test_parameters = {'apple': 'pie'}
+        mock_request.side_effect = Session().request
+        _request_json(
+            url='http://google.com',
+            parameters=test_parameters
+        )
+        _, kwargs = mock_request.call_args
+        self.assertEqual(kwargs['method'], 'GET')
+        self.assertTrue(kwargs['params'] == _d2l(test_parameters))
+
+    def test_get_invalid_url(self):
+        status, content = _request_json('mapi rulez')
+        self.assertEqual(status, 400)
+        self.assertIsNone(content)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_post_body(self, mock_request):
+        data = {'apple': 'pie'}
+        mock_request.side_effect = Session().request
+        _request_json(
+            url='http://google.com',
+            body=data
+        )
+        _, kwargs = mock_request.call_args
+        self.assertEqual(kwargs['method'], 'POST')
+        self.assertDictEqual(kwargs['json'], data)
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_post_parameters(self, mock_request):
+        mock_request.side_effect = Session().request
+        data = {'apple': 'pie', 'orange': None}
+        _request_json(
+            url='http://google.com',
+            body=data,
+            parameters=data
+        )
+        _, kwargs = mock_request.call_args
+        self.assertEqual(kwargs['method'], 'POST')
+        self.assertListEqual(_d2l(_clean_dict(data)), kwargs['params'])
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    def test_post_headers(self, mock_request):
+        mock_request.side_effect = Session().request
+        data = {'apple': 'pie', 'orange': None}
+        _request_json(
+            url='http://google.com',
+            body=data,
+            headers=data
+        )
+        _, kwargs = mock_request.call_args
+        self.assertEqual(kwargs['method'], 'POST')
+        self.assertIn('apple', kwargs['headers'])
+        self.assertNotIn('orange', kwargs['headers'])
+
+
+class TestCleanDict(TestCase):
+    def test_str_values(self):
+        dict_in = {
+            'apple': 'pie',
+            'candy': 'corn',
+            'bologna': 'sandwich'
+        }
+        dict_out = _clean_dict(dict_in)
+        self.assertDictEqual(dict_in, dict_out)
+
+    def test_some_none(self):
+        dict_in = {
+            'super': 'mario',
+            'sonic': 'hedgehog',
+            'samus': None,
+            'princess': 'zelda',
+            'bowser': None
+        }
+        dict_want = {
+            'super': 'mario',
+            'sonic': 'hedgehog',
+            'princess': 'zelda',
+        }
+        dict_out = _clean_dict(dict_in)
+        self.assertDictEqual(dict_out, dict_want)
+
+    def test_all_falsy(self):
+        dict_in = {
+            'who': None,
+            'let': 0,
+            'the': False,
+            'dogs': [],
+            'out': ()
+        }
+        dict_want = {
+            'let': '0',
+            'the': 'False'
+        }
+        dict_out = _clean_dict(dict_in)
+        self.assertDictEqual(dict_out, dict_want)
+
+    def test_int_values(self):
+        dict_in = {
+            '0': 0,
+            '1': 1,
+            '2': 2,
+            '3': 3,
+            '4': 4
+        }
+        dict_want = {
+            '0': '0',
+            '1': '1',
+            '2': '2',
+            '3': '3',
+            '4': '4'
+        }
+        dict_out = _clean_dict(dict_in)
+        self.assertDictEqual(dict_out, dict_want)
+
+    def test_not_a_dict(self):
+        with self.assertRaises(AssertionError):
+            # noinspection PyTypeChecker
+            _clean_dict('mama mia pizza pie')
+
+    def test_str_strip(self):
+        dict_in = {
+            'please': '.',
+            'fix ': '.',
+            ' my spacing': '.',
+            '  issues  ': '.',
+        }
+        dict_want = {
+            'please': '.',
+            'fix': '.',
+            'my spacing': '.',
+            'issues': '.',
+        }
+        dict_out = _clean_dict(dict_in)
+        self.assertDictEqual(dict_out, dict_want)
+
+    def test_whitelist(self):
+        whitelist = {'apple', 'raspberry', 'pecan'}
+        dict_in = {'apple': 'pie', 'pecan': 'pie', 'pumpkin': 'pie'}
+        dict_out = {'apple': 'pie', 'pecan': 'pie'}
+        self.assertDictEqual(_clean_dict(dict_in, whitelist), dict_out)
+
+
+class TestGetUserAgent(TestCase):
+    def test_explicit(self):
+        for platform in {'chrome', 'edge', 'ios'}:
+            with self.subTest(platform=platform):
+                self.assertIn(_get_user_agent(platform), AGENT_ALL)
+
+    def test_random(self):
+        for i in range(10):
+            self.assertIn(_get_user_agent(), AGENT_ALL)
 
 
 class TestImdbMainDetails(TestCase):
@@ -446,7 +756,7 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
     def test_invalid_lang(self):
         with self.assertRaises(MapiProviderException):
             tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-                lang='xyz')
+                                       lang='xyz')
 
     def test_invalid_id_tvdb(self):
         with self.assertRaises(MapiProviderException):
