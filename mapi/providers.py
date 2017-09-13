@@ -52,8 +52,6 @@ def provider_factory(provider, **options):
     :param options: Optional kwargs; passed on to class constructor.
     :keyword str api_key: Some API providers require an API key to use their
         service
-    :keyword int year_delta:  If set and a year is provided for a movie query,
-        results will be filtered around this value inclusively
     :return: One of this module's provider objects
     """
     try:
@@ -76,8 +74,6 @@ class Provider(_AbstractClass):
         """ Initializes the provider
 
         :param options: Optional kwargs; see below..
-        :keyword int year_delta: If set and a year is provided for a movie
-            query, results will be filtered around this value inclusively.
         """
         cls_name = self.__class__.__name__
         self._api_key = options.get(
