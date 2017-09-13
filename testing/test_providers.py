@@ -98,6 +98,34 @@ assert API_KEY_TMDB
 assert API_KEY_TVDB
 
 
+class TestHasProvider(TestCase):
+    def test_has_provider(self):
+        self.assertTrue(has_provider('imdb'))
+        self.assertTrue(has_provider('tmdb'))
+        self.assertTrue(has_provider('tvdb'))
+
+    def test_missing_provider(self):
+        self.assertFalse(has_provider('omdb'))
+
+
+class TestHasProviderSupport(TestCase):
+    def test_has_provider_has_support(self):
+        self.assertTrue(has_provider_support('imdb', 'movie'))
+        self.assertTrue(has_provider_support('tmdb', 'movie'))
+        self.assertTrue(has_provider_support('tvdb', 'television'))
+
+    def test_has_provider_missing_support(self):
+        self.assertFalse(has_provider_support('imdb', 'television'))
+        self.assertFalse(has_provider_support('tmdb', 'television'))
+        self.assertFalse(has_provider_support('tvdb', 'movie'))
+
+    def test_missing_provider_valid_mtype(self):
+        self.assertFalse(has_provider_support('omdb', 'movie'))
+
+    def test_missing_provider_invalid_mtype(self):
+        self.assertFalse(has_provider_support('omdb', 'media_type_subtitle'))
+
+
 class TestProviderFactory(TestCase):
     def test_imdb(self):
         client = provider_factory('imdb')
