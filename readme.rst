@@ -96,6 +96,7 @@ If you just want to lookup metadata using an API Provider's ID code, you can do 
  'title': 'The Goonies'}
 
 Some APIs, like TMDb, allow you to search by an IMDb 'tt-const' as well:
+
 >>> results = client.search(id_imdb='tt0089218')  # Using IMDb ID
 >>> pprint(dict(next(results)))
 {'date': '1985-06-06',
