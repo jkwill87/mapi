@@ -55,10 +55,15 @@ class TestMetadataTelevisionFormat(TestCase):
             s, 'Adventure Time - S05E03 - Five More Short Graybles'
         )
 
-    def test_format_missing(self):
+    def test_format_missing_episode(self):
         self.metadata['episode'] = None
         s = self.metadata.format()
         self.assertEqual(s, 'Adventure Time - 5 - Five More Short Graybles')
+
+    def test_format_missing_title(self):
+        self.metadata['title'] = None
+        s = self.metadata.format()
+        self.assertEqual(s, 'Adventure Time - 05x03')
 
     def test_invalid_media(self):
         with self.assertRaises(ValueError):

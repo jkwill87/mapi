@@ -165,9 +165,11 @@ class MetadataTelevision(Metadata):
 
     @staticmethod
     def _str_pad_episode(s):
-        s = sub(r'(?<=\s)(\d)(?=x\d)', r'0\1', s)
-        s = sub(r'(?<=\dx)(\d)(?=\s)', r'0\1', s)
-        s = sub(r'([S|E])(\d)(?=\s|$|E)', r'\g<1>0\g<2>', s)
+        # 01x01 pattern
+        s = sub(r'(?<=\s)(\d)(?=x\d)', r'0\1', s, IGNORECASE)
+        s = sub(r'(?<=\dx)(\d)(?=\s|$)', r'0\1', s, IGNORECASE)
+        # S01E01 pattern
+        s = sub(r'([S|E])(\d)(?=\s|$|E)', r'\g<1>0\g<2>', s, IGNORECASE)
         return s
 
     def format(self, template=None):
