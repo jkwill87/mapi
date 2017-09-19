@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from collections import MutableMapping
 from datetime import datetime as dt
-from re import sub
+from re import sub, IGNORECASE
 
 # Compatibility for Python 2.7/3+
 _AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
@@ -9,7 +9,7 @@ _AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 class Metadata(_AbstractClass, MutableMapping):
     template = ''
-    fields = {}
+    fields = set()
 
     def __delitem__(self, key):
         raise NotImplementedError('values can be modified but keys are static')
@@ -49,14 +49,14 @@ class Metadata(_AbstractClass, MutableMapping):
                 % (key, self.__class__.__name__)
             )
 
-        # Validate value
-        elif key == 'media' and value not in ['movie', 'television', None]:
-            raise ValueError()
+        elif key == 'media' and self['media'] and self['media'] != value:
+            raise ValueError('media cannot be changed')
+
         elif key == 'date' and value is not None:
             dt.strptime(value, '%Y-%m-%d')
 
         # If its gotten this far, looks good
-        self._dict[key] = value
+        self._dict[key] = str(value) if value else None
 
     def __str__(self):
         return self.format()
@@ -152,6 +152,10 @@ class MetadataTelevision(Metadata):
         'synopsis',
     }
 
+    def __init__(self, **params):
+        super(MetadataTelevision, self).__init__(**params)
+        self._dict['media'] = 'television'
+
     @staticmethod
     def _str_pad_episode(s):
         s = sub(r'(?<=\s)(\d)(?=x\d)', r'0\1', s)
@@ -175,3 +179,7 @@ class MetadataMovie(Metadata):
         'date',
         'synopsis',
     }
+
+    def __init__(self, **params):
+        super(MetadataMovie, self).__init__(**params)
+        self._dict['media'] = 'movie'
