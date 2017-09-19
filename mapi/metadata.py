@@ -6,6 +6,13 @@ from re import sub, IGNORECASE
 # Compatibility for Python 2.7/3+
 _AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
 
+# Fields not used by mapi but seem reasonable to be set elsewhere
+_EXTRA_FIELDS = {
+    'extension',
+    'group',
+    'quality'
+}
+
 
 class Metadata(_AbstractClass, MutableMapping):
     template = ''
@@ -43,9 +50,9 @@ class Metadata(_AbstractClass, MutableMapping):
     def __setitem__(self, key, value):
 
         # Validate key
-        if key not in self.fields:
+        if key not in self.fields | _EXTRA_FIELDS:
             raise KeyError(
-                '%s is not a valid %s field'
+                "'%s' cannot be set for %s"
                 % (key, self.__class__.__name__)
             )
 
