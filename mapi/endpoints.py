@@ -390,6 +390,8 @@ def tvdb_episodes_id(token, id_tvdb, lang='en'):
         raise MapiProviderException('invalid token')
     elif status == 404:
         raise MapiNotFoundException
+    elif status == 200 and 'invalidLanguage' in content.get('errors', {}):
+        raise MapiNotFoundException
     assert status == 200 and content.get('data')
     return content
 
