@@ -8,18 +8,18 @@ with open('requirements.txt', 'r') as fp:
 with open('readme.rst', 'r') as fp:
     LONG_DESCRIPTION = fp.read()
 
-ABOUT = {
-    'author': 'Jessy Williams',
-    'author_email': 'jessy@jessywilliams.com',
-    'description': 'An API for media database APIs which allows you to search '
-        + 'for metadata using a simple, common interface',
-    'license': 'MIT',
-    'long_description': LONG_DESCRIPTION,
-    'name': 'mapi',
-    'packages': ['mapi'],
-    'install_requires': REQUIREMENTS,
-    'url': 'https://github.com/jkwill87/mapi',
-    'version': '2.0.2'
-}
-
-setup(**ABOUT)
+setup(
+    author='Jessy Williams',
+    author_email='jessy@jessywilliams.com',
+    description=(
+        'An API for media database APIs which allows you to search for metadata'
+        'using a simple, common interface'
+    ),
+    license='MIT',
+    long_description=LONG_DESCRIPTION,
+    name='mapi',
+    packages=['mapi'],
+    install_requires=REQUIREMENTS,
+    url='https://github.com/jkwill87/mapi',
+    version='2.0.3'
+)
