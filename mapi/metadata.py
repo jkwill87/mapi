@@ -62,6 +62,10 @@ class Metadata(_AbstractClass, MutableMapping):
         elif key == 'date' and value is not None:
             dt.strptime(value, '%Y-%m-%d')
 
+        # Multi-episode hack; treat as if simply the first episode in list
+        if key == 'episode' and isinstance(value, (list, tuple)):
+            value = sorted(value)[0]
+
         # If its gotten this far, looks good
         self._dict[key] = str(value) if value else None
 
@@ -71,7 +75,7 @@ class Metadata(_AbstractClass, MutableMapping):
     def _str_replace(self, mobj):
         try:
             prefix, key, suffix = mobj.groups()
-            value = self[key]
+            value = self.get(key)
             assert value
             value = self._str_title_case(value)
             return '%s%s%s' % (prefix, value, suffix)
@@ -92,13 +96,12 @@ class Metadata(_AbstractClass, MutableMapping):
             'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk', 'mtv',
             'nba', 'nfl', 'nhl', 'nsfw', 'nyc', 'omg', 'pga', 'rsvp', 'tnt',
             'tv', 'ufc', 'ufo', 'uk', 'usa', 'vip', 'wtf', 'wwe', 'wwi',
-            'wwii', 'yolo'
+            'wwii', 'xxx', 'yolo'
         ]
         lowercase = [
             'a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'ces', 'de',
             'des', 'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on',
-            'or',
-            'the', 'to', 'un', 'une' 'via',
+            'or', 'the', 'to', 'un', 'une' 'via',
             'h264', 'h265'
         ]
 
