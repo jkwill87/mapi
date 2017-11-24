@@ -75,7 +75,7 @@ Okay, so no we want to look up some movies. We can search for using a specific y
 Searches return a generator, so by breaking on 10, we only ask for what we need, reducing the bandwidth and time required for the request.
 
 
-Looking up by ID
+Looking up a movie by ID
 ----------------
 
 If you just want to lookup metadata using an API Provider's ID code, you can do that too:
@@ -155,6 +155,8 @@ given search query. Extra fields are simply ignored.
 +----------+---------------------+-----------+------------------------+----------------------------+
 | year     | IMDb, TMDb          | str / int | Feature's release year |                            |
 +----------+---------------------+-----------+------------------------+----------------------------+
+| date     | TVDb                | str       | YYYY-MM-DD formatted   | [4]_                       |
++----------+---------------------+-----------+------------------------+----------------------------+
 | series   | TVDb                | str       | Series' name           |                            |
 +----------+---------------------+-----------+------------------------+----------------------------+
 | season   | TVDb                | str / int | Series' airing season  |                            |
@@ -209,6 +211,7 @@ Notes
        either an ID or title to yield any results, and television queries must
        have either and ID or series to yield any results.
 .. [3] If this field is passed as a string it must be numeric.
+.. [4] Dates may also be specified partially, i.e. as YYYY-MM or YYYY
 
 .. |licence| image:: https://img.shields.io/github/license/jkwill87/mapi.svg
    :target: https://en.wikipedia.org/wiki/MIT_License
