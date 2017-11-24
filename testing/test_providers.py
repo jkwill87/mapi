@@ -300,3 +300,21 @@ class TestTvdb(TestCase):
                 ))
                 self.assertEqual(results[0]['season'], '1')
                 self.assertEqual(results[0]['episode'], '3')
+
+    def test_search_series_date_year(self):
+        results = list(self.client.search(
+            series='The Daily Show', date='2017-11-01'
+        ))
+        self.assertEqual(len(results), 1)
+        self.assertTrue(results[0]['title'] == 'Hillary Clinton')
+
+    def test_search_series_date_partial(self):
+        results = list(self.client.search(
+            series='The Daily Show', date='2017'
+        ))
+        self.assertEqual(len(results), 170)
+        self.assertTrue(any(r['title'] == 'Hillary Clinton' for r in results))
+
+    def dest_search_series_date_invalid_format(self):
+        with self.assertRaises(MapiProviderException):
+            self.client.search(series='The Daily Show', date='13')
