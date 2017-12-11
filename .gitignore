@@ -1,6 +1,7 @@
 *.monopic
 *.pyc
 *.sqlite
+.DS_Store
 .idea
 .vscode
 dist
