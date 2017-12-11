@@ -315,8 +315,8 @@ class TVDb(Provider):
                 yield result
         elif series and date:
             if not match(
-                    r'(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?',
-                    date
+                r'(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?',
+                date
             ):
                 raise MapiProviderException('Date must be in YYYY-MM-DD format')
             for result in self._search_series_date(series, date):
@@ -349,7 +349,7 @@ class TVDb(Provider):
                         season=str(entry['airedSeason']),
                         episode=str(entry['airedEpisodeNumber']),
                         date=entry['firstAired'],
-                        title=entry['episodeName'],
+                        title=entry['episodeName'].split(';', 1)[0],
                         synopsis=str(entry['overview'])
                             .replace('\r\n', '').replace('  ', '').strip(),
                         media='television',
@@ -407,7 +407,7 @@ class TVDb(Provider):
                             season=str(entry['airedSeason']),
                             episode=str(entry['airedEpisodeNumber']),
                             date=entry['firstAired'],
-                            title=entry['episodeName'],
+                            title=entry['episodeName'].split(';', 1)[0],
                             synopsis=str(entry['overview']).replace('\r\n', '')
                                 .replace('  ', '').strip(),
                             media='television',
