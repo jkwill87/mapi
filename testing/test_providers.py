@@ -154,7 +154,7 @@ class TestImdb(TestCase):
                 results = list(self.client.search(id_imdb=meta['id_imdb']))
                 self.assertTrue(results)
                 result = results[0]
-                self.assertEqual(meta['title'], result['title'])
+                self.assertEqual(result['title'], meta['title'])
 
     def test_search_title(self):
         for meta in movie_meta:
@@ -178,7 +178,7 @@ class TestTmdb(TestCase):
                 results = list(self.client.search(id_imdb=meta['id_imdb']))
                 self.assertTrue(results)
                 result = results[0]
-                self.assertEqual(meta['title'], result['title'])
+                self.assertEqual(result['title'], meta['title'])
 
     def test_search_id_tmdb(self):
         for meta in movie_meta:
@@ -186,7 +186,7 @@ class TestTmdb(TestCase):
                 results = list(self.client.search(id_tmdb=meta['id_tmdb']))
                 self.assertTrue(results)
                 result = results[0]
-                self.assertEqual(meta['title'], result['title'])
+                self.assertEqual(result['title'], meta['title'])
 
     def test_search_title(self):
         for meta in movie_meta:
@@ -208,7 +208,7 @@ class TestTvdb(TestCase):
         for meta in television_meta:
             with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):
                 results = list(self.client.search(id_tvdb=meta['id_tvdb']))
-                self.assertEqual(meta['id_tvdb'], results[0]['id_tvdb'])
+                self.assertEqual(results[0]['id_tvdb'], meta['id_tvdb'])
 
     def test_search_id_tvdb_season(self):
         for meta in television_meta:
@@ -234,9 +234,9 @@ class TestTvdb(TestCase):
                     season=1,
                     episode=3
                 ))
-                self.assertEqual(len(results), 1)
-                self.assertEqual(results[0]['season'], '1')
-                self.assertEqual(results[0]['episode'], '3')
+                self.assertEqual(1, len(results))
+                self.assertEqual('1', results[0]['season'])
+                self.assertEqual('3', results[0]['episode'])
 
     def test_search_id_imdb(self):
         for meta in television_meta:
@@ -271,8 +271,8 @@ class TestTvdb(TestCase):
                 results = list(self.client.search(
                     id_imdb=meta['id_imdb'], season=1, episode=3
                 ))
-                self.assertEqual(results[0]['season'], '1')
-                self.assertEqual(results[0]['episode'], '3')
+                self.assertEqual('1', results[0]['season'])
+                self.assertEqual('3', results[0]['episode'])
 
     def test_search_series(self):
         for meta in television_meta:
@@ -298,21 +298,21 @@ class TestTvdb(TestCase):
                 results = list(self.client.search(
                     series=meta['series'], season=1, episode=3
                 ))
-                self.assertEqual(results[0]['season'], '1')
-                self.assertEqual(results[0]['episode'], '3')
+                self.assertEqual('1', results[0]['season'])
+                self.assertEqual('3', results[0]['episode'])
 
     def test_search_series_date_year(self):
         results = list(self.client.search(
             series='The Daily Show', date='2017-11-01'
         ))
-        self.assertEqual(len(results), 1)
+        self.assertEqual(1, len(results))
         self.assertTrue(results[0]['title'] == 'Hillary Clinton')
 
     def test_search_series_date_partial(self):
         results = list(self.client.search(
             series='The Daily Show', date='2017'
         ))
-        self.assertEqual(len(results), 170)
+        self.assertLessEqual(170, len(results))
         self.assertTrue(any(r['title'] == 'Hillary Clinton' for r in results))
 
     def dest_search_series_date_invalid_format(self):

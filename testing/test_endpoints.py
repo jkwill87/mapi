@@ -139,7 +139,7 @@ class TestRequestJson(TestCase):
         mock_response = MockRequestResponse(200, xml_data)
         mock_request.return_value = mock_response
         status, content = _request_json('http://...')
-        self.assertEqual(status, 200)
+        self.assertEqual(200, status)
         self.assertIsNone(content)
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -160,7 +160,7 @@ class TestRequestJson(TestCase):
         mock_response = MockRequestResponse(200, html_data)
         mock_request.return_value = mock_response
         status, content = _request_json('http://...')
-        self.assertEqual(status, 200)
+        self.assertEqual(200, status)
         self.assertIsNone(content)
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -171,9 +171,9 @@ class TestRequestJson(TestCase):
             headers={'apple': 'pie', 'orange': None}
         )
         _, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['method'], 'GET')
-        self.assertEqual(len(kwargs['headers']), 2)
-        self.assertEqual(kwargs['headers']['apple'], 'pie')
+        self.assertEqual('GET', kwargs['method'])
+        self.assertEqual(2, len(kwargs['headers']))
+        self.assertEqual('pie', kwargs['headers']['apple'])
         self.assertIn('user-agent', kwargs['headers'])
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -185,12 +185,12 @@ class TestRequestJson(TestCase):
             parameters=test_parameters
         )
         _, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['method'], 'GET')
+        self.assertEqual('GET', kwargs['method'])
         self.assertTrue(kwargs['params'] == _d2l(test_parameters))
 
     def test_get_invalid_url(self):
         status, content = _request_json('mapi rulez')
-        self.assertEqual(status, 400)
+        self.assertEqual(400, status)
         self.assertIsNone(content)
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -202,7 +202,7 @@ class TestRequestJson(TestCase):
             body=data
         )
         _, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['method'], 'POST')
+        self.assertEqual('POST', kwargs['method'])
         self.assertDictEqual(kwargs['json'], data)
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -215,7 +215,7 @@ class TestRequestJson(TestCase):
             parameters=data
         )
         _, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['method'], 'POST')
+        self.assertEqual('POST', kwargs['method'])
         self.assertListEqual(_d2l(_clean_dict(data)), kwargs['params'])
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -228,7 +228,7 @@ class TestRequestJson(TestCase):
             headers=data
         )
         _, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['method'], 'POST')
+        self.assertEqual('POST', kwargs['method'])
         self.assertIn('apple', kwargs['headers'])
         self.assertNotIn('orange', kwargs['headers'])
 
@@ -241,7 +241,7 @@ class TestCleanDict(TestCase):
             'bologna': 'sandwich'
         }
         dict_out = _clean_dict(dict_in)
-        self.assertDictEqual(dict_in, dict_out)
+        self.assertDictEqual(dict_out, dict_in)
 
     def test_some_none(self):
         dict_in = {
@@ -251,13 +251,13 @@ class TestCleanDict(TestCase):
             'princess': 'zelda',
             'bowser': None
         }
-        dict_want = {
+        dict_expect = {
             'super': 'mario',
             'sonic': 'hedgehog',
             'princess': 'zelda',
         }
         dict_out = _clean_dict(dict_in)
-        self.assertDictEqual(dict_out, dict_want)
+        self.assertDictEqual(dict_expect, dict_out)
 
     def test_all_falsy(self):
         dict_in = {
@@ -267,12 +267,12 @@ class TestCleanDict(TestCase):
             'dogs': [],
             'out': ()
         }
-        dict_want = {
+        dict_expect = {
             'let': '0',
             'the': 'False'
         }
         dict_out = _clean_dict(dict_in)
-        self.assertDictEqual(dict_out, dict_want)
+        self.assertDictEqual(dict_expect, dict_out)
 
     def test_int_values(self):
         dict_in = {
@@ -282,7 +282,7 @@ class TestCleanDict(TestCase):
             '3': 3,
             '4': 4
         }
-        dict_want = {
+        dict_expect = {
             '0': '0',
             '1': '1',
             '2': '2',
@@ -290,7 +290,7 @@ class TestCleanDict(TestCase):
             '4': '4'
         }
         dict_out = _clean_dict(dict_in)
-        self.assertDictEqual(dict_out, dict_want)
+        self.assertDictEqual(dict_expect, dict_out)
 
     def test_not_a_dict(self):
         with self.assertRaises(AssertionError):
@@ -304,20 +304,20 @@ class TestCleanDict(TestCase):
             ' my spacing': '.',
             '  issues  ': '.',
         }
-        dict_want = {
+        dict_expect = {
             'please': '.',
             'fix': '.',
             'my spacing': '.',
             'issues': '.',
         }
         dict_out = _clean_dict(dict_in)
-        self.assertDictEqual(dict_out, dict_want)
+        self.assertDictEqual(dict_expect, dict_out)
 
     def test_whitelist(self):
         whitelist = {'apple', 'raspberry', 'pecan'}
         dict_in = {'apple': 'pie', 'pecan': 'pie', 'pumpkin': 'pie'}
         dict_out = {'apple': 'pie', 'pecan': 'pie'}
-        self.assertDictEqual(_clean_dict(dict_in, whitelist), dict_out)
+        self.assertDictEqual(dict_out, _clean_dict(dict_in, whitelist))
 
 
 class TestGetUserAgent(TestCase):
@@ -348,7 +348,7 @@ class TestImdbMainDetails(TestCase):
         self.assertEqual('feature', result['data']['type'])
 
         self.assertIn('year', result['data'])
-        self.assertEqual('1985', result['data']['year'])
+        self.assertEqual('1985', result['data']['year'], )
 
         self.assertIn('plot', result['data'])
         self.assertIn('outline', result['data']['plot'])
@@ -444,11 +444,11 @@ class TestTmdbFind(TestCase):
         }
         result = tmdb_find(TMDB_API_KEY, 'imdb_id', GOONIES_IMDB_ID)
         self.assertIsInstance(result, dict)
-        self.assertSetEqual(set(result.keys()), expected_top_level_keys)
+        self.assertSetEqual(expected_top_level_keys, set(result.keys()))
         self.assertGreater(len(result.get('movie_results', {})), 0)
         self.assertSetEqual(
-            set(result.get('movie_results', {})[0].keys()),
-            expected_movie_results_keys
+            expected_movie_results_keys,
+            set(result.get('movie_results', {})[0].keys())
         )
 
     def test_api_key_fail(self):
@@ -499,7 +499,7 @@ class TestTmdbMovies(TestCase):
         }
         result = tmdb_movies(TMDB_API_KEY, GOONIES_TMDB_ID)
         self.assertIsInstance(result, dict)
-        self.assertSetEqual(set(result.keys()), expected_top_level_keys)
+        self.assertSetEqual(expected_top_level_keys, set(result.keys()))
         self.assertEqual('The Goonies', result.get('original_title'))
 
     def test_api_key_fail(self):
@@ -541,14 +541,14 @@ class TestTmdbSearchMovies(TestCase):
         }
         result = tmdb_search_movies(TMDB_API_KEY, 'the goonies', 1985)
         self.assertIsInstance(result, dict)
-        self.assertSetEqual(set(result.keys()), expected_top_level_keys)
+        self.assertSetEqual(expected_top_level_keys, set(result.keys()))
         self.assertIsInstance(result['results'], list)
         self.assertSetEqual(
-            set(result.get('results', [{}])[0].keys()),
-            expected_results_keys
+            expected_results_keys,
+            set(result.get('results', [{}])[0].keys())
         )
-        self.assertEqual(len(result['results']), 1)
-        self.assertEqual('The Goonies', result['results'][0]['original_title'])
+        self.assertEqual(1, len(result['results']))
+        self.assertEqual(result['results'][0]['original_title'], 'The Goonies')
         result = tmdb_search_movies(TMDB_API_KEY, 'the goonies')
         self.assertGreater(len(result['results']), 1)
 
@@ -643,9 +643,9 @@ class TestTvdbEpisodesId(TestCase):
         result = tvdb_episodes_id(self.token, LOST_TVDB_ID_EPISODE)
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
-        self.assertSetEqual(set(result['data'].keys()), expected_top_level_keys)
-        self.assertEqual(result['data']['seriesId'], LOST_TVDB_ID_SERIES)
-        self.assertEqual(result['data']['id'], LOST_TVDB_ID_EPISODE)
+        self.assertSetEqual(expected_top_level_keys, set(result['data'].keys()))
+        self.assertEqual(LOST_TVDB_ID_SERIES, result['data']['seriesId'])
+        self.assertEqual(LOST_TVDB_ID_EPISODE, result['data']['id'])
 
 
 class TestTvdbSeriesId(TestCase):
@@ -696,9 +696,9 @@ class TestTvdbSeriesId(TestCase):
         result = tvdb_series_id(self.token, LOST_TVDB_ID_SERIES)
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
-        self.assertSetEqual(set(result['data'].keys()), expected_top_level_keys)
-        self.assertEqual(result['data']['id'], LOST_TVDB_ID_SERIES)
-        self.assertEqual(result['data']['seriesName'], 'Lost')
+        self.assertSetEqual(expected_top_level_keys, set(result['data'].keys()))
+        self.assertEqual(LOST_TVDB_ID_SERIES, result['data']['id'])
+        self.assertEqual('Lost', result['data']['seriesName'])
 
 
 class TestTvdbSeriesIdEpisodes(TestCase):
@@ -740,9 +740,9 @@ class TestTvdbSeriesIdEpisodes(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         entry = result['data'][0]
-        self.assertSetEqual(set(entry.keys()), expected_top_level_keys)
-        self.assertEqual(len(entry), 12)
-        self.assertEqual(entry['id'], LOST_TVDB_ID_EPISODE)
+        self.assertSetEqual(expected_top_level_keys, set(entry.keys()))
+        self.assertEqual(12, len(entry))
+        self.assertEqual(LOST_TVDB_ID_EPISODE, entry['id'])
 
 
 class TestTvdbSeriesEpisodesQuery(TestCase):
@@ -798,9 +798,9 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']
-        self.assertIs(len(data), 100)
-        self.assertSetEqual(set(data[0].keys()), expected_top_level_keys)
-        self.assertEqual(data[0]['id'], LOST_TVDB_ID_EPISODE)
+        self.assertIs(100, len(data))
+        self.assertSetEqual(expected_top_level_keys, set(data[0].keys()))
+        self.assertEqual(LOST_TVDB_ID_EPISODE, data[0]['id'])
 
     def test_succeess_id_tvdb_season(self):
         expected_top_level_keys = {
@@ -822,9 +822,9 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']
-        self.assertIs(len(data), 24)
+        self.assertIs(24, len(data))
         self.assertSetEqual(set(data[0].keys()), expected_top_level_keys)
-        self.assertEqual(data[0]['id'], LOST_TVDB_ID_EPISODE)
+        self.assertEqual(LOST_TVDB_ID_EPISODE, data[0]['id'])
         self.assertIsNone(result['links']['prev'])
         self.assertIsNone(result['links']['next'])
 
@@ -848,9 +848,9 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']
-        self.assertIs(len(data), 1)
+        self.assertIs(1, len(data))
         self.assertSetEqual(set(data[0].keys()), expected_top_level_keys)
-        self.assertEqual(data[0]['id'], LOST_TVDB_ID_EPISODE)
+        self.assertEqual(LOST_TVDB_ID_EPISODE, data[0]['id'])
         self.assertIsNone(result['links']['prev'])
         self.assertIsNone(result['links']['next'])
 
@@ -886,7 +886,7 @@ class TestTvdbSearchSeries(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']
-        self.assertIs(len(data), 100)
+        self.assertIs(100, len(data))
         self.assertSetEqual(set(data[0].keys()), expected_top_level_keys)
 
     def test_success_series_id_imdb(self):
@@ -904,8 +904,8 @@ class TestTvdbSearchSeries(TestCase):
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']
-        self.assertIs(len(data), 1)
-        self.assertSetEqual(set(data[0].keys()), expected_top_level_keys)
+        self.assertIs(1, len(data))
+        self.assertSetEqual(expected_top_level_keys, set(data[0].keys()))
 
     def test_success_series_id_zap2it(self):
         pass  # TODO -- not currently used by mapi
