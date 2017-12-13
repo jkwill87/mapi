@@ -356,7 +356,7 @@ class TVDb(Provider):
                         id_tvdb=str(id_tvdb),
                     )
                     found = True
-                except ValueError:
+                except (AttributeError, ValueError):
                     continue
             if page == episode_data['links']['last']:
                 break
@@ -414,7 +414,7 @@ class TVDb(Provider):
                             id_tvdb=str(entry['airedSeasonID']),
                         )
                         found = True
-                    except ValueError:
+                    except (AttributeError, ValueError):
                         continue
                 if page == response['links']['last']:
                     break
