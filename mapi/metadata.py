@@ -85,35 +85,47 @@ class Metadata(_AbstractClass, MutableMapping):
 
     @staticmethod
     def _str_title_case(s):
+        assert isinstance(s, str)
         if not s:
             return s
         else:
-            s = str(s)
+            s = s.title()
 
-        uppercase = [
+        lowercase = {
+            'a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'ces', 'de',
+            'des', 'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on',
+            'or', 'the', 'to', 'un', 'une' 'via',
+            'h264', 'h265'
+        }
+        uppercase = {
             'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
             '2d', '3d', 'aka', 'atm', 'bbc', 'bff', 'cia', 'csi', 'dc', 'doa',
             'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk', 'mtv',
             'nba', 'nfl', 'nhl', 'nsfw', 'nyc', 'omg', 'pga', 'rsvp', 'tnt',
             'tv', 'ufc', 'ufo', 'uk', 'usa', 'vip', 'wtf', 'wwe', 'wwi',
             'wwii', 'xxx', 'yolo'
-        ]
-        lowercase = [
-            'a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'ces', 'de',
-            'des', 'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on',
-            'or', 'the', 'to', 'un', 'une' 'via',
-            'h264', 'h265'
-        ]
+        }
+        padding_chars = '["!$\'(),-./:;<>@[]_`{} ]'
 
-        s_list = s.lower().split(' ')
+        string_lower = s.lower()
+        string_length = len(s)
+        for word in lowercase | uppercase:
+            pos = string_lower.find(word)
 
-        for i in range(len(s_list)):
-            if s_list[i] in uppercase:
-                s_list[i] = s_list[i].upper()
-            elif s_list[i] not in lowercase or i == 0:
-                s_list[i] = s_list[i].capitalize()
+            # skip if word is not found
+            if pos == -1: continue
 
-        return ' '.join(x for x in s_list)
+            word_length = len(word)
+            starts = pos == 0
+            ends = pos + word_length == string_length  # +1?
+            next_char = None if ends else string_lower[pos + word_length]
+            prev_char = None if starts else string_lower[pos - 1]
+            left_partitioned = prev_char is None or prev_char in padding_chars
+            right_partitioned = next_char is None or next_char in padding_chars
+            if left_partitioned and right_partitioned:
+                transform = word.upper() if word in uppercase else word.lower()
+                s = s[:pos] + transform + s[pos + word_length:]
+        return s
 
     @staticmethod
     def _str_fix_whitespace(s):
