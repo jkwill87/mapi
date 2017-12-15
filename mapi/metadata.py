@@ -86,18 +86,13 @@ class Metadata(_AbstractClass, MutableMapping):
     @staticmethod
     def _str_title_case(s):
         assert isinstance(s, str)
-        if not s:
-            return s
-        else:
-            s = s.title()
-
-        lowercase = {
+        lowercase_exceptions = {
             'a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'ces', 'de',
             'des', 'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on',
-            'or', 'the', 'to', 'un', 'une' 'via',
+            'or', 'the', 'to', 'un', 'une', 'with', 'via',
             'h264', 'h265'
         }
-        uppercase = {
+        uppercase_exceptions = {
             'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
             '2d', '3d', 'aka', 'atm', 'bbc', 'bff', 'cia', 'csi', 'dc', 'doa',
             'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk', 'mtv',
@@ -106,25 +101,38 @@ class Metadata(_AbstractClass, MutableMapping):
             'wwii', 'xxx', 'yolo'
         }
         padding_chars = '["!$\'(),-./:;<>@[]_`{} ]'
-
         string_lower = s.lower()
         string_length = len(s)
-        for word in lowercase | uppercase:
-            pos = string_lower.find(word)
+        s = s.title()
 
-            # skip if word is not found
+        # process lowercase transformations
+        for exception in lowercase_exceptions:
+            pos = string_lower.find(exception)
             if pos == -1: continue
-
-            word_length = len(word)
             starts = pos == 0
-            ends = pos + word_length == string_length  # +1?
+            if starts: continue
+            prev_char = string_lower[pos - 1]
+            left_partitioned = prev_char in padding_chars
+            word_length = len(exception)
+            ends = pos + word_length == string_length
             next_char = None if ends else string_lower[pos + word_length]
-            prev_char = None if starts else string_lower[pos - 1]
-            left_partitioned = prev_char is None or prev_char in padding_chars
-            right_partitioned = next_char is None or next_char in padding_chars
+            right_partitioned = ends or next_char in padding_chars
             if left_partitioned and right_partitioned:
-                transform = word.upper() if word in uppercase else word.lower()
-                s = s[:pos] + transform + s[pos + word_length:]
+                s = s[:pos] + exception.lower() + s[pos + word_length:]
+
+        # process uppercase transformations
+        for exception in uppercase_exceptions:
+            pos = string_lower.find(exception)
+            if pos == -1: continue
+            starts = pos == 0
+            prev_char = None if starts else string_lower[pos - 1]
+            left_partitioned = starts or prev_char in padding_chars
+            word_length = len(exception)
+            ends = pos + word_length == string_length
+            next_char = None if ends else string_lower[pos + word_length]
+            right_partitioned = ends or next_char in padding_chars
+            if left_partitioned and right_partitioned:
+                s = s[:pos] + exception.upper() + s[pos + word_length:]
         return s
 
     @staticmethod
