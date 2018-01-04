@@ -77,7 +77,8 @@ class Metadata(_AbstractClass, MutableMapping):
             prefix, key, suffix = mobj.groups()
             value = self.get(key)
             assert value
-            value = self._str_title_case(value)
+            if key not in _EXTRA_FIELDS:
+                value = self._str_title_case(value)
             return '%s%s%s' % (prefix, value, suffix)
         except (IndexError, KeyError, AssertionError):
             # log.warning("couldn't sub for %s" % mobj.group())
