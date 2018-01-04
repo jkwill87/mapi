@@ -15,7 +15,10 @@ from mapi.metadata import MetadataMovie, MetadataTelevision
 _AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 API_TELEVISION = {'tvdb'}
-API_MOVIE = {'imdb', 'tmdb'}
+API_MOVIE = {
+    # 'imdb',  # TODO: Revisit after IMDb endpoints have been reimplemented
+    'tmdb'
+}
 API_ALL = API_TELEVISION | API_MOVIE
 
 
@@ -55,7 +58,8 @@ def provider_factory(provider, **options):
     """
     try:
         return {
-            'imdb': IMDb,
+            # TODO: Revisit after IMDb endpoints have been reimplemented
+            # 'imdb': IMDb,
             'tmdb': TMDb,
             'tvdb': TVDb,
         }[provider.lower()](**options)
@@ -108,6 +112,7 @@ class Provider(_AbstractClass):
         return self._api_key
 
 
+# TODO: Revisit after IMDb endpoints have been reimplemented
 class IMDb(Provider):
     """ Queries the unofficial IMDb mobile API
     """

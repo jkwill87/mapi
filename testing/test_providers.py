@@ -100,7 +100,8 @@ assert API_KEY_TVDB
 
 class TestHasProvider(TestCase):
     def test_has_provider(self):
-        self.assertTrue(has_provider('imdb'))
+        # TODO: Revisit after IMDb endpoints have been reimplemented
+        # self.assertTrue(has_provider('imdb'))
         self.assertTrue(has_provider('tmdb'))
         self.assertTrue(has_provider('tvdb'))
 
@@ -110,12 +111,14 @@ class TestHasProvider(TestCase):
 
 class TestHasProviderSupport(TestCase):
     def test_has_provider_has_support(self):
-        self.assertTrue(has_provider_support('imdb', 'movie'))
+        # TODO: Revisit after IMDb endpoints have been reimplemented
+        # self.assertTrue(has_provider_support('imdb', 'movie'))
         self.assertTrue(has_provider_support('tmdb', 'movie'))
         self.assertTrue(has_provider_support('tvdb', 'television'))
 
     def test_has_provider_missing_support(self):
-        self.assertFalse(has_provider_support('imdb', 'television'))
+        # TODO: Revisit after IMDb endpoints have been reimplemented
+        # self.assertFalse(has_provider_support('imdb', 'television'))
         self.assertFalse(has_provider_support('tmdb', 'television'))
         self.assertFalse(has_provider_support('tvdb', 'movie'))
 
@@ -127,9 +130,10 @@ class TestHasProviderSupport(TestCase):
 
 
 class TestProviderFactory(TestCase):
-    def test_imdb(self):
-        client = provider_factory('imdb')
-        self.assertIsInstance(client, IMDb)
+    # TODO: Revisit after IMDb endpoints have been reimplemented
+    # def test_imdb(self):
+    #     client = provider_factory('imdb')
+    #     self.assertIsInstance(client, IMDb)
 
     def test_tmdb(self):
         client = provider_factory('tmdb', api_key=API_KEY_TMDB)
@@ -143,29 +147,29 @@ class TestProviderFactory(TestCase):
         with self.assertRaises(MapiException):
             provider_factory('yolo')
 
-
-class TestImdb(TestCase):
-    def setUp(self):
-        self.client = IMDb(api_key=API_KEY_TMDB)
-
-    def test_search_id_imdb(self):
-        for meta in movie_meta:
-            with self.subTest(id_imdb=meta['id_imdb']):
-                results = list(self.client.search(id_imdb=meta['id_imdb']))
-                self.assertTrue(results)
-                result = results[0]
-                self.assertEqual(result['title'], meta['title'])
-
-    def test_search_title(self):
-        for meta in movie_meta:
-            found = False
-            with self.subTest(title=meta['title']):
-                results = self.client.search(title=meta['title'])
-                for result in results:
-                    if result['id_imdb'] == meta['id_imdb']:
-                        found = True
-                        break
-                self.assertTrue(found)
+# TODO: Revisit after IMDb endpoints have been reimplemented
+# class TestImdb(TestCase):
+#     def setUp(self):
+#         self.client = IMDb(api_key=API_KEY_TMDB)
+#
+#     def test_search_id_imdb(self):
+#         for meta in movie_meta:
+#             with self.subTest(id_imdb=meta['id_imdb']):
+#                 results = list(self.client.search(id_imdb=meta['id_imdb']))
+#                 self.assertTrue(results)
+#                 result = results[0]
+#                 self.assertEqual(result['title'], meta['title'])
+#
+#     def test_search_title(self):
+#         for meta in movie_meta:
+#             found = False
+#             with self.subTest(title=meta['title']):
+#                 results = self.client.search(title=meta['title'])
+#                 for result in results:
+#                     if result['id_imdb'] == meta['id_imdb']:
+#                         found = True
+#                         break
+#                 self.assertTrue(found)
 
 
 class TestTmdb(TestCase):

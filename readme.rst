@@ -50,13 +50,13 @@ Adventure Time - S05E03 - Five More Short Graybles
 You can read more about the `format` method in the source documentation.
 
 
-Searching for a movie by title and year using IMDb
---------------------------------------------------
+Searching for a movie by title and year
+---------------------------------------
 
 Okay, so no we want to look up some movies. We can search for using a specific year, by an upper range using '-year', by a lower range using 'year-', or between a range of years using 'year-year'. Lets use the latter to get a listing of Star Trek movies from the 90s. As it turns out, there's a lot.
 
->>> from mapi.providers import IMDb
->>> client = IMDb()
+>>> from mapi.providers import TMDb
+>>> client = TMDb()
 >>> results = client.search(title='Star Trek', year='1990-1999')
 >>> for i, result in enumerate(results, 1):
 >>>     print('%d) %s' % (i, result))
@@ -76,7 +76,7 @@ Searches return a generator, so by breaking on 10, we only ask for what we need,
 
 
 Looking up a movie by ID
-----------------
+------------------------
 
 If you just want to lookup metadata using an API Provider's ID code, you can do that too:
 
@@ -145,15 +145,15 @@ given search query. Extra fields are simply ignored.
 +----------+---------------------+-----------+------------------------+----------------------------+
 | Field    | API                 | Type      | Description            | Notes                      |
 +==========+=====================+===========+========================+============================+
-| id_imdb  | IMDb, TMDb, TVDb    | str       | IMDb movie id key      | [1]_ [2]_                  |
+| id_imdb  | TMDb, TVDb          | str       | IMDb movie id key      | [1]_ [2]_                  |
 +----------+---------------------+-----------+------------------------+----------------------------+
 | id_tmdb  | TMDb                | str / int | TMDb movie id key      | [2]_ [3]_                  |
 +----------+---------------------+-----------+------------------------+----------------------------+
 | id_tvdb  | TVDb series id key  | str / int | TVDb season id key     | [2]_ [3]_                  |
 +----------+---------------------+-----------+------------------------+----------------------------+
-| title    | IMDb, TMDb          | str       | Feature's title        |                            |
+| title    | TMDb                | str       | Feature's title        |                            |
 +----------+---------------------+-----------+------------------------+----------------------------+
-| year     | IMDb, TMDb          | str / int | Feature's release year |                            |
+| year     | TMDb                | str / int | Feature's release year |                            |
 +----------+---------------------+-----------+------------------------+----------------------------+
 | date     | TVDb                | str       | YYYY-MM-DD formatted   | [4]_                       |
 +----------+---------------------+-----------+------------------------+----------------------------+
@@ -176,13 +176,11 @@ so desire.
 +----------+------------+--------------------------------------------------------------------------+
 | Field    | API        | Description                                                              |
 +==========+============+==========================================================================+
-| id_imdb  | IMDb       | IMDb movie id key                                                        |
-+----------+------------+--------------------------------------------------------------------------+
 | id_tmdb  | TMDb       | TMDb movie id key                                                        |
 +----------+------------+--------------------------------------------------------------------------+
 | id_tvdb  | TVDb       | TVDb season id key                                                       |
 +----------+------------+--------------------------------------------------------------------------+
-| title    | IMDb, TMDb | Feature's title                                                          |
+| title    | TMDb       | Feature's title                                                          |
 +----------+------------+--------------------------------------------------------------------------+
 | date     | ALL        | Media's release date (YYYY-MM-DD)                                        |
 +----------+------------+--------------------------------------------------------------------------+
@@ -207,6 +205,7 @@ MIT. See license.txt for details.
 Notes
 =====
 .. [1] id_imdb must be prefixed with 'tt'.
+.. [1] id_imdb must be prefixed with 'tt'.
 .. [2] Although ID, title, and series are each optional, movie queries must have
        either an ID or title to yield any results, and television queries must
        have either and ID or series to yield any results.
@@ -219,4 +218,4 @@ Notes
    :target: https://travis-ci.org/jkwill87/mapi
 .. |pypi| image:: https://img.shields.io/pypi/v/mapi.svg
    :target: https://pypi.python.org/pypi/mapi
-.. |api| image:: https://img.shields.io/badge/api-IMDb/TMDb/TVDb-D8D200.svg
+.. |api| image:: https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg
