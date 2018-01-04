@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=utf-8
 
 from distutils.core import setup
@@ -21,5 +22,5 @@ setup(
     packages=['mapi'],
     install_requires=REQUIREMENTS,
     url='https://github.com/jkwill87/mapi',
-    version='2.1.0'
+    version='2.2.0'
 )
