@@ -147,30 +147,6 @@ class TestProviderFactory(TestCase):
         with self.assertRaises(MapiException):
             provider_factory('yolo')
 
-# TODO: Revisit after IMDb endpoints have been reimplemented
-# class TestImdb(TestCase):
-#     def setUp(self):
-#         self.client = IMDb(api_key=API_KEY_TMDB)
-#
-#     def test_search_id_imdb(self):
-#         for meta in movie_meta:
-#             with self.subTest(id_imdb=meta['id_imdb']):
-#                 results = list(self.client.search(id_imdb=meta['id_imdb']))
-#                 self.assertTrue(results)
-#                 result = results[0]
-#                 self.assertEqual(result['title'], meta['title'])
-#
-#     def test_search_title(self):
-#         for meta in movie_meta:
-#             found = False
-#             with self.subTest(title=meta['title']):
-#                 results = self.client.search(title=meta['title'])
-#                 for result in results:
-#                     if result['id_imdb'] == meta['id_imdb']:
-#                         found = True
-#                         break
-#                 self.assertTrue(found)
-
 
 class TestTmdb(TestCase):
     def setUp(self):
