@@ -22,5 +22,5 @@ setup(
     packages=['mapi'],
     install_requires=REQUIREMENTS,
     url='https://github.com/jkwill87/mapi',
-    version='3.0.0'
+    version='3.0.1'
 )

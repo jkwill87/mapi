@@ -339,7 +339,7 @@ def tvdb_login(api_key):
     status, content = _request_json(url, body=body, cache=False)
     if status == 401:
         raise MapiProviderException('invalid api key')
-    assert status == 200 and content.get('token')
+    assert status == 200 and content.get('token')  # TVDb down or unavailable?
     return content['token']
 
 
