@@ -3,6 +3,7 @@
 *.sqlite
 .DS_Store
 .idea
+.eggs/
 .vscode
 dist
 makefile
