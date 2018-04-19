@@ -1,23 +1,23 @@
-import sys
 from json import loads
 from os import environ
 
 from requests import Session
 
+from mapi import IS_PY2
 from mapi.endpoints import *
 # noinspection PyProtectedMember
 from mapi.endpoints import _clean_dict, _d2l, _get_user_agent, _request_json
 from mapi.exceptions import *
 
-if sys.version_info.major == 3:
-    from unittest import TestCase
-    # noinspection PyCompatibility
-    from unittest.mock import patch
-else:
+if IS_PY2:
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     from unittest2 import TestCase
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     from mock import patch
+else:
+    from unittest import TestCase
+    # noinspection PyCompatibility
+    from unittest.mock import patch
 
 """ Unit tests for endpoints.py
 """

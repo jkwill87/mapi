@@ -5,17 +5,19 @@
 
 import sys
 
+from mapi import IS_PY2
 from mapi.providers import *
 
-if sys.version_info.major == 3:
-    from unittest import TestCase
-else:
+if IS_PY2:
     # Sidesteps python2 str/unicode/encode/decode stupidity
+    # noinspection PyUnresolvedReferences
     reload(sys)
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     sys.setdefaultencoding('utf-8')
     # noinspection PyUnresolvedReferences,PyPackageRequirements
     from unittest2 import TestCase
+else:
+    from unittest import TestCase
 
 movie_meta = [{
     'media': 'movie',

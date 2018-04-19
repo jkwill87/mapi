@@ -1,5 +1,0 @@
-appdirs
-requests
-requests_cache
-mock;python_version<"3"
-unittest2;python_version<"3"
