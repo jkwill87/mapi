@@ -7,4 +7,5 @@
 dist
 makefile
 MANIFEST
+mapi.egg-info
 playground.py

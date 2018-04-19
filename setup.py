@@ -2,6 +2,7 @@
 # coding=utf-8
 
 from distutils.core import setup
+from mapi import IS_PY2
 
 with open('requirements.txt', 'r') as fp:
     REQUIREMENTS = fp.read().splitlines()

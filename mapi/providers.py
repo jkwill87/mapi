@@ -6,8 +6,7 @@ from abc import ABCMeta, abstractmethod
 from os import environ
 from re import match
 
-from mapi import *
-from mapi import endpoints
+from mapi import endpoints, log
 from mapi.exceptions import *
 from mapi.metadata import MetadataMovie, MetadataTelevision
 
