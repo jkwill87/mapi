@@ -103,7 +103,7 @@ class Provider(_AbstractClass):
         return (int(start), int(end)) if dash else (int(start), int(start))
 
     @abstractmethod
-    def search(self, **parameters):
+    def search(self, id_key=None, **parameters):
         pass
 
     @property
@@ -116,12 +116,14 @@ class IMDb(Provider):
     """ Queries the unofficial IMDb mobile API
     """
 
-    def search(self, **parameters):
+    def search(self, id_key=None, **parameters):
         """ Searches IMDb for movie metadata
 
         :param kwargs parameters: Search parameters
+        :param str id_key: alias for id_imdb parameter
         :keyword str title: Feature title
         :keyword optional str or int year: Feature year
+        :keyword str id_imdb: IMDb movie id key; must be prefixed with 'tt'
         :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
         :return list of dict: Movie metadata; see readme for mapping details
         :rtype: dict
@@ -130,7 +132,7 @@ class IMDb(Provider):
         # Process parameters
         title = parameters.get('title')
         year = parameters.get('year')
-        id_imdb = parameters.get('id_imdb')
+        id_imdb = parameters.get('id_imdb') or id_key
 
         # Search by IMDb 'tt-const' ID
         if id_imdb:
@@ -195,10 +197,11 @@ class TMDb(Provider):
         if not self.api_key:
             raise MapiProviderException('TMDb requires an API key')
 
-    def search(self, **parameters):
+    def search(self, id_key=None, **parameters):
         """ Searches TMDb for movie metadata
 
         :param kwargs parameters: Search parameters
+        :param str id_key: alias for id_imdb
         :keyword str id_tmdb: TMDb movie id key; must be numeric
         :keyword str id_imdb: IMDb movie id key; must be prefixed with 'tt'
         :keyword str title: Feature title
@@ -207,7 +210,7 @@ class TMDb(Provider):
         :return list of dict: Movie metadata; see readme for mapping details
         :rtype: dict
         """
-        id_tmdb = parameters.get('id_tmdb')
+        id_tmdb = parameters.get('id_tmdb') or id_key
         id_imdb = parameters.get('id_imdb')
         title = parameters.get('title')
         year = parameters.get('year')
@@ -289,12 +292,13 @@ class TVDb(Provider):
             raise MapiProviderException('TVDb requires an API key')
         self.token = endpoints.tvdb_login(self.api_key)
 
-    def search(self, **parameters):
+    def search(self, id_key=None, **parameters):
         """ Searches TVDb for movie metadata
 
         TODO: Consider making parameters for episode ids
 
         :param kwargs parameters: Search parameters
+        :param str id_key: alias for id_tvdb
         :keyword str id_tvdb: TVDb series id key; must be numeric
         :keyword str id_imdb: IMDb series id key; must be prefixed with 'tt'
         :keyword str series: Series name
@@ -305,8 +309,8 @@ class TVDb(Provider):
         :rtype: dict
         """
         episode = parameters.get('episode')
+        id_tvdb = parameters.get('id_tvdb') or id_key
         id_imdb = parameters.get('id_imdb')
-        id_tvdb = parameters.get('id_tvdb')
         season = parameters.get('season')
         series = parameters.get('series')
         date = parameters.get('date')
