@@ -13,6 +13,12 @@ Installation
 `$ pip install mapi`
 
 
+Running Tests
+=============
+
+`$ python setup.py test`
+
+
 Examples
 ========
 
