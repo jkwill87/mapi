@@ -7,7 +7,7 @@ from setuptools import setup
 
 from mapi import IS_PY2
 
-with open('readme.rst', 'r') as fp:
+with open('readme.md', 'r') as fp:
     LONG_DESCRIPTION = fp.read()
 
 
