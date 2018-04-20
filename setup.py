@@ -35,5 +35,5 @@ setup(
     tests_require=['mock>=2', 'unittest2>=1.1'] if IS_PY2 else [],
     test_suite="setup.test_suite",
     url='https://github.com/jkwill87/mapi',
-    version='3.0.1'
+    version='3.1.0'
 )
