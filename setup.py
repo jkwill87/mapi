@@ -23,7 +23,7 @@ setup(
         'An API for media database APIs which allows you to search for metadata'
         'using a simple, common interface'
     ),
-    include_package_data = True,
+    include_package_data=True,
     install_requires=[
         'appdirs>=1.4',
         'requests>=2.18',
@@ -37,5 +37,5 @@ setup(
     tests_require=['mock>=2', 'unittest2>=1.1'] if IS_PY2 else [],
     test_suite="setup.test_suite",
     url='https://github.com/jkwill87/mapi',
-    version='3.1.0'
+    version='3.1.1'
 )
