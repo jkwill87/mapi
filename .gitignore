@@ -8,6 +8,5 @@
 MANIFEST
 build
 dist
-makefile
 mapi.egg-info
 playground.py
