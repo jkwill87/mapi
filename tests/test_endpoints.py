@@ -1,26 +1,15 @@
+""" Unit tests for endpoints.py
+"""
+
 from json import loads
 from os import environ
-
 from requests import Session
 
-from mapi import IS_PY2
+from . import *
 from mapi.endpoints import *
-# noinspection PyProtectedMember
 from mapi.endpoints import _clean_dict, _d2l, _get_user_agent, _request_json
 from mapi.exceptions import *
 
-if IS_PY2:
-    # noinspection PyUnresolvedReferences,PyPackageRequirements
-    from unittest2 import TestCase, skip
-    # noinspection PyUnresolvedReferences,PyPackageRequirements
-    from mock import patch
-else:
-    from unittest import TestCase, skip
-    # noinspection PyCompatibility
-    from unittest.mock import patch
-
-""" Unit tests for endpoints.py
-"""
 
 JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'
@@ -218,6 +207,7 @@ class TestRequestJson(TestCase):
         self.assertEqual('POST', kwargs['method'])
         self.assertListEqual(_d2l(_clean_dict(data)), kwargs['params'])
 
+    @ignore_warnings
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
     def test_post_headers(self, mock_request):
         mock_request.side_effect = Session().request
@@ -327,7 +317,7 @@ class TestGetUserAgent(TestCase):
                 self.assertIn(_get_user_agent(platform), AGENT_ALL)
 
     def test_random(self):
-        for i in range(10):
+        for _ in range(10):
             self.assertIn(_get_user_agent(), AGENT_ALL)
 
 
@@ -680,22 +670,23 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
         with self.assertRaises(MapiProviderException):
             tvdb_series_episodes_query(self.token, JUNK_TEXT)
 
+    @ignore_warnings
     def test_page_valid(self):
         tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-            page=1)
+                                   page=1)
         tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-            page=1, season=1)
+                                   page=1, season=1)
         tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-            page=1, season=1, episode=1)
+                                   page=1, season=1, episode=1)
         with self.assertRaises(MapiNotFoundException):
             tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-                page=11)
+                                       page=11)
         with self.assertRaises(MapiNotFoundException):
             tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-                page=2, season=1)
+                                       page=2, season=1)
         with self.assertRaises(MapiNotFoundException):
             tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-                page=2, season=1, episode=1)
+                                       page=2, season=1, episode=1)
 
     def test_success_id_tvdb(self):
         expected_top_level_keys = {
@@ -736,7 +727,7 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
             'overview'
         }
         result = tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-            season=1)
+                                            season=1)
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']
@@ -762,7 +753,7 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
             'overview'
         }
         result = tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-            season=1, episode=1)
+                                            season=1, episode=1)
         self.assertIsInstance(result, dict)
         self.assertIn('data', result)
         data = result['data']

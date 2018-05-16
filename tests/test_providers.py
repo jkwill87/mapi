@@ -2,22 +2,9 @@
 
 """ Unit tests for providers.py
 """
-
-import sys
-
-from mapi import IS_PY2
+from . import *
 from mapi.providers import *
 
-if IS_PY2:
-    # Sidesteps python2 str/unicode/encode/decode stupidity
-    # noinspection PyUnresolvedReferences
-    reload(sys)
-    # noinspection PyUnresolvedReferences,PyPackageRequirements
-    sys.setdefaultencoding('utf-8')
-    # noinspection PyUnresolvedReferences,PyPackageRequirements
-    from unittest2 import TestCase
-else:
-    from unittest import TestCase
 
 movie_meta = [{
     'media': 'movie',

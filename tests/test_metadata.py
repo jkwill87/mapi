@@ -1,5 +1,4 @@
-from unittest import TestCase
-
+from . import *
 from mapi.metadata import MetadataMovie, MetadataTelevision
 
 
