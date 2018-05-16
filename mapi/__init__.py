@@ -16,12 +16,10 @@ See https://github.com/jkwill87/mapi for more information.
 """
 
 import logging as _logging
-from sys import modules as _modules, version_info as _version_info
+from sys import modules as _modules
 
 # Set up logging
 log = _logging.getLogger(__name__)
 log.addHandler((_logging.StreamHandler()))
 log.setLevel(_logging.DEBUG if 'pydevd' in _modules else _logging.ERROR)
 _logging.getLogger('requests').setLevel(_logging.CRITICAL)
-
-IS_PY2 = _version_info[0] == 2

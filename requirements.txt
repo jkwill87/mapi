@@ -1,0 +1,3 @@
+appdirs
+requests
+requests_cache

@@ -2,6 +2,7 @@
 
 """ Provides a high-level interface for metadata media providers
 """
+
 from abc import ABCMeta, abstractmethod
 from os import environ
 from re import match

@@ -2,11 +2,12 @@
 *.pyc
 *.sqlite
 .DS_Store
-.idea
 .eggs/
+.idea
 .vscode
+MANIFEST
+build
 dist
 makefile
-MANIFEST
 mapi.egg-info
 playground.py

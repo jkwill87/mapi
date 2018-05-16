@@ -1,3 +1,8 @@
+# coding=utf-8
+
+""" Metadata data classes
+"""
+
 from abc import ABCMeta
 from collections import MutableMapping
 from datetime import datetime as dt
@@ -15,6 +20,9 @@ _EXTRA_FIELDS = {
 
 
 class Metadata(_AbstractClass, MutableMapping):
+    """ Base Metadata class
+    """
+
     template = ''
     fields = set()
 
@@ -168,8 +176,10 @@ class Metadata(_AbstractClass, MutableMapping):
         return s
 
 
-# noinspection PyAbstractClass
 class MetadataTelevision(Metadata):
+    """ Televesion Metadata class
+    """
+
     template = '<$series - >< - $season><x$episode - >< - $title>'
     fields = {
         'id_imdb',
@@ -201,8 +211,10 @@ class MetadataTelevision(Metadata):
         return self._str_pad_episode(s)
 
 
-# noinspection PyAbstractClass
 class MetadataMovie(Metadata):
+    """ Movie Metadata class
+    """
+    
     template = '<$title ><($year)>'
     fields = {
         'id_imdb',

@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """ Unit tests for endpoints.py
 """
 
@@ -8,7 +10,7 @@ from requests import Session
 from . import *
 from mapi.endpoints import *
 from mapi.endpoints import _clean_dict, _d2l, _get_user_agent, _request_json
-from mapi.exceptions import *
+from mapi.exceptions import MapiNotFoundException, MapiProviderException
 
 
 JUNK_IMDB_ID = 'tt1234567890'
@@ -284,7 +286,6 @@ class TestCleanDict(TestCase):
 
     def test_not_a_dict(self):
         with self.assertRaises(AssertionError):
-            # noinspection PyTypeChecker
             _clean_dict('mama mia pizza pie')
 
     def test_str_strip(self):

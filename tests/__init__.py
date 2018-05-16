@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import sys
 from logging import getLogger
 from warnings import catch_warnings, simplefilter

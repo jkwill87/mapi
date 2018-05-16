@@ -14,7 +14,7 @@ mapi (**M**etadata **API**) is a python library which provides a high-level inte
 
 # Running Tests
 
-`$ ./setup.py test`
+`$ python -m unittest discover`
 
 
 # Examples

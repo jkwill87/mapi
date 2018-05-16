@@ -2,6 +2,8 @@
 
 """ Unit tests for providers.py
 """
+from os import environ
+
 from . import *
 from mapi.providers import *
 
