@@ -153,7 +153,9 @@ class IMDb(Provider):
 
     def _search_id_imdb(self, id_imdb):
         assert id_imdb
-        response = endpoints.imdb_main_details(id_imdb)['data']
+        response = endpoints.imdb_main_details(
+            id_imdb, cache=self.cache
+        )['data']
 
         try:
             return MetadataMovie(
@@ -172,7 +174,7 @@ class IMDb(Provider):
         assert title
         found = False
         year_from, year_to = self._year_expand(year)
-        response = endpoints.imdb_mobile_find(title)
+        response = endpoints.imdb_mobile_find(title, cache=self.cache)
 
         # Ranking: popular, exact, approx, then substring; not intuitive but w/e
         ids = list()
@@ -233,7 +235,7 @@ class TMDb(Provider):
 
     def _search_id_imdb(self, id_imdb):
         response = endpoints.tmdb_find(
-            self.api_key, 'imdb_id', id_imdb
+            self.api_key, 'imdb_id', id_imdb, cache=self.cache
         )['movie_results'][0]
         return MetadataMovie(
             title=response['title'],
@@ -245,7 +247,9 @@ class TMDb(Provider):
 
     def _search_id_tmdb(self, id_tmdb):
         assert id_tmdb
-        response = endpoints.tmdb_movies(self.api_key, id_tmdb)
+        response = endpoints.tmdb_movies(
+            self.api_key, id_tmdb, cache=self.cache
+        )
         return MetadataMovie(
             title=response['title'],
             date=response['release_date'],
@@ -263,7 +267,7 @@ class TMDb(Provider):
 
         while True:
             response = endpoints.tmdb_search_movies(
-                self.api_key, title, year, page=page
+                self.api_key, title, year, page=page, cache=self.cache
             )
             for entry in response['results']:
                 try:
@@ -342,19 +346,23 @@ class TVDb(Provider):
             raise MapiNotFoundException
 
     def _search_id_imdb(self, id_imdb, season=None, episode=None):
-        series_data = endpoints.tvdb_search_series(self.token, id_imdb=id_imdb)
+        series_data = endpoints.tvdb_search_series(
+            self.token, id_imdb=id_imdb, cache=self.cache
+        )
         id_tvdb = (series_data['data'][0]['id'])
         return self._search_id_tvdb(id_tvdb, season, episode)
 
     def _search_id_tvdb(self, id_tvdb, season=None, episode=None):
         assert id_tvdb
         found = False
-        series_data = endpoints.tvdb_series_id(self.token, id_tvdb)
+        series_data = endpoints.tvdb_series_id(
+            self.token, id_tvdb, cache=self.cache
+        )
         page = 1
         page_max = 5
         while True:
             episode_data = endpoints.tvdb_series_episodes_query(
-                self.token, id_tvdb, episode, season
+                self.token, id_tvdb, episode, season, cache=self.cache
             )
             for entry in episode_data['data']:
                 try:
@@ -383,7 +391,9 @@ class TVDb(Provider):
     def _search_series(self, series, season, episode):
         assert series
         found = False
-        series_data = endpoints.tvdb_search_series(self.token, series)
+        series_data = endpoints.tvdb_search_series(
+            self.token, series, cache=self.cache
+        )
         entries = [entry['id'] for entry in series_data['data'][:5]]
 
         for id_tvdb in entries:
@@ -397,7 +407,9 @@ class TVDb(Provider):
     def _search_series_date(self, series, date):
         assert series and date
         found = False
-        series_data = endpoints.tvdb_search_series(self.token, series)
+        series_data = endpoints.tvdb_search_series(
+            self.token, series, cache=self.cache
+        )
         series_entries = {
             entry['id']: entry['seriesName']
             for entry in series_data['data'][:5]
@@ -408,7 +420,7 @@ class TVDb(Provider):
             while True:
                 try:
                     response = endpoints.tvdb_series_id_episodes(
-                        self.token, id_tvdb, page
+                        self.token, id_tvdb, page, cache=self.cache
                     )
                 except MapiNotFoundException:
                     break
