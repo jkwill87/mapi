@@ -246,10 +246,10 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
     status, content = _request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
-    if status == 404 or not any(content.get(k, {}) for k in keys):
-        raise MapiNotFoundException
     elif status != 200 or not any(content.keys()):
         raise MapiNetworkException('TMDb down or unavailable?')
+    elif status == 404 or not any(content.get(k, {}) for k in keys):
+        raise MapiNotFoundException
     return content
 
 
@@ -276,7 +276,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
     status, content = _request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
-    if status == 404:
+    elif status == 404:
         raise MapiNotFoundException
     elif status != 200 or not any(content.keys()):
         raise MapiNetworkException('TMDb down or unavailable?')
@@ -316,10 +316,10 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
     status, content = _request_json(url, parameters)
     if status == 401:
         raise MapiProviderException('invalid API key')
-    if status == 404 or status == 422 or not content.get('total_results'):
-        raise MapiNotFoundException
     elif status != 200 or not any(content.keys()):
         raise MapiNetworkException('TMDb down or unavailable?')
+    elif status == 404 or status == 422 or not content.get('total_results'):
+        raise MapiNotFoundException
     return content
 
 
