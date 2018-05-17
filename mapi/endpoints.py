@@ -152,7 +152,7 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
     return status, content
 
 
-def imdb_main_details(id_imdb):
+def imdb_main_details(id_imdb, cache=True):
     """ Lookup a media item using the Internet Movie Database's internal API
 
     This endpoint is more detailed than the mobile endpoint but has a tenancy to
@@ -169,7 +169,7 @@ def imdb_main_details(id_imdb):
     }
     status = content = None
     for i in range(50):  # retry when service unavailable
-        status, content = _request_json(url, parameters)
+        status, content = _request_json(url, parameters, cache=cache)
         if status == 503:
             sleep((i + 1) * .025)  # .025 to 1.25 secs, total ~32
         else:
@@ -181,7 +181,7 @@ def imdb_main_details(id_imdb):
     return content
 
 
-def imdb_mobile_find(title, nr=False, tt=False):
+def imdb_mobile_find(title, nr=False, tt=False, cache=True):
     """ Search the Internet Movie Database using its undocumented iOS API
 
     :param str title: Movie title used for searching
@@ -194,7 +194,7 @@ def imdb_mobile_find(title, nr=False, tt=False):
     parameters = {'json': True, 'nr': nr, 'tt': tt, 'q': title}
     status = content = None
     for i in range(50):  # retry when service unavailable
-        status, content = _request_json(url, parameters)
+        status, content = _request_json(url, parameters, cache=cache)
         if status == 503:
             sleep((i + 1) * .025)  # wait from .025 to 1.25 secs
         else:
@@ -207,7 +207,8 @@ def imdb_mobile_find(title, nr=False, tt=False):
     return content
 
 
-def tmdb_find(api_key, external_source, external_id, language='en-US'):
+def tmdb_find(api_key, external_source, external_id, language='en-US',
+        cache=True):
     """ Search for The Movie Database objects using another DB's foreign key
 
     Note: language codes aren't checked on this end or by TMDb, so if you
@@ -243,7 +244,7 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
         'tv_results',
         'tv_season_results'
     ]
-    status, content = _request_json(url, parameters)
+    status, content = _request_json(url, parameters, cache=cache)
     if status == 401:
         raise MapiProviderException('invalid API key')
     elif status != 200 or not any(content.keys()):
@@ -253,7 +254,7 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
     return content
 
 
-def tmdb_movies(api_key, id_tmdb, language='en-US'):
+def tmdb_movies(api_key, id_tmdb, language='en-US', cache=True):
     """ Lookup a movie item using The Movie Database
 
     Online docs: developers.themoviedb.org/3/movies
@@ -273,7 +274,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
         'api_key': api_key,
         'language': language
     }
-    status, content = _request_json(url, parameters)
+    status, content = _request_json(url, parameters, cache=cache)
     if status == 401:
         raise MapiProviderException('invalid API key')
     elif status == 404:
@@ -284,7 +285,7 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
 
 
 def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
-        page=1):
+        page=1, cache=True):
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
@@ -313,7 +314,7 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
         'region': region,
         'year': year,
     }
-    status, content = _request_json(url, parameters)
+    status, content = _request_json(url, parameters, cache=cache)
     if status == 401:
         raise MapiProviderException('invalid API key')
     elif status != 200 or not any(content.keys()):
@@ -362,7 +363,7 @@ def tvdb_refresh_token(token):
     return content['token']
 
 
-def tvdb_episodes_id(token, id_tvdb, lang='en'):
+def tvdb_episodes_id(token, id_tvdb, lang='en', cache=True):
     """ Returns the full information for a given episode id
 
     Online docs: https://api.thetvdb.com/swagger#!/Episodes
@@ -386,7 +387,7 @@ def tvdb_episodes_id(token, id_tvdb, lang='en'):
         'Accept-Language': lang,
         'Authorization': 'Bearer %s' % token
     }
-    status, content = _request_json(url, headers=headers)
+    status, content = _request_json(url, headers=headers, cache=cache)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -398,7 +399,7 @@ def tvdb_episodes_id(token, id_tvdb, lang='en'):
     return content
 
 
-def tvdb_series_id(token, id_tvdb, lang='en'):
+def tvdb_series_id(token, id_tvdb, lang='en', cache=True):
     """ Returns a series records that contains all information known about a
     particular series id
 
@@ -423,7 +424,7 @@ def tvdb_series_id(token, id_tvdb, lang='en'):
         'Accept-Language': lang,
         'Authorization': 'Bearer %s' % token
     }
-    status, content = _request_json(url, headers=headers)
+    status, content = _request_json(url, headers=headers, cache=cache)
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -433,7 +434,7 @@ def tvdb_series_id(token, id_tvdb, lang='en'):
     return content
 
 
-def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
+def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en', cache=True):
     """ All episodes for a given series
 
     Note: Paginated with 100 results per page
@@ -460,7 +461,9 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
         'Authorization': 'Bearer %s' % token
     }
     parameters = {'page': page}
-    status, content = _request_json(url, parameters, headers=headers)
+    status, content = _request_json(
+        url, parameters, headers=headers, cache=cache
+    )
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -471,7 +474,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
 
 
 def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
-        page=1, lang='en'):
+        page=1, lang='en', cache=True):
     """ This route allows the user to query against episodes for the given series
 
     Note: Paginated with 100 results per page; omitted imdbId, when would you
@@ -505,7 +508,9 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
         'airedEpisode': episode,
         'page': page
     }
-    status, content = _request_json(url, parameters, headers=headers)
+    status, content = _request_json(
+        url, parameters, headers=headers, cache=cache
+    )
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 404:
@@ -516,7 +521,7 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
 
 
 def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
-        lang='en'):
+        lang='en', cache=True):
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
@@ -545,7 +550,9 @@ def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
         'Accept-Language': lang,
         'Authorization': 'Bearer %s' % token
     }
-    status, content = _request_json(url, parameters, headers=headers)
+    status, content = _request_json(
+        url, parameters, headers=headers, cache=cache
+    )
     if status == 401:
         raise MapiProviderException('invalid token')
     elif status == 405:
