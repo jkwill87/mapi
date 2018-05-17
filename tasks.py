@@ -49,6 +49,8 @@ def install():
 def uninstall():
     sh('sudo -H pip -q uninstall -y mapi')
 
+def test():
+    sh('python -m unittest discover -v')
 
 def version():
     print('%s version %s ' % (PROJECT, VERSION))
