@@ -70,7 +70,7 @@ def provider_factory(provider, **options):
 
 
 class Provider(_AbstractClass):
-    """ 
+    """ ABC for Providers, high-level interfaces for metadata media providers
     """
 
     def __init__(self, **options):
@@ -83,6 +83,7 @@ class Provider(_AbstractClass):
             'api_key',
             environ.get('API_KEY_%s' % cls_name.upper())
         )
+        self._cache = options.get('cache', True)
 
     @staticmethod
     def _year_expand(s):
@@ -110,6 +111,10 @@ class Provider(_AbstractClass):
     @property
     def api_key(self):
         return self._api_key
+
+    @property
+    def cache(self):
+        return self._cache
 
 
 # TODO: Revisit after IMDb endpoints have been reimplemented
