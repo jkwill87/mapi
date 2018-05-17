@@ -493,10 +493,9 @@ class TestTvdbEpisodesId(TestCase):
     def setUp(self):
         self.token = tvdb_login(TVDB_API_KEY)
 
-    @skip('Incompatible with requests_cache')
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
-            tvdb_episodes_id(JUNK_TEXT, LOST_TVDB_ID_EPISODE)
+            tvdb_episodes_id(JUNK_TEXT, LOST_TVDB_ID_EPISODE, cache=False)
 
     def test_invalid_lang(self):
         with self.assertRaises(MapiProviderException):
@@ -558,10 +557,9 @@ class TestTvdbSeriesId(TestCase):
     def setUp(self):
         self.token = tvdb_login(TVDB_API_KEY)
 
-    @skip('Incompatible with requests_cache')
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
-            tvdb_series_id(JUNK_TEXT, LOST_TVDB_ID_SERIES)
+            tvdb_series_id(JUNK_TEXT, LOST_TVDB_ID_SERIES, cache=False)
 
     def test_invalid_lang(self):
         with self.assertRaises(MapiProviderException):
@@ -612,10 +610,9 @@ class TestTvdbSeriesIdEpisodes(TestCase):
     def setUp(self):
         self.token = tvdb_login(TVDB_API_KEY)
 
-    @skip('Incompatible with requests_cache')
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
-            tvdb_series_id_episodes(JUNK_TEXT, LOST_TVDB_ID_SERIES)
+            tvdb_series_id_episodes(JUNK_TEXT, LOST_TVDB_ID_SERIES, cache=False)
 
     def test_invalid_lang(self):
         with self.assertRaises(MapiProviderException):
@@ -657,15 +654,17 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
     def setUp(self):
         self.token = tvdb_login(TVDB_API_KEY)
 
-    @skip('Incompatible with requests_cache')
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
-            tvdb_series_episodes_query(JUNK_TEXT, LOST_TVDB_ID_SERIES)
+            tvdb_series_episodes_query(
+                JUNK_TEXT, LOST_TVDB_ID_SERIES, cache=False
+            )
 
     def test_invalid_lang(self):
         with self.assertRaises(MapiProviderException):
-            tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES,
-                                       lang='xyz')
+            tvdb_series_episodes_query(
+                self.token, LOST_TVDB_ID_SERIES, lang='xyz'
+            )
 
     def test_invalid_id_tvdb(self):
         with self.assertRaises(MapiProviderException):
@@ -769,10 +768,9 @@ class TestTvdbSearchSeries(TestCase):
     def setUp(self):
         self.token = tvdb_login(TVDB_API_KEY)
 
-    @skip('Incompatible with requests_cache')
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
-            tvdb_search_series(JUNK_TEXT, 'Lost')
+            tvdb_search_series(JUNK_TEXT, 'Lost', cache=False)
 
     def test_invalid_lang(self):
         with self.assertRaises(MapiProviderException):
