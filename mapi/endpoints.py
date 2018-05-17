@@ -174,11 +174,10 @@ def imdb_main_details(id_imdb):
             sleep((i + 1) * .025)  # .025 to 1.25 secs, total ~32
         else:
             break
-    assert status != 400
     if status == 404 or not content:
         raise MapiNotFoundException
-    assert status == 200
-    assert any(content.keys())
+    elif status != 200 or not any(content.keys()):
+        raise MapiNetworkException('IMDb down or unavailable?')
     return content
 
 
@@ -203,8 +202,8 @@ def imdb_mobile_find(title, nr=False, tt=False):
 
     if status == 400 or not content:
         raise MapiNotFoundException
-    assert status == 200
-    assert any(content.keys())
+    elif status != 200 or not any(content.keys()):
+        raise MapiNetworkException('IMDb down or unavailable?')
     return content
 
 
@@ -249,8 +248,8 @@ def tmdb_find(api_key, external_source, external_id, language='en-US'):
         raise MapiProviderException('invalid API key')
     if status == 404 or not any(content.get(k, {}) for k in keys):
         raise MapiNotFoundException
-    assert status == 200
-    assert any(content.keys())
+    elif status != 200 or not any(content.keys()):
+        raise MapiNetworkException('TMDb down or unavailable?')
     return content
 
 
@@ -279,8 +278,8 @@ def tmdb_movies(api_key, id_tmdb, language='en-US'):
         raise MapiProviderException('invalid API key')
     if status == 404:
         raise MapiNotFoundException
-    assert status == 200
-    assert any(content.keys())
+    elif status != 200 or not any(content.keys()):
+        raise MapiNetworkException('TMDb down or unavailable?')
     return content
 
 
@@ -319,8 +318,8 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
         raise MapiProviderException('invalid API key')
     if status == 404 or status == 422 or not content.get('total_results'):
         raise MapiNotFoundException
-    assert status == 200
-    assert any(content.keys())
+    elif status != 200 or not any(content.keys()):
+        raise MapiNetworkException('TMDb down or unavailable?')
     return content
 
 
@@ -339,7 +338,8 @@ def tvdb_login(api_key):
     status, content = _request_json(url, body=body, cache=False)
     if status == 401:
         raise MapiProviderException('invalid api key')
-    assert status == 200 and content.get('token')  # TVDb down or unavailable?
+    elif status != 200 or not content.get('token'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content['token']
 
 
@@ -357,7 +357,8 @@ def tvdb_refresh_token(token):
     status, content = _request_json(url, headers=headers, cache=False)
     if status == 401:
         raise MapiProviderException('invalid token')
-    assert status == 200 and content.get('token')
+    elif status != 200 or not content.get('token'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content['token']
 
 
@@ -392,7 +393,8 @@ def tvdb_episodes_id(token, id_tvdb, lang='en'):
         raise MapiNotFoundException
     elif status == 200 and 'invalidLanguage' in content.get('errors', {}):
         raise MapiNotFoundException
-    assert status == 200 and content.get('data')
+    elif status != 200 or not content.get('data'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content
 
 
@@ -426,7 +428,8 @@ def tvdb_series_id(token, id_tvdb, lang='en'):
         raise MapiProviderException('invalid token')
     elif status == 404:
         raise MapiNotFoundException
-    assert status == 200
+    elif status != 200 or not content.get('data'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content
 
 
@@ -462,7 +465,8 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en'):
         raise MapiProviderException('invalid token')
     elif status == 404:
         raise MapiNotFoundException
-    assert status == 200
+    elif status != 200 or not content.get('data'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content
 
 
@@ -506,7 +510,8 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
         raise MapiProviderException('invalid token')
     elif status == 404:
         raise MapiNotFoundException
-    assert status == 200
+    elif status != 200 or not content.get('data'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content
 
 
@@ -548,5 +553,6 @@ def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
             'series, id_imdb, id_zap2it parameters are mutually exclusive')
     elif status == 404:
         raise MapiNotFoundException
-    assert status == 200
+    elif status != 200 or not content.get('data'):
+        raise MapiNetworkException('TVDb down or unavailable?')
     return content
