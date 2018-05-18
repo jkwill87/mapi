@@ -127,8 +127,9 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
         method = 'GET'
         headers['user-agent'] = _get_user_agent(agent)
 
+    initial_cache_state = SESSION._is_cache_disabled  # yes, i'm a bad person
     try:
-        SESSION._is_cache_disabled = not cache  # yes, i'm a bad person
+        SESSION._is_cache_disabled = not cache
         response = SESSION.request(
             url=url,
             params=parameters,
@@ -142,6 +143,8 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
     except (requests.RequestException, AttributeError, ValueError) as e:
         log.debug(e, exc_info=True)
         content = None
+    finally:
+        SESSION._is_cache_disabled = initial_cache_state
 
     log.info("method: %s" % method)
     log.info("headers: %r" % headers)
