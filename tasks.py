@@ -32,14 +32,15 @@ def _bump(increment):
     if not response.lower().strip().startswith('y'):
         print('aborting')
         return
+    sh('pip install -q -r requirements-dev.txt')
     with open('version.txt', 'w') as version_txt:
         version_txt.write(str(new_version))
     sh('git commit -am "Minor version bump"')
     sh('git tag %s' % new_version)
     sh('git push --tags')
-    sh('./setup.py sdist') # TODO: revise w/ wheel args
-    sh('python -m twine upload dis/%s-%s-py2.py3-none-any.whl' % (PROJECT, new_version)) # TODO: revise
-
+    sh('./setup.py sdist bdist_wheel')
+    sh('python -m twine upload dis/%s-%s*.whl' % (PROJECT, new_version))
+    sh('rm -r *.egg-info')
 
 def bump_major():
     _bump(1.0)
