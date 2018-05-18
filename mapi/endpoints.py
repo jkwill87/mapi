@@ -155,61 +155,6 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
     return status, content
 
 
-def imdb_main_details(id_imdb, cache=True):
-    """ Lookup a media item using the Internet Movie Database's internal API
-
-    This endpoint is more detailed than the mobile endpoint but has a tenancy to
-    unpredictably return 503 status codes when hit frequently
-
-    :param str id_imdb: Internet Movie Database's primary key; prefixed w/ 'tt'
-    :return: dict
-    """
-    if not match(r'tt\d+', id_imdb):
-        raise MapiProviderException('invalid imdb tt-const value')
-    url = 'https://app.imdb.com/title/maindetails'
-    parameters = {
-        'tconst': id_imdb,
-    }
-    status = content = None
-    for i in range(50):  # retry when service unavailable
-        status, content = _request_json(url, parameters, cache=cache)
-        if status == 503:
-            sleep((i + 1) * .025)  # .025 to 1.25 secs, total ~32
-        else:
-            break
-    if status == 404 or not content:
-        raise MapiNotFoundException
-    elif status != 200 or not any(content.keys()):
-        raise MapiNetworkException('IMDb down or unavailable?')
-    return content
-
-
-def imdb_mobile_find(title, nr=False, tt=False, cache=True):
-    """ Search the Internet Movie Database using its undocumented iOS API
-
-    :param str title: Movie title used for searching
-    :param bool nr: ???
-    :param bool tt: ???
-    :return: status, data
-    :rtype: dict
-    """
-    url = 'http://www.imdb.com/xml/find'
-    parameters = {'json': True, 'nr': nr, 'tt': tt, 'q': title}
-    status = content = None
-    for i in range(50):  # retry when service unavailable
-        status, content = _request_json(url, parameters, cache=cache)
-        if status == 503:
-            sleep((i + 1) * .025)  # wait from .025 to 1.25 secs
-        else:
-            break
-
-    if status == 400 or not content:
-        raise MapiNotFoundException
-    elif status != 200 or not any(content.keys()):
-        raise MapiNetworkException('IMDb down or unavailable?')
-    return content
-
-
 def tmdb_find(api_key, external_source, external_id, language='en-US',
         cache=True):
     """ Search for The Movie Database objects using another DB's foreign key

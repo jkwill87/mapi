@@ -91,8 +91,6 @@ assert API_KEY_TVDB
 
 class TestHasProvider(TestCase):
     def test_has_provider(self):
-        # TODO: Revisit after IMDb endpoints have been reimplemented
-        # self.assertTrue(has_provider('imdb'))
         self.assertTrue(has_provider('tmdb'))
         self.assertTrue(has_provider('tvdb'))
 
@@ -102,14 +100,10 @@ class TestHasProvider(TestCase):
 
 class TestHasProviderSupport(TestCase):
     def test_has_provider_has_support(self):
-        # TODO: Revisit after IMDb endpoints have been reimplemented
-        # self.assertTrue(has_provider_support('imdb', 'movie'))
         self.assertTrue(has_provider_support('tmdb', 'movie'))
         self.assertTrue(has_provider_support('tvdb', 'television'))
 
     def test_has_provider_missing_support(self):
-        # TODO: Revisit after IMDb endpoints have been reimplemented
-        # self.assertFalse(has_provider_support('imdb', 'television'))
         self.assertFalse(has_provider_support('tmdb', 'television'))
         self.assertFalse(has_provider_support('tvdb', 'movie'))
 
@@ -121,10 +115,6 @@ class TestHasProviderSupport(TestCase):
 
 
 class TestProviderFactory(TestCase):
-    # TODO: Revisit after IMDb endpoints have been reimplemented
-    # def test_imdb(self):
-    #     client = provider_factory('imdb')
-    #     self.assertIsInstance(client, IMDb)
 
     def test_tmdb(self):
         client = provider_factory('tmdb', api_key=API_KEY_TMDB)

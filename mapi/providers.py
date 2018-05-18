@@ -58,8 +58,6 @@ def provider_factory(provider, **options):
     """
     try:
         return {
-            # TODO: Revisit after IMDb endpoints have been reimplemented
-            # 'imdb': IMDb,
             'tmdb': TMDb,
             'tvdb': TVDb,
         }[provider.lower()](**options)
@@ -115,85 +113,6 @@ class Provider(_AbstractClass):
     @property
     def cache(self):
         return self._cache
-
-
-# TODO: Revisit after IMDb endpoints have been reimplemented
-class IMDb(Provider):
-    """ Queries the unofficial IMDb mobile API
-    """
-
-    def search(self, id_key=None, **parameters):
-        """ Searches IMDb for movie metadata
-
-        :param kwargs parameters: Search parameters
-        :param str id_key: alias for id_imdb parameter
-        :keyword str title: Feature title
-        :keyword optional str or int year: Feature year
-        :keyword str id_imdb: IMDb movie id key; must be prefixed with 'tt'
-        :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
-        :return list of dict: Movie metadata; see readme for mapping details
-        :rtype: dict
-        """
-
-        # Process parameters
-        title = parameters.get('title')
-        year = parameters.get('year')
-        id_imdb = parameters.get('id_imdb') or id_key
-
-        # Search by IMDb 'tt-const' ID
-        if id_imdb:
-            yield self._search_id_imdb(id_imdb)
-
-        # Search by title / year
-        elif title:
-            for result in self._search_title(title, year):
-                yield result
-        else:
-            raise MapiNotFoundException
-
-    def _search_id_imdb(self, id_imdb):
-        assert id_imdb
-        response = endpoints.imdb_main_details(
-            id_imdb, cache=self.cache
-        )['data']
-
-        try:
-            return MetadataMovie(
-                id_imdb=response['tconst'],
-                media='movie',
-                synopsis=response['plot']['outline'],
-                title=response['title'],
-                date=response['release_date']['normal']
-            )
-
-        # Ignore hits with missing fields
-        except (KeyError, ValueError):
-            raise MapiNotFoundException
-
-    def _search_title(self, title, year):
-        assert title
-        found = False
-        year_from, year_to = self._year_expand(year)
-        response = endpoints.imdb_mobile_find(title, cache=self.cache)
-
-        # Ranking: popular, exact, approx, then substring; not intuitive but w/e
-        ids = list()
-        ids += [entry['id'] for entry in response.get('title_popular', [])]
-        ids += [entry['id'] for entry in response.get('title_exec', [])]
-        ids += [entry['id'] for entry in response.get('title_approx', [])]
-        ids += [entry['id'] for entry in response.get('title_substring', [])]
-
-        for id_imdb in ids:
-            try:
-                meta = self._search_id_imdb(id_imdb)
-                if year_from <= int(meta['year']) <= year_to:
-                    yield meta
-                    found = True
-            # Sometimes IMDb gives junk results; omit these
-            except MapiNotFoundException:
-                continue
-        if not found:
-            raise MapiNotFoundException
 
 
 class TMDb(Provider):
