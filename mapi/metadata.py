@@ -102,10 +102,10 @@ class Metadata(_AbstractClass, MutableMapping):
         }
         uppercase_exceptions = {
             'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
-            '2d', '3d', 'aka', 'atm', 'bbc', 'bff', 'cia', 'csi', 'dc', 'doa',
-            'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk', 'mtv',
-            'nba', 'nfl', 'nhl', 'nsfw', 'nyc', 'omg', 'pga', 'rsvp', 'tnt',
-            'tv', 'ufc', 'ufo', 'uk', 'usa', 'vip', 'wtf', 'wwe', 'wwi',
+            '2d', '3d', 'au', 'aka', 'atm', 'bbc', 'bff', 'cia', 'csi', 'dc',
+            'doa', 'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk',
+            'mtv', 'nba', 'nfl', 'nhl', 'nsfw', 'nyc', 'omg', 'pga', 'rsvp',
+            'tnt', 'tv', 'ufc', 'ufo', 'uk', 'usa', 'vip', 'wtf', 'wwe', 'wwi',
             'wwii', 'xxx', 'yolo'
         }
         padding_chars = '["!$\'(),-./:;<>@[]_`{} ]'
