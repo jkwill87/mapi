@@ -157,14 +157,6 @@ class Metadata(_AbstractClass, MutableMapping):
 
     def format(self, template=None):
         """ Substitutes variables within template with that of fields'
-
-        :param template: Each substitution is indicated by an alphanumeric word
-            prefixed by a sigil ($) symbol within angled brackets. If the
-            matching field is found then substitution takes place, else it is
-            omitted. If it is omitted, then all whitespace and non alphanumerics
-            (i.e. spaces, dashes, underscores and the like) within the square
-            brackets will be omitted as well.
-        :rtype: str
         """
         s = sub(
             r'(?:<([^<]*?)\$(\w+)([^>]*?)>)',

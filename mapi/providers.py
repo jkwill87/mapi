@@ -27,21 +27,12 @@ API_ALL = API_TELEVISION | API_MOVIE
 
 def has_provider(provider):
     """ Verifies that module has support for requested API provider
-
-    :param str provider: API constant or its corresponding value from API_ALL
-    :return bool: True if package supports specified db provider, else False
     """
     return provider.lower() in API_ALL
 
 
 def has_provider_support(provider, media_type):
     """ Verifies if API provider has support for requested media type
-
-    :param str provider: API constant or its corresponding value from API_ALL
-    :param str media_type: Media type constant or its corresponding value from
-        MEDIA_TYPE_ALL
-    :return bool: True if api provider is available and package supports
-        media type, else False
     """
     if provider.lower() not in API_ALL:
         return False
@@ -51,13 +42,6 @@ def has_provider_support(provider, media_type):
 
 def provider_factory(provider, **options):
     """ Factory function for DB Provider Concrete Classes
-
-    :param provider: one of the constants contained within the API_ALL or their
-        resolved value
-    :param options: Optional kwargs; passed on to class constructor.
-    :keyword str api_key: Some API providers require an API key to use their
-        service
-    :return: One of this module's provider objects
     """
     try:
         return {
@@ -89,12 +73,6 @@ class Provider(_AbstractClass):
     @staticmethod
     def _year_expand(s):
         """ Parses a year or dash-delimeted year range
-
-        :param optional str or int s: Year or year range to be parsed
-        :rtype: tuple of int or None
-        :return: The first integer in the tuple is the from year, the second is
-            the to year. If either field was omitted or invalid, it will be
-            represented as None.
         """
         regex = r'^((?:19|20)\d{2})?(\s*-\s*)?((?:19|20)\d{2})?$'
         try:
@@ -129,16 +107,6 @@ class TMDb(Provider):
 
     def search(self, id_key=None, **parameters):
         """ Searches TMDb for movie metadata
-
-        :param kwargs parameters: Search parameters
-        :param str id_key: alias for id_imdb
-        :keyword str id_tmdb: TMDb movie id key; must be numeric
-        :keyword str id_imdb: IMDb movie id key; must be prefixed with 'tt'
-        :keyword str title: Feature title
-        :keyword optional str or int year: Feature year
-        :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
-        :return list of dict: Movie metadata; see readme for mapping details
-        :rtype: dict
         """
         id_tmdb = parameters.get('id_tmdb') or id_key
         id_imdb = parameters.get('id_imdb')
@@ -228,17 +196,6 @@ class TVDb(Provider):
         """ Searches TVDb for movie metadata
 
         TODO: Consider making parameters for episode ids
-
-        :param kwargs parameters: Search parameters
-        :param str id_key: alias for id_tvdb
-        :keyword str id_tvdb: TVDb series id key; must be numeric
-        :keyword str id_imdb: IMDb series id key; must be prefixed with 'tt'
-        :keyword str series: Series name
-        :keyword str or int season: Aired season number
-        :keyword str or int episode: Aired episode number
-        :raises MapiException: Or one of its subclasses; see mapi/exceptions.py
-        :return list of dict: Movie metadata; see readme for mapping details
-        :rtype: dict
         """
         episode = parameters.get('episode')
         id_tvdb = parameters.get('id_tvdb') or id_key

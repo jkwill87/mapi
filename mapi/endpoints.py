@@ -48,11 +48,6 @@ SESSION = requests_cache.CachedSession(
 
 def _clean_dict(target_dict, whitelist=None):
     """ Convenience function that removes a dicts keys that have falsy values
-
-    :param dict target_dict: the dict to clean
-    :param optional set whitelist: if set, will filter keys outside of whitelist
-    :return: the cleaned dict
-    :rtype: dict
     """
     assert isinstance(target_dict, dict)
     return {
@@ -65,22 +60,12 @@ def _clean_dict(target_dict, whitelist=None):
 
 def _d2l(d):
     """ Convenience function that converts a dict into a sorted list of tuples
-
-    :param dict d: dictionary
-    :return: list of sorted tuples
-    :rtype: list of tuple
     """
     return sorted([(k, v) for k, v in d.items()])
 
 
 def _get_user_agent(platform=None):
     """ Convenience function that looks up a user agent string, random if N/A
-
-    Valid platforms are listed in the constants module
-
-    :param optional str platform: the platform for the required user agent
-    :return: the user agent string
-    :rtype: str
     """
     if isinstance(platform, str):
         platform = platform.upper()
@@ -95,22 +80,8 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
         agent=None):
     """ Queries a url for json data
 
-    Essentially just wraps requests to abstract return values and exceptions
-
     Note: Requests are cached using requests_cached for a week, this is done
     transparently by using the package's monkey patching
-
-    :param str url: The url to query
-    :param dict parameters: Query string parameters
-    :param dict body: JSON body parameters; if set implicitly POSTs
-    :param optional dict headers: HTTP headers; content type, length, and user
-        agent already get set internally
-    :param str agent: User agent handle to include in headers; must be one
-        specified in the constants module; if unset on will be chosen randomly
-    :param bool cache: Use requests_cache cached session; default True
-    :return: a list where the first item is the numeric status code and the
-        second is a dict containing the JSON data retrieved
-    :rtype: list
     """
     assert url
     status = 400
@@ -168,15 +139,6 @@ def tmdb_find(api_key, external_source, external_id, language='en-US',
         certain fields like synopsis will just be empty
 
     Online docs: developers.themoviedb.org/3/find
-
-    :param str api_key: A Movie Database API key
-    :param str external_source: one of imdb_id, freebase_mid, freebase_id,
-        tvdb_id, tvrage_id
-    :param str external_id: id number corresponding to external_source
-    :param str language: IETF language tag
-    :raises MapiNotFoundException: No matches for request.
-    :return: Returned json data
-    :rtype: dict
     """
     sources = ['imdb_id', 'freebase_mid', 'freebase_id', 'tvdb_id', 'tvrage_id']
     if external_source not in sources:
@@ -210,13 +172,6 @@ def tmdb_movies(api_key, id_tmdb, language='en-US', cache=True):
     """ Lookup a movie item using The Movie Database
 
     Online docs: developers.themoviedb.org/3/movies
-
-    :param str api_key: A Movie Database API key
-    :param str or int id_tmdb: The Movie Database id to lookup
-    :param str language: IETF language tag
-    :raises MapiNotFoundException: No matches for request
-    :return: Returned json data
-    :rtype: dict
     """
     try:
         url = 'https://api.themoviedb.org/3/movie/%d' % int(id_tmdb)
@@ -241,16 +196,6 @@ def tmdb_search_movies(api_key, title, year=None, adult=False, region=None,
     """ Search for movies using The Movie Database
 
     Online docs: developers.themoviedb.org/3/search/search-movies
-
-    :param str api_key: A Movie Database API key
-    :param str title: Search criteria; i.e. the movie title
-    :param optional int or str year: Feature's release year
-    :param bool adult: Include adult (pornography) content in the results
-    :param optional str region: ISO 3166-1 code
-    :param int page: Results are returned paginated; page selection; default 1
-    :raises MapiNotFoundException: No matches for request
-    :return: Returned json data
-    :rtype: dict
     """
     url = 'https://api.themoviedb.org/3/search/movie'
     try:
@@ -280,11 +225,7 @@ def tvdb_login(api_key):
     """ Logs into TVDb using the provided api key
 
     Note: You can register for a free TVDb key at thetvdb.com/?tab=apiregister
-    Online docs: api.thetvdb.com/swagger#!/Authentication/post_login
-
-    :param str api_key: A Television Database api key
-    :return: JWT token required for all other endpoints; expires after 24 hours
-    :rtype: str
+    Online docs: api.thetvdb.com/swagger#!/Authentication/post_login=
     """
     url = 'https://api.thetvdb.com/login'
     body = {'apikey': api_key}
@@ -299,11 +240,7 @@ def tvdb_login(api_key):
 def tvdb_refresh_token(token):
     """ Refreshes JWT token
 
-    Online docs: api.thetvdb.com/swagger#!/Authentication/get_refresh_token
-
-    :param str token: Token to refresh
-    :return: JWT token required for all other endpoints; expires after 24 hours
-    :rtype: str
+    Online docs: api.thetvdb.com/swagger#!/Authentication/get_refresh_token=
     """
     url = 'https://api.thetvdb.com/refresh_token'
     headers = {'Authorization': 'Bearer %s' % token}
@@ -318,14 +255,7 @@ def tvdb_refresh_token(token):
 def tvdb_episodes_id(token, id_tvdb, lang='en', cache=True):
     """ Returns the full information for a given episode id
 
-    Online docs: https://api.thetvdb.com/swagger#!/Episodes
-
-    :param str token: TVDb JWT token; generate using login/ reload endpoints
-    :param str or int id_tvdb: TVDb episode id
-    :param str lang: TVDb language abbreviation code; defaults to 'en' for
-        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
-    :return: Returned json data
-    :rtype: dict
+    Online docs: https://api.thetvdb.com/swagger#!/Episodes=
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -355,14 +285,7 @@ def tvdb_series_id(token, id_tvdb, lang='en', cache=True):
     """ Returns a series records that contains all information known about a
     particular series id
 
-    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id
-
-    :param str token: TVDb JWT token; generate using login/ reload endpoints
-    :param str or int id_tvdb: TVDb series id
-    :param str lang: TVDb language abbreviation code; defaults to 'en' for
-        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
-    :return: Returned json data
-    :rtype: dict
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id=
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -390,15 +313,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang='en', cache=True):
     """ All episodes for a given series
 
     Note: Paginated with 100 results per page
-    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes
-
-    :param str token: TVDb JWT token; generate using login/ reload endpoints
-    :param str or int id_tvdb: TVDb series id
-    :param int page: Page selection; default 1
-    :param str lang: TVDb language abbreviation code; defaults to 'en' for
-        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
-    :return: Returned json data
-    :rtype: dict
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes=
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -431,17 +346,7 @@ def tvdb_series_episodes_query(token, id_tvdb, episode=None, season=None,
 
     Note: Paginated with 100 results per page; omitted imdbId, when would you
     ever need to query against both tvdb and imdb series ids??
-    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes_query
-
-    :param str token: TVDb JWT token; generate using login/ reload endpoints
-    :param str or int id_tvdb: TVDb series id
-    :param optional str or int episode: Series' episode number
-    :param optional str or int season: Series' season number
-    :param int page: Page selection; default 1
-    :param str lang: TVDb language abbreviation code; defaults to 'en' for
-        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
-    :return: Returned json data
-    :rtype: dict
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes_query=
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -477,16 +382,7 @@ def tvdb_search_series(token, series=None, id_imdb=None, id_zap2it=None,
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
-    Note: results a maximum of 100 entries per page, no option for pagination
-
-    :param str token: TVDb JWT token; generate using login/ reload endpoints
-    :param optional str series: Name of the series
-    :param optional str id_imdb: IMDb series id code
-    :param optional str id_zap2it: Zap2It series id code
-    :param str lang: TVDb language abbreviation code; defaults to 'en' for
-        english; see https://api.thetvdb.com/swagger#!/Languages/get_languages
-    :return: Returned json data
-    :rtype: dict
+    Note: results a maximum of 100 entries per page, no option for pagination=
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
