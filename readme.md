@@ -16,6 +16,11 @@ mapi (**M**etadata **API**) is a python library which provides a high-level inte
 
 `$ python -m unittest discover`
 
+**Notes:**
+- Run `pip install -r requirements-dev.txt` first to install testing dependencies
+- Testing requires internet access
+- Testing requires `API_KEY_TMDB` and `TVDB_API_KEY` to be defined as environment variables
+
 
 # Examples
 
