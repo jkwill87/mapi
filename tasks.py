@@ -16,8 +16,15 @@ def help():
 
 
 def clean():
-    sh(r'find . | grep -E "(__pycache__|\.pyc|\.pyo$|\.mapi\.sqlite)" | xargs rm -rfv')
-
+    garbage = [
+        '__pycache__',
+        '.pyc',
+        '.sqlite',
+        '*egg-info',
+        'build',
+        'dist'
+    ]
+    sh('rm -rvf %s' % ' '.join(garbage))
 
 def _bump(increment):
     new_version = VERSION + increment
