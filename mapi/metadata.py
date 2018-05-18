@@ -96,10 +96,9 @@ class Metadata(_AbstractClass, MutableMapping):
     def _str_title_case(s):
         assert isinstance(s, str)
         lowercase_exceptions = {
-            'a', 'an', 'and', 'as', 'at', 'au', 'but', 'by', 'ces', 'de',
-            'des', 'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on',
-            'or', 'the', 'to', 'un', 'une', 'with', 'via',
-            'h264', 'h265'
+            'a', 'an', 'and', 'as', 'at', 'but', 'by', 'ces', 'de', 'des',
+            'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on', 'or',
+            'the', 'to', 'un', 'une', 'with', 'via', 'h264', 'h265'
         }
         uppercase_exceptions = {
             'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
