@@ -12,7 +12,11 @@ import requests_cache
 from appdirs import user_cache_dir
 
 from mapi import log
-from mapi.exceptions import *
+from mapi.exceptions import (
+    MapiNetworkException,
+    MapiNotFoundException,
+    MapiProviderException
+)
 
 TVDB_LANGUAGE_CODES = [
     'cs', 'da', 'de', 'el', 'en', 'es', 'fi', 'fr', 'he', 'hr', 'hu', 'it',

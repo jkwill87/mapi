@@ -8,7 +8,11 @@ from os import environ
 from re import match
 
 from mapi import endpoints, log
-from mapi.exceptions import *
+from mapi.exceptions import (
+    MapiException,
+    MapiNotFoundException,
+    MapiProviderException
+)
 from mapi.metadata import MetadataMovie, MetadataTelevision
 
 # Compatibility for Python 2.7/3+
@@ -16,7 +20,6 @@ _AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 API_TELEVISION = {'tvdb'}
 API_MOVIE = {
-    # 'imdb',  # TODO: Revisit after IMDb endpoints have been reimplemented
     'tmdb'
 }
 API_ALL = API_TELEVISION | API_MOVIE
