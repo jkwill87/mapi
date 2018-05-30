@@ -1,12 +1,13 @@
-*.monopic
-*.pyc
-*.sqlite
+.coverage
 .DS_Store
 .eggs/
 .idea
 .vscode
-MANIFEST
+*.monopic
+*.pyc
+*.sqlite
 build
 dist
+MANIFEST
 mapi.egg-info
 playground.py
