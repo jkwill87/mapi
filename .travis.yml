@@ -8,7 +8,7 @@ dist: trusty
 os: linux
 script: coverage run --source=mapi -m unittest discover -v
 after_success:
-  - coveralls
+  - codecov
 env:
   global:
   - secure: JcD/1ag/fTNkygaavf5jcRkQiJDgIyrtL4F00sWYCpEyBN6i1p1++0oRtXvS/EHVFNqPB0VDOeiX0LEp3GJV1tNPizyqQOrnOSl6+QUfCiy8Pz2tP5olq+6EuQqp68oNqokwlZraDCk8QxJhnitWsukhZhuf7dQBfluoTj/EEAN/uNrG7hjwTUvQnKOlSkF5ry01gCigffFwWZ9ZiTUauvV+6gmoG7xeDiwvsIlf5S0XQmtJWTWAVYdUSqt8X4qfwiamQuKNHKNPQcqMqRGhKgFRp+uCpCcU5jJqrdNmq2/w7ebbWYAqZ0MM6zarN/J+4/K4OglUm8PniFbSiNmCA1G1wQRlN7Kn61RD1T+Ruj6TIOLndKy8W+zK/yFUIejTPBaolVQ+YMv11WdqOD8rWAFGXNLk30+miV78dMlRClqF4sEO4Lz0eX1tzTri6IUTrTUtpCNvshWVGGRo3Mxlxp7ZOAxgka7I5xZ4RPiyUCaKZM8xuIurg6egfrbLKlmRTIkUx6dvZNPDiuY2ENyl/yyAbrdGpPZiNtmAyAmXmhGh8cHiGqJ2QYeKtfvgKWYSiXClKGlJm/fQcmLYfo/fcruQejOXc4M3Nt/YsGxFQT8Tgw0APAwJqlMtniwK4dRVclk0rzNSVqCl1bTKViDZ5SOkrO7tTeh5TrerN8P3esc=
