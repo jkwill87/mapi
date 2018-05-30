@@ -1,7 +1,9 @@
 [![licence](https://img.shields.io/github/license/jkwill87/mapi.svg)](https://en.wikipedia.org/wiki/MIT_License)
 [![pypi](https://img.shields.io/pypi/v/mapi.svg)](https://pypi.python.org/pypi/mapi)
 [![travis\_ci](https://img.shields.io/travis/jkwill87/mapi/develop.svg)](https://travis-ci.org/jkwill87/mapi)
+[![coverage](https://coveralls.io/repos/github/jkwill87/mapi/badge.svg?branch=develop)](https://coveralls.io/github/jkwill87/mapi?branch=develop)
 ![api](https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg)
+
 # mapi
 
 mapi (**M**etadata **API**) is a python library which provides a high-level interface for media database providers, allowing users to efficiently search for television and movie metadata using a simple interface.
