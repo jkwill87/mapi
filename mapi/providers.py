@@ -273,11 +273,12 @@ class TVDb(Provider):
         series_data = endpoints.tvdb_search_series(
             self.token, series, cache=self.cache
         )
-        entries = [entry['id'] for entry in series_data['data'][:5]]
 
-        for id_tvdb in entries:
+        for series_id in [entry['id'] for entry in series_data['data'][:5]]:
             try:
-                return self._search_id_tvdb(id_tvdb, season, episode)
+                for episode in self._search_id_tvdb(series_id, season, episode):
+                    found = True
+                    yield episode
             except MapiNotFoundException:
                 continue  # may not have requested episode or may be banned
         if not found:
