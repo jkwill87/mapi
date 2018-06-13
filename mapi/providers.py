@@ -276,9 +276,9 @@ class TVDb(Provider):
 
         for series_id in [entry['id'] for entry in series_data['data'][:5]]:
             try:
-                for episode in self._search_id_tvdb(series_id, season, episode):
+                for data in self._search_id_tvdb(series_id, season, episode):
                     found = True
-                    yield episode
+                    yield data
             except MapiNotFoundException:
                 continue  # may not have requested episode or may be banned
         if not found:

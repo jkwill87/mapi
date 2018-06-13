@@ -246,6 +246,12 @@ class TestTvdb(TestCase):
                         break
                 self.assertTrue(found)
 
+    def test_search_series_deep(self):
+        results = self.client.search(
+            series='House Rules (au)', season=6, episode=6
+        )
+        self.assertTrue(any(r['id_tvdb'] == '269795' for r in results))
+
     def test_search_title_season(self):
         for meta in television_meta:
             with self.subTest(series=meta['series']):
