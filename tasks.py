@@ -46,11 +46,12 @@ def _bump(increment):
         version_txt.write('VERSION = %s\n' % new_version)
     sh('git reset HEAD -- .')  # unstage all changes
     sh('git add %s/__version__.py' % PROJECT)
-    sh('git commit -am "Version bump"')
+    sh('git commit -m "Version bump"')
     sh('git tag %s' % new_version)
+    sh('git push')
     sh('git push --tags')
     sh('./setup.py sdist bdist_wheel')
-    sh('python -m twine upload dist/%s-%s*.whl' % (PROJECT, new_version))
+    sh('python -m twine upload dist/%s-%s*' % (PROJECT, new_version))
     clean()
 
 
