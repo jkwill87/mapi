@@ -227,10 +227,10 @@ class TestRequestJson(TestCase):
     @ignore_warnings
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
     @patch('mapi.endpoints.SESSION.cache.clear')
-    def test_rety(self, mock_clear, mock_request):
+    def test_retry(self, mock_clear, mock_request):
         mock_request.side_effect = Exception
         _request_json(url='http://google.com')
-        mock_clear.assert_called_once()
+        mock_clear.assert_called_once_with()
 
 
 class TestCleanDict(TestCase):
