@@ -40,7 +40,7 @@ def _bump(increment):
     if not response.lower().strip().startswith('y'):
         print('aborting')
         return
-    sh('pip install -q -r requirements-dev.txt')
+    sh('pip install -q -U -r requirements-dev.txt')
 
     with open(VERSION_PATH, 'w') as version_txt:
         version_txt.write('VERSION = %s\n' % new_version)
