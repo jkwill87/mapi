@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from unittest import TestLoader
-
 from setuptools import setup
+
+from mapi.__version__ import VERSION
 
 with open('readme.md', 'r') as fp:
     LONG_DESCRIPTION = fp.read()
@@ -11,15 +11,13 @@ with open('readme.md', 'r') as fp:
 with open('requirements.txt', 'r') as fp:
     REQUIREMENTS = fp.read().splitlines()
 
-with open('version.txt', 'r') as fp:
-    VERSION = float(fp.read())
-
 setup(
     author='Jessy Williams',
     author_email='jessy@jessywilliams.com',
     description=(
-        'An API for media database APIs which allows you to search for '
-        'metadata using a simple, common interface'
+        'Python library which provides a high-level interface for media '
+        'database providers, allowing users to search for television and movie '
+        'metadata using a simple interface'
     ),
     include_package_data=True,
     install_requires=REQUIREMENTS,
