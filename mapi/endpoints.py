@@ -5,9 +5,7 @@
 import random
 from re import match
 from sys import version_info
-from time import sleep
 
-import requests
 import requests_cache
 from appdirs import user_cache_dir
 
@@ -77,14 +75,15 @@ def _get_user_agent(platform=None):
 
 
 def _request_json(url, parameters=None, body=None, headers=None, cache=True,
-        agent=None):
+        agent=None, reattempt=True):
     """ Queries a url for json data
 
     Note: Requests are cached using requests_cached for a week, this is done
     transparently by using the package's monkey patching
     """
     assert url
-    status = 400
+    content = None
+    status = 500
     log.info("url: %s" % url)
 
     if isinstance(headers, dict):
@@ -115,18 +114,21 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
         status = response.status_code
         content = response.json() if status // 100 == 2 else None
         cache = getattr(response, 'from_cache', False)
-    except (requests.RequestException, AttributeError, ValueError) as e:
+    except Exception as e:
         log.debug(e, exc_info=True)
-        content = None
+        if reattempt:
+            SESSION.cache.clear()
+            _request_json(url, parameters, body, headers, cache, agent, False)
+    else:
+        log.info("method: %s" % method)
+        log.info("headers: %r" % headers)
+        log.info("parameters: %r" % parameters)
+        log.info("cache: %r" % cache)
+        log.info("status: %d" % status)
+        log.debug("content: %s" % content)
     finally:
         SESSION._is_cache_disabled = initial_cache_state
 
-    log.info("method: %s" % method)
-    log.info("headers: %r" % headers)
-    log.info("parameters: %r" % parameters)
-    log.info("cache: %r" % cache)
-    log.info("status: %d" % status)
-    log.debug("content: %s" % content)
     return status, content
 
 

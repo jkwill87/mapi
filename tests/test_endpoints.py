@@ -181,7 +181,7 @@ class TestRequestJson(TestCase):
 
     def test_get_invalid_url(self):
         status, content = _request_json('mapi rulez')
-        self.assertEqual(400, status)
+        self.assertEqual(500, status)
         self.assertIsNone(content)
 
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
@@ -223,6 +223,13 @@ class TestRequestJson(TestCase):
         self.assertEqual('POST', kwargs['method'])
         self.assertIn('apple', kwargs['headers'])
         self.assertNotIn('orange', kwargs['headers'])
+
+    @patch('mapi.endpoints.requests_cache.CachedSession.request')
+    @patch('mapi.endpoints.SESSION.cache.clear')
+    def test_rety(self, mock_clear, mock_request):
+        mock_request.side_effect = Exception
+        _request_json(url='http://google.com')
+        mock_clear.assert_called_once()
 
 
 class TestCleanDict(TestCase):
