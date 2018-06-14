@@ -165,6 +165,7 @@ class TestTvdb(TestCase):
     def setUp(self):
         self.client = TVDb(api_key=API_KEY_TVDB)
 
+    @ignore_warnings
     def test_search_id_tvdb(self):
         for meta in television_meta:
             with self.subTest(id_tvdb=meta['id_tvdb'], series=meta['series']):

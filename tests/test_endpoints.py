@@ -224,6 +224,7 @@ class TestRequestJson(TestCase):
         self.assertIn('apple', kwargs['headers'])
         self.assertNotIn('orange', kwargs['headers'])
 
+    @ignore_warnings
     @patch('mapi.endpoints.requests_cache.CachedSession.request')
     @patch('mapi.endpoints.SESSION.cache.clear')
     def test_rety(self, mock_clear, mock_request):
