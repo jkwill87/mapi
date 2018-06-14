@@ -44,6 +44,8 @@ def _bump(increment):
 
     with open(VERSION_PATH, 'w') as version_txt:
         version_txt.write('VERSION = %s\n' % new_version)
+    sh('git reset HEAD -- .')  # unstage all changes
+    sh('git add %s/__version__.py' % PROJECT)
     sh('git commit -am "Version bump"')
     sh('git tag %s' % new_version)
     sh('git push --tags')
@@ -85,5 +87,3 @@ task_name = argv[1] if len(argv) == 2 else None
 
 # Run task (defaulting to help in undefined)
 TASKS.get(task_name, help)()
-
-bump_minor()
