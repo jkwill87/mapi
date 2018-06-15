@@ -10,6 +10,7 @@ from sys import argv
 PROJECT = getcwd().split(sep)[-1].lower()
 VERSION = 0
 VERSION_PATH = "%s/%s" % (PROJECT, '__version__.py')
+
 try:
     # Load VERSION from __version__.py
     exec(open(VERSION_PATH).read(), globals())
@@ -72,16 +73,22 @@ def uninstall():
 
 
 def test():
-    sh('python -m unittest discover -v')
+    sh('coverage run --source=mnamer -m unittest discover -v')
 
 
 def version():
-    print('%s version %s ' % (PROJECT, VERSION))
+    print('%s %s' % (PROJECT, VERSION))
+    sh('python --version')
 
 
-# Determine available tasks (e.g. any defined function not prefixed by an underscore)
+# Determine available tasks (e.g. defined function not prefixed by an underscore)
 def _fx(): pass
-TASKS = {f.__name__:f for f in globals().values() if type(f) == type(_fx) and f.__name__[0] != '_'}
+
+
+TASKS = {
+    f.__name__: f for f in globals().values()
+    if type(f) == type(_fx) and f.__name__[0] != '_'
+}
 
 # Determine arguments
 task_name = argv[1] if len(argv) == 2 else None
