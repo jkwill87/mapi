@@ -11,9 +11,11 @@ if IS_PY2:
     from mock import patch
     reload(sys)
     sys.setdefaultencoding('utf-8')
+    sys.path.insert(0, '..')
 else:
     from unittest import TestCase, skip
     from unittest.mock import patch
+
 
 def ignore_warnings(test_func):
     def do_test(self, *args, **kwargs):
@@ -22,5 +24,6 @@ def ignore_warnings(test_func):
                 simplefilter("ignore", ResourceWarning)
             test_func(self, *args, **kwargs)
     return do_test
+
 
 getLogger('mapi').disabled = True
