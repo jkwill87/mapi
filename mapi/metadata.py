@@ -64,6 +64,9 @@ class Metadata(_AbstractClass, MutableMapping):
                 % (key, self.__class__.__name__)
             )
 
+        elif key == 'extension':
+            value = value if value.startswith('.') else '.' + value
+
         elif key == 'media' and self['media'] and self['media'] != value:
             raise ValueError('media cannot be changed')
 

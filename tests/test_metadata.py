@@ -7,7 +7,7 @@ from . import *
 from mapi.metadata import MetadataMovie, MetadataTelevision
 
 
-class TestMetadataMovieFormat(TestCase):
+class TestMetadataMovie(TestCase):
     def setUp(self):
         self.metadata = MetadataMovie(
             media='movie',
@@ -36,8 +36,16 @@ class TestMetadataMovieFormat(TestCase):
         with self.assertRaises(KeyError):
             self.metadata['yolo'] = 'hi'
 
+    def test_set_extension__dot(self):
+        self.metadata['extension'] = '.mkv'
+        self.assertEqual(self.metadata['extension'], '.mkv')
 
-class TestMetadataTelevisionFormat(TestCase):
+    def test_set_extension__no_dot(self):
+        self.metadata['extension'] = 'mkv'
+        self.assertEqual(self.metadata['extension'], '.mkv')
+
+
+class TestMetadataTelevision(TestCase):
     def setUp(self):
         self.metadata = MetadataTelevision(
             media='television',
