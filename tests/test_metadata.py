@@ -3,8 +3,8 @@
 """ Unit tests for metadata.py
 """
 
-from . import *
 from mapi.metadata import MetadataMovie, MetadataTelevision
+from . import *
 
 
 class TestMetadataMovie(TestCase):

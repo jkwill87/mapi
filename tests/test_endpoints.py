@@ -5,13 +5,13 @@
 
 from json import loads
 from os import environ
+
 from requests import Session
 
-from . import *
 from mapi.endpoints import *
 from mapi.endpoints import _clean_dict, _d2l, _get_user_agent, _request_json
 from mapi.exceptions import MapiNotFoundException, MapiProviderException
-
+from . import *
 
 JUNK_IMDB_ID = 'tt1234567890'
 JUNK_TEXT = 'asdf#$@#g9765sdfg54hggaw'

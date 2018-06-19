@@ -2,11 +2,9 @@
 
 """ Unit tests for providers.py
 """
-from os import environ
 
-from . import *
 from mapi.providers import *
-
+from . import *
 
 movie_meta = [{
     'media': 'movie',

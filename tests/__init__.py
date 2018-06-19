@@ -11,7 +11,6 @@ if IS_PY2:
     from mock import patch
     reload(sys)
     sys.setdefaultencoding('utf-8')
-    sys.path.insert(0, '..')
 else:
     from unittest import TestCase, skip
     from unittest.mock import patch
