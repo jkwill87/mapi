@@ -110,6 +110,7 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
             json=body,
             headers=headers,
             method=method,
+            timeout=1
         )
         status = response.status_code
         content = response.json() if status // 100 == 2 else None
