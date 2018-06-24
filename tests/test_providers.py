@@ -131,6 +131,7 @@ class TestTmdb(TestCase):
     def setUp(self):
         self.client = TMDb(api_key=API_KEY_TMDB)
 
+    @ignore_warnings
     def test_search_id_imdb(self):
         for meta in movie_meta:
             with self.subTest(id_imdb=meta['id_imdb']):
