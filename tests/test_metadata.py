@@ -15,24 +15,29 @@ class TestMetadataMovie(TestCase):
             date='2006-01-01'
         )
 
-    def test_format_default(self):
+    def test_format__default(self):
         s = self.metadata.format()
         self.assertEqual('Saw III (2006)', s)
 
-    def test_format_override(self):
+    def test_format__override(self):
         s = self.metadata.format('TITLE:<$title>')
         self.assertEqual('TITLE:Saw III', s)
 
-    def test_format_missing(self):
+    def test_format__missing(self):
         self.metadata['date'] = None
         s = self.metadata.format()
         self.assertEqual('Saw III', s)
 
-    def test_invalid_media(self):
+    def test_format__apostrophes(self):
+        self.metadata['title'] = "a bug's life"
+        s = self.metadata.format('<$title>')
+        self.assertEquals("A Bug's Life", s)
+
+    def test_invalid__media(self):
         with self.assertRaises(ValueError):
             self.metadata['media'] = 'yolo'
 
-    def test_invalid_field(self):
+    def test_invalid__field(self):
         with self.assertRaises(KeyError):
             self.metadata['yolo'] = 'hi'
 
