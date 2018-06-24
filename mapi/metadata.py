@@ -6,6 +6,7 @@
 from collections import MutableMapping
 from datetime import datetime as dt
 from re import sub, IGNORECASE
+from string import capwords
 
 DEFAULT_FIELDS = {
     'date',
@@ -102,7 +103,7 @@ class Metadata(MutableMapping):
         padding_chars = '["!$\'(),-./:;<>@[]_`{} ]'
         string_lower = s.lower()
         string_length = len(s)
-        s = s.title()
+        s = capwords(s)
 
         # process lowercase transformations
         for exception in lowercase_exceptions:
