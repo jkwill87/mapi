@@ -8,6 +8,7 @@ from sys import version_info
 
 import requests_cache
 from appdirs import user_cache_dir
+from requests import RequestException
 
 from mapi import log, ustr
 from mapi.exceptions import (
@@ -75,7 +76,7 @@ def _get_user_agent(platform=None):
 
 
 def _request_json(url, parameters=None, body=None, headers=None, cache=True,
-        agent=None, reattempt=True):
+                  agent=None, reattempt=5):
     """ Queries a url for json data
 
     Note: Requests are cached using requests_cached for a week, this is done
@@ -115,11 +116,18 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
         status = response.status_code
         content = response.json() if status // 100 == 2 else None
         cache = getattr(response, 'from_cache', False)
-    except Exception as e:
+    except RequestException as e:
         log.debug(e, exc_info=True)
-        if reattempt:
+        return _request_json(
+            url, parameters, body, headers, cache, agent, reattempt - 1
+        )
+    except Exception as e:
+        log.error(e, exc_info=True)
+        if reattempt > 0:
             SESSION.cache.clear()
-            _request_json(url, parameters, body, headers, cache, agent, False)
+            return _request_json(
+                url, parameters, body, headers, False, agent, 0
+            )
     else:
         log.info("method: %s" % method)
         log.info("headers: %r" % headers)
