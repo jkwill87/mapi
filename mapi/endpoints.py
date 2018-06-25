@@ -9,7 +9,7 @@ from sys import version_info
 import requests_cache
 from appdirs import user_cache_dir
 
-from mapi import log
+from mapi import log, ustr
 from mapi.exceptions import (
     MapiNetworkException,
     MapiNotFoundException,
@@ -49,7 +49,7 @@ def _clean_dict(target_dict, whitelist=None):
     """
     assert isinstance(target_dict, dict)
     return {
-        str(k).strip(): str(v).strip()
+        ustr(k).strip(): ustr(v).strip()
         for k, v in target_dict.items()
         if v not in (None, Ellipsis, [], (), '')
         and (not whitelist or k in whitelist)
@@ -65,7 +65,7 @@ def _d2l(d):
 def _get_user_agent(platform=None):
     """ Convenience function that looks up a user agent string, random if N/A
     """
-    if isinstance(platform, str):
+    if isinstance(platform, ustr):
         platform = platform.upper()
     return {
         'chrome': AGENT_CHROME,
@@ -96,7 +96,7 @@ def _request_json(url, parameters=None, body=None, headers=None, cache=True,
         method = 'POST'
         headers['content-type'] = 'application/json'
         headers['user-agent'] = _get_user_agent(agent)
-        headers['content-length'] = str(len(body))
+        headers['content-length'] = ustr(len(body))
     else:
         method = 'GET'
         headers['user-agent'] = _get_user_agent(agent)

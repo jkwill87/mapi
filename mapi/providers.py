@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from os import environ
 from re import match
 
-from mapi import endpoints, log
+from mapi import endpoints, log, ustr
 from mapi.exceptions import (
     MapiException,
     MapiNotFoundException,
@@ -76,7 +76,7 @@ class Provider(_AbstractClass):
         """
         regex = r'^((?:19|20)\d{2})?(\s*-\s*)?((?:19|20)\d{2})?$'
         try:
-            start, dash, end = match(regex, str(s)).groups()
+            start, dash, end = match(regex, ustr(s)).groups()
             start = start or 1900
             end = end or 2099
         except AttributeError:
@@ -145,7 +145,7 @@ class TMDb(Provider):
             date=response['release_date'],
             synopsis=response['overview'],
             media='movie',
-            id_tmdb=str(id_tmdb),
+            id_tmdb=ustr(id_tmdb),
         )
 
     def _search_title(self, title, year):
@@ -166,7 +166,7 @@ class TMDb(Provider):
                         date=entry['release_date'],
                         synopsis=entry['overview'],
                         media='movie',
-                        id_tmdb=str(entry['id'])
+                        id_tmdb=ustr(entry['id'])
                     )
                 except ValueError:
                     continue
@@ -247,14 +247,14 @@ class TVDb(Provider):
                 try:
                     yield MetadataTelevision(
                         series=series_data['data']['seriesName'],
-                        season=str(entry['airedSeason']),
-                        episode=str(entry['airedEpisodeNumber']),
+                        season=ustr(entry['airedSeason']),
+                        episode=ustr(entry['airedEpisodeNumber']),
                         date=entry['firstAired'],
                         title=entry['episodeName'].split(';', 1)[0],
-                        synopsis=str(entry['overview'])
+                        synopsis=(entry['overview'] or '')
                             .replace('\r\n', '').replace('  ', '').strip(),
                         media='television',
-                        id_tvdb=str(id_tvdb),
+                        id_tvdb=ustr(id_tvdb),
                     )
                     found = True
                 except (AttributeError, ValueError):
@@ -310,14 +310,14 @@ class TVDb(Provider):
                     try:
                         yield MetadataTelevision(
                             series=series_name,
-                            season=str(entry['airedSeason']),
-                            episode=str(entry['airedEpisodeNumber']),
+                            season=ustr(entry['airedSeason']),
+                            episode=ustr(entry['airedEpisodeNumber']),
                             date=entry['firstAired'],
                             title=entry['episodeName'].split(';', 1)[0],
-                            synopsis=str(entry['overview']).replace('\r\n', '')
+                            synopsis=ustr(entry['overview']).replace('\r\n', '')
                                 .replace('  ', '').strip(),
                             media='television',
-                            id_tvdb=str(entry['airedSeasonID']),
+                            id_tvdb=ustr(entry['airedSeasonID']),
                         )
                         found = True
                     except (AttributeError, ValueError):

@@ -8,6 +8,8 @@ from datetime import datetime as dt
 from re import sub, IGNORECASE
 from string import capwords
 
+from mapi import ustr
+
 DEFAULT_FIELDS = {
     'date',
     'media',
@@ -79,14 +81,14 @@ class Metadata(MutableMapping):
             value = sorted(value)[0]
 
         # If its gotten this far, looks good
-        self._dict[key] = str(value) if value else None
+        self._dict[key] = ustr(value) if value else None
 
     def __str__(self):
         return self.format()
 
     @staticmethod
     def _str_title_case(s):
-        assert isinstance(s, str)
+        assert isinstance(s, ustr)
         lowercase_exceptions = {
             'a', 'an', 'and', 'as', 'at', 'but', 'by', 'ces', 'de', 'des',
             'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on', 'or',
@@ -169,7 +171,7 @@ class Metadata(MutableMapping):
 
 
 class MetadataTelevision(Metadata):
-    """ Televesion Metadata class
+    """ Television Metadata class
     """
 
     fields = Metadata.fields | {
