@@ -3,25 +3,16 @@
 """ Metadata data classes
 """
 
-from collections import MutableMapping
+from collections.abc import MutableMapping
 from datetime import datetime as dt
 from re import sub, IGNORECASE
 from string import capwords
 
 from mapi import ustr
 
-DEFAULT_FIELDS = {
-    'date',
-    'media',
-    'synopsis',
-    'title',
-}
+DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
 
-EXTRA_FIELDS = {
-    'extension',
-    'group',
-    'quality'
-}
+EXTRA_FIELDS = {"extension", "group", "quality"}
 
 
 class Metadata(MutableMapping):
@@ -33,18 +24,18 @@ class Metadata(MutableMapping):
     def __init__(self, **params):
         self._dict = {k: None for k in DEFAULT_FIELDS}
         self.update(params)
-        self.template = params.get('template', '<$title>')
+        self.template = params.get("template", "<$title>")
 
     def __delitem__(self, key):
-        raise NotImplemented('values can be modified but keys are static')
+        raise NotImplementedError("values can be modified but keys are static")
 
     def __getitem__(self, key):
         # Case insensitive keys
         key = key.lower()
 
         # Special case for year
-        if key == 'year':
-            date = self._dict.__getitem__('date')
+        if key == "year":
+            date = self._dict.__getitem__("date")
             return date[:4] if date else None
         else:
             return self._dict.__getitem__(key)
@@ -63,21 +54,20 @@ class Metadata(MutableMapping):
         # Validate key
         if key not in self.fields:
             raise KeyError(
-                "'%s' cannot be set for %s"
-                % (key, self.__class__.__name__)
+                "'%s' cannot be set for %s" % (key, self.__class__.__name__)
             )
 
-        elif key == 'extension':
-            value = value if not value or value.startswith('.') else '.' + value
+        elif key == "extension":
+            value = value if not value or value.startswith(".") else "." + value
 
-        elif key == 'media' and self['media'] and self['media'] != value:
-            raise ValueError('media cannot be changed')
+        elif key == "media" and self["media"] and self["media"] != value:
+            raise ValueError("media cannot be changed")
 
-        elif key == 'date' and value is not None:
-            dt.strptime(value, '%Y-%m-%d')
+        elif key == "date" and value is not None:
+            dt.strptime(value, "%Y-%m-%d")
 
         # Multi-episode hack; treat as if simply the first episode in list
-        elif key == 'episode' and isinstance(value, (list, tuple)):
+        elif key == "episode" and isinstance(value, (list, tuple)):
             value = sorted(value)[0]
 
         # If its gotten this far, looks good
@@ -90,19 +80,89 @@ class Metadata(MutableMapping):
     def _str_title_case(s):
         assert isinstance(s, ustr)
         lowercase_exceptions = {
-            'a', 'an', 'and', 'as', 'at', 'but', 'by', 'ces', 'de', 'des',
-            'du', 'for', 'from', 'in', 'la', 'le', 'nor', 'of', 'on', 'or',
-            'the', 'to', 'un', 'une', 'with', 'via', 'h264', 'h265'
+            "a",
+            "an",
+            "and",
+            "as",
+            "at",
+            "but",
+            "by",
+            "ces",
+            "de",
+            "des",
+            "du",
+            "for",
+            "from",
+            "in",
+            "la",
+            "le",
+            "nor",
+            "of",
+            "on",
+            "or",
+            "the",
+            "to",
+            "un",
+            "une",
+            "with",
+            "via",
+            "h264",
+            "h265",
         }
         uppercase_exceptions = {
-            'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x',
-            '2d', '3d', 'au', 'aka', 'atm', 'bbc', 'bff', 'cia', 'csi', 'dc',
-            'doa', 'espn', 'fbi', 'ira', 'jfk', 'la', 'lol', 'mlb', 'mlk',
-            'mtv', 'nba', 'nfl', 'nhl', 'nsfw', 'nyc', 'omg', 'pga', 'rsvp',
-            'tnt', 'tv', 'ufc', 'ufo', 'uk', 'usa', 'vip', 'wtf', 'wwe', 'wwi',
-            'wwii', 'xxx', 'yolo'
+            "i",
+            "ii",
+            "iii",
+            "iv",
+            "v",
+            "vi",
+            "vii",
+            "viii",
+            "ix",
+            "x",
+            "2d",
+            "3d",
+            "au",
+            "aka",
+            "atm",
+            "bbc",
+            "bff",
+            "cia",
+            "csi",
+            "dc",
+            "doa",
+            "espn",
+            "fbi",
+            "ira",
+            "jfk",
+            "la",
+            "lol",
+            "mlb",
+            "mlk",
+            "mtv",
+            "nba",
+            "nfl",
+            "nhl",
+            "nsfw",
+            "nyc",
+            "omg",
+            "pga",
+            "rsvp",
+            "tnt",
+            "tv",
+            "ufc",
+            "ufo",
+            "uk",
+            "usa",
+            "vip",
+            "wtf",
+            "wwe",
+            "wwi",
+            "wwii",
+            "xxx",
+            "yolo",
         }
-        padding_chars = '["!$\'(),-./:;<>@[]_`{} ]'
+        padding_chars = "[\"!$'(),-./:;<>@[]_`{} ]"
         string_lower = s.lower()
         string_length = len(s)
         s = capwords(s)
@@ -110,9 +170,11 @@ class Metadata(MutableMapping):
         # process lowercase transformations
         for exception in lowercase_exceptions:
             pos = string_lower.find(exception)
-            if pos == -1: continue
+            if pos == -1:
+                continue
             starts = pos == 0
-            if starts: continue
+            if starts:
+                continue
             prev_char = string_lower[pos - 1]
             left_partitioned = prev_char in padding_chars
             word_length = len(exception)
@@ -120,12 +182,13 @@ class Metadata(MutableMapping):
             next_char = None if ends else string_lower[pos + word_length]
             right_partitioned = ends or next_char in padding_chars
             if left_partitioned and right_partitioned:
-                s = s[:pos] + exception.lower() + s[pos + word_length:]
+                s = s[:pos] + exception.lower() + s[pos + word_length :]
 
         # process uppercase transformations
         for exception in uppercase_exceptions:
             pos = string_lower.find(exception)
-            if pos == -1: continue
+            if pos == -1:
+                continue
             starts = pos == 0
             prev_char = None if starts else string_lower[pos - 1]
             left_partitioned = starts or prev_char in padding_chars
@@ -134,17 +197,17 @@ class Metadata(MutableMapping):
             next_char = None if ends else string_lower[pos + word_length]
             right_partitioned = ends or next_char in padding_chars
             if left_partitioned and right_partitioned:
-                s = s[:pos] + exception.upper() + s[pos + word_length:]
+                s = s[:pos] + exception.upper() + s[pos + word_length :]
         return s
 
     @staticmethod
     def _str_fix_whitespace(s):
         # Concatenate dashes
-        s = sub(r'-\s*-', '-', s)
+        s = sub(r"-\s*-", "-", s)
         # Strip leading/ trailing dashes
-        s = sub(r'-\s*$|^\s*-', '', s)
+        s = sub(r"-\s*$|^\s*-", "", s)
         # Concatenate whitespace
-        s = sub(r'\s+', ' ', s)
+        s = sub(r"\s+", " ", s)
         # Strip leading/ trailing whitespace
         s = s.strip()
         return s
@@ -156,15 +219,15 @@ class Metadata(MutableMapping):
             assert value
             if key not in EXTRA_FIELDS:
                 value = self._str_title_case(value)
-            return '%s%s%s' % (prefix, value, suffix)
+            return "%s%s%s" % (prefix, value, suffix)
         except (IndexError, KeyError, AssertionError):
             # log.warning("couldn't sub for %s" % mobj.group())
-            return ''
+            return ""
 
     def format(self, template=None):
         """ Substitutes variables within template with that of fields'
         """
-        pattern = r'(?:<([^<]*?)\$(\w+)([^>]*?)>)'
+        pattern = r"(?:<([^<]*?)\$(\w+)([^>]*?)>)"
         s = sub(pattern, self._format_repl, template or self.template)
         s = self._str_fix_whitespace(s)
         return s
@@ -175,25 +238,25 @@ class MetadataTelevision(Metadata):
     """
 
     fields = Metadata.fields | {
-        'episode',
-        'id_imdb',
-        'id_tvdb',
-        'season',
-        'series',
+        "episode",
+        "id_imdb",
+        "id_tvdb",
+        "season",
+        "series",
     }
 
     def __init__(self, **params):
         super(MetadataTelevision, self).__init__(**params)
-        self.template = '<$series - >< - $season><x$episode - >< - $title>'
-        self._dict['media'] = 'television'
+        self.template = "<$series - >< - $season><x$episode - >< - $title>"
+        self._dict["media"] = "television"
 
     @staticmethod
     def _str_pad_episode(s):
         # 01x01 pattern
-        s = sub(r'(?<=\s)(\d)(?=x\d)', r'0\1', s, IGNORECASE)
-        s = sub(r'(?<=\dx)(\d)(?=\s|$)', r'0\1', s, IGNORECASE)
+        s = sub(r"(?<=\s)(\d)(?=x\d)", r"0\1", s, IGNORECASE)
+        s = sub(r"(?<=\dx)(\d)(?=\s|$)", r"0\1", s, IGNORECASE)
         # S01E01 pattern
-        s = sub(r'([S|E])(\d)(?=\s|$|E)', r'\g<1>0\g<2>', s, IGNORECASE)
+        s = sub(r"([S|E])(\d)(?=\s|$|E)", r"\g<1>0\g<2>", s, IGNORECASE)
         return s
 
     def format(self, template=None):
@@ -205,12 +268,10 @@ class MetadataMovie(Metadata):
     """ Movie Metadata class
     """
 
-    fields = Metadata.fields | {
-        'id_imdb',
-        'id_tmdb',
-    }
+    fields = Metadata.fields | {"id_imdb", "id_tmdb"}
 
     def __init__(self, **params):
         super(MetadataMovie, self).__init__(**params)
-        self.template = '<$title ><($year)>'
-        self._dict['media'] = 'movie'
+        self.template = "<$title ><($year)>"
+        self._dict["media"] = "movie"
+
