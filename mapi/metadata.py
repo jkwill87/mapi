@@ -43,6 +43,9 @@ class Metadata(MutableMapping):
     def __iter__(self):
         return {k: v for k, v in self._dict.items() if v}.__iter__()
 
+    def __hash__(self):
+        return frozenset(self._dict.items()).__hash__()
+
     def __len__(self):
         return {k: v for k, v in self._dict.items() if v}.__len__()
 
@@ -274,4 +277,3 @@ class MetadataMovie(Metadata):
         super(MetadataMovie, self).__init__(**params)
         self.template = "<$title ><($year)>"
         self._dict["media"] = "movie"
-
