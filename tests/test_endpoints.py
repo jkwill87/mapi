@@ -305,6 +305,7 @@ class TestTmdbFind(TestCase):
             "original_title",
             "overview",
             "poster_path",
+            "popularity",
             "release_date",
             "title",
             "video",
