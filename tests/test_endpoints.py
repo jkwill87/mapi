@@ -134,7 +134,7 @@ class TestRequestJson(TestCase):
         html_data = """
             <!DOCTYPE html>
             <html>
-                <body>   
+                <body>
                     <h1>Data</h1>
                     <ul>
                     <li>Title: The Matrix</li>
@@ -551,6 +551,7 @@ class TestTvdbSeriesId(TestCase):
             "imdbId",
             "lastUpdated",
             "network",
+            "networkId",
             "overview",
             "rating",
             "runtime",
@@ -558,9 +559,9 @@ class TestTvdbSeriesId(TestCase):
             "seriesName",
             "siteRating",
             "siteRatingCount",
+            "slug",
             "status",
             "zap2itId",
-            "networkId",
         }
         result = tvdb_series_id(self.token, LOST_TVDB_ID_SERIES)
         self.assertIsInstance(result, dict)
@@ -596,21 +597,41 @@ class TestTvdbSeriesIdEpisodes(TestCase):
             "airedEpisodeNumber",
             "airedSeason",
             "airedSeasonID",
+            "airsAfterSeason",
+            "airsBeforeEpisode",
+            "airsBeforeSeason",
+            "director",
+            "directors",
+            "dvdChapter",
+            "dvdDiscid",
             "dvdEpisodeNumber",
             "dvdSeason",
             "episodeName",
+            "filename",
             "firstAired",
+            "guestStars",
             "id",
+            "imdbId",
             "language",
             "lastUpdated",
+            "lastUpdatedBy",
             "overview",
+            "productionCode",
+            "seriesId",
+            "showUrl",
+            "siteRating",
+            "siteRatingCount",
+            "thumbAdded",
+            "thumbAuthor",
+            "thumbHeight",
+            "thumbWidth",
+            "writers",
         }
         result = tvdb_series_id_episodes(self.token, LOST_TVDB_ID_SERIES)
         self.assertIsInstance(result, dict)
         self.assertIn("data", result)
         entry = result["data"][0]
         self.assertSetEqual(expected_top_level_keys, set(entry.keys()))
-        self.assertEqual(12, len(entry))
         self.assertEqual(LOST_TVDB_ID_EPISODE, entry["id"])
 
 
@@ -660,14 +681,35 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
             "airedEpisodeNumber",
             "airedSeason",
             "airedSeasonID",
+            "airsAfterSeason",
+            "airsBeforeEpisode",
+            "airsBeforeSeason",
+            "director",
+            "directors",
+            "dvdChapter",
+            "dvdDiscid",
             "dvdEpisodeNumber",
             "dvdSeason",
             "episodeName",
+            "filename",
             "firstAired",
+            "guestStars",
             "id",
+            "imdbId",
             "language",
             "lastUpdated",
+            "lastUpdatedBy",
             "overview",
+            "productionCode",
+            "seriesId",
+            "showUrl",
+            "siteRating",
+            "siteRatingCount",
+            "thumbAdded",
+            "thumbAuthor",
+            "thumbHeight",
+            "thumbWidth",
+            "writers",
         }
         result = tvdb_series_episodes_query(self.token, LOST_TVDB_ID_SERIES)
         self.assertIsInstance(result, dict)
@@ -683,14 +725,35 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
             "airedEpisodeNumber",
             "airedSeason",
             "airedSeasonID",
+            "airsAfterSeason",
+            "airsBeforeEpisode",
+            "airsBeforeSeason",
+            "director",
+            "directors",
+            "dvdChapter",
+            "dvdDiscid",
             "dvdEpisodeNumber",
             "dvdSeason",
             "episodeName",
+            "filename",
             "firstAired",
+            "guestStars",
             "id",
+            "imdbId",
             "language",
             "lastUpdated",
+            "lastUpdatedBy",
             "overview",
+            "productionCode",
+            "seriesId",
+            "showUrl",
+            "siteRating",
+            "siteRatingCount",
+            "thumbAdded",
+            "thumbAuthor",
+            "thumbHeight",
+            "thumbWidth",
+            "writers",
         }
         result = tvdb_series_episodes_query(
             self.token, LOST_TVDB_ID_SERIES, season=1
@@ -710,14 +773,35 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
             "airedEpisodeNumber",
             "airedSeason",
             "airedSeasonID",
+            "airsAfterSeason",
+            "airsBeforeEpisode",
+            "airsBeforeSeason",
+            "director",
+            "directors",
+            "dvdChapter",
+            "dvdDiscid",
             "dvdEpisodeNumber",
             "dvdSeason",
             "episodeName",
+            "filename",
             "firstAired",
+            "guestStars",
             "id",
+            "imdbId",
             "language",
             "lastUpdated",
+            "lastUpdatedBy",
             "overview",
+            "productionCode",
+            "seriesId",
+            "showUrl",
+            "siteRating",
+            "siteRatingCount",
+            "thumbAdded",
+            "thumbAuthor",
+            "thumbHeight",
+            "thumbWidth",
+            "writers",
         }
         result = tvdb_series_episodes_query(
             self.token, LOST_TVDB_ID_SERIES, season=1, episode=1
@@ -757,6 +841,7 @@ class TestTvdbSearchSeries(TestCase):
             "network",
             "overview",
             "seriesName",
+            "slug",
             "status",
         }
         result = tvdb_search_series(self.token, "Lost")
@@ -775,6 +860,7 @@ class TestTvdbSearchSeries(TestCase):
             "network",
             "overview",
             "seriesName",
+            "slug",
             "status",
         }
         result = tvdb_search_series(self.token, id_imdb=LOST_IMDB_ID_SERIES)
