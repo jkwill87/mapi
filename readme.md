@@ -1,8 +1,8 @@
-![api](https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg?style=for-the-badge)
 [![pypi](https://img.shields.io/pypi/v/mapi.svg?style=for-the-badge)](https://pypi.python.org/pypi/mapi)
 [![travis\_ci](https://img.shields.io/travis/jkwill87/mapi/develop.svg?style=for-the-badge)](https://travis-ci.org/jkwill87/mapi)
 [![coverage](https://img.shields.io/codecov/c/github/jkwill87/mapi/develop.svg?style=for-the-badge)](https://codecov.io/gh/jkwill87/mapi)
 [![licence](https://img.shields.io/github/license/jkwill87/mapi.svg?style=for-the-badge)](https://en.wikipedia.org/wiki/MIT_License)
+![api](https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg?style=for-the-badge)
 
 # mapi
 
