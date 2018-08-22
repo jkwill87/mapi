@@ -7,21 +7,19 @@ from abc import ABCMeta, abstractmethod
 from os import environ
 from re import match
 
-from mapi import endpoints, log
+from mapi import endpoints, log, ustr
 from mapi.exceptions import (
     MapiException,
     MapiNotFoundException,
-    MapiProviderException
+    MapiProviderException,
 )
 from mapi.metadata import MetadataMovie, MetadataTelevision
 
 # Compatibility for Python 2.7/3+
-_AbstractClass = ABCMeta('ABC', (object,), {'__slots__': ()})
+_AbstractClass = ABCMeta("ABC", (object,), {"__slots__": ()})
 
-API_TELEVISION = {'tvdb'}
-API_MOVIE = {
-    'tmdb'
-}
+API_TELEVISION = {"tvdb"}
+API_MOVIE = {"tmdb"}
 API_ALL = API_TELEVISION | API_MOVIE
 
 
@@ -36,7 +34,7 @@ def has_provider_support(provider, media_type):
     """
     if provider.lower() not in API_ALL:
         return False
-    provider_const = 'API_' + media_type.upper()
+    provider_const = "API_" + media_type.upper()
     return provider in globals().get(provider_const, {})
 
 
@@ -44,12 +42,9 @@ def provider_factory(provider, **options):
     """ Factory function for DB Provider Concrete Classes
     """
     try:
-        return {
-            'tmdb': TMDb,
-            'tvdb': TVDb,
-        }[provider.lower()](**options)
+        return {"tmdb": TMDb, "tvdb": TVDb}[provider.lower()](**options)
     except KeyError:
-        msg = 'Attempted to initialize non-existing DB Provider'
+        msg = "Attempted to initialize non-existing DB Provider"
         log.error(msg)
         raise MapiException(msg)
 
@@ -65,18 +60,17 @@ class Provider(_AbstractClass):
         """
         cls_name = self.__class__.__name__
         self._api_key = options.get(
-            'api_key',
-            environ.get('API_KEY_%s' % cls_name.upper())
+            "api_key", environ.get("API_KEY_%s" % cls_name.upper())
         )
-        self._cache = options.get('cache', True)
+        self._cache = options.get("cache", True)
 
     @staticmethod
     def _year_expand(s):
         """ Parses a year or dash-delimeted year range
         """
-        regex = r'^((?:19|20)\d{2})?(\s*-\s*)?((?:19|20)\d{2})?$'
+        regex = r"^((?:19|20)\d{2})?(\s*-\s*)?((?:19|20)\d{2})?$"
         try:
-            start, dash, end = match(regex, str(s)).groups()
+            start, dash, end = match(regex, ustr(s)).groups()
             start = start or 1900
             end = end or 2099
         except AttributeError:
@@ -103,15 +97,15 @@ class TMDb(Provider):
     def __init__(self, **options):
         super(TMDb, self).__init__(**options)
         if not self.api_key:
-            raise MapiProviderException('TMDb requires an API key')
+            raise MapiProviderException("TMDb requires an API key")
 
     def search(self, id_key=None, **parameters):
         """ Searches TMDb for movie metadata
         """
-        id_tmdb = parameters.get('id_tmdb') or id_key
-        id_imdb = parameters.get('id_imdb')
-        title = parameters.get('title')
-        year = parameters.get('year')
+        id_tmdb = parameters.get("id_tmdb") or id_key
+        id_imdb = parameters.get("id_imdb")
+        title = parameters.get("title")
+        year = parameters.get("year")
 
         if id_tmdb:
             yield self._search_id_tmdb(id_tmdb)
@@ -125,14 +119,14 @@ class TMDb(Provider):
 
     def _search_id_imdb(self, id_imdb):
         response = endpoints.tmdb_find(
-            self.api_key, 'imdb_id', id_imdb, cache=self.cache
-        )['movie_results'][0]
+            self.api_key, "imdb_id", id_imdb, cache=self.cache
+        )["movie_results"][0]
         return MetadataMovie(
-            title=response['title'],
-            date=response['release_date'],
-            synopsis=response['overview'],
-            media='movie',
-            id_tmdb=response['id'],
+            title=response["title"],
+            date=response["release_date"],
+            synopsis=response["overview"],
+            media="movie",
+            id_tmdb=response["id"],
         )
 
     def _search_id_tmdb(self, id_tmdb):
@@ -141,11 +135,11 @@ class TMDb(Provider):
             self.api_key, id_tmdb, cache=self.cache
         )
         return MetadataMovie(
-            title=response['title'],
-            date=response['release_date'],
-            synopsis=response['overview'],
-            media='movie',
-            id_tmdb=str(id_tmdb),
+            title=response["title"],
+            date=response["release_date"],
+            synopsis=response["overview"],
+            media="movie",
+            id_tmdb=ustr(id_tmdb),
         )
 
     def _search_title(self, title, year):
@@ -159,21 +153,21 @@ class TMDb(Provider):
             response = endpoints.tmdb_search_movies(
                 self.api_key, title, year, page=page, cache=self.cache
             )
-            for entry in response['results']:
+            for entry in response["results"]:
                 try:
                     meta = MetadataMovie(
-                        title=entry['title'],
-                        date=entry['release_date'],
-                        synopsis=entry['overview'],
-                        media='movie',
-                        id_tmdb=str(entry['id'])
+                        title=entry["title"],
+                        date=entry["release_date"],
+                        synopsis=entry["overview"],
+                        media="movie",
+                        id_tmdb=ustr(entry["id"]),
                     )
                 except ValueError:
                     continue
-                if year_from <= int(meta['year']) <= year_to:
+                if year_from <= int(meta["year"]) <= year_to:
                     yield meta
                     found = True
-            if page == response['total_pages']:
+            if page == response["total_pages"]:
                 break
             elif page >= page_max:
                 break
@@ -189,7 +183,7 @@ class TVDb(Provider):
     def __init__(self, **options):
         super(TVDb, self).__init__(**options)
         if not self.api_key:
-            raise MapiProviderException('TVDb requires an API key')
+            raise MapiProviderException("TVDb requires an API key")
         self.token = endpoints.tvdb_login(self.api_key)
 
     def search(self, id_key=None, **parameters):
@@ -197,12 +191,12 @@ class TVDb(Provider):
 
         TODO: Consider making parameters for episode ids
         """
-        episode = parameters.get('episode')
-        id_tvdb = parameters.get('id_tvdb') or id_key
-        id_imdb = parameters.get('id_imdb')
-        season = parameters.get('season')
-        series = parameters.get('series')
-        date = parameters.get('date')
+        episode = parameters.get("episode")
+        id_tvdb = parameters.get("id_tvdb") or id_key
+        id_imdb = parameters.get("id_imdb")
+        season = parameters.get("season")
+        series = parameters.get("series")
+        date = parameters.get("date")
 
         if id_tvdb:
             for result in self._search_id_tvdb(id_tvdb, season, episode):
@@ -212,10 +206,10 @@ class TVDb(Provider):
                 yield result
         elif series and date:
             if not match(
-                r'(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?',
-                date
+                r"(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?",
+                date,
             ):
-                raise MapiProviderException('Date must be in YYYY-MM-DD format')
+                raise MapiProviderException("Date must be in YYYY-MM-DD format")
             for result in self._search_series_date(series, date):
                 yield result
         elif series:
@@ -228,7 +222,7 @@ class TVDb(Provider):
         series_data = endpoints.tvdb_search_series(
             self.token, id_imdb=id_imdb, cache=self.cache
         )
-        id_tvdb = (series_data['data'][0]['id'])
+        id_tvdb = series_data["data"][0]["id"]
         return self._search_id_tvdb(id_tvdb, season, episode)
 
     def _search_id_tvdb(self, id_tvdb, season=None, episode=None):
@@ -243,23 +237,25 @@ class TVDb(Provider):
             episode_data = endpoints.tvdb_series_episodes_query(
                 self.token, id_tvdb, episode, season, cache=self.cache
             )
-            for entry in episode_data['data']:
+            for entry in episode_data["data"]:
                 try:
                     yield MetadataTelevision(
-                        series=series_data['data']['seriesName'],
-                        season=str(entry['airedSeason']),
-                        episode=str(entry['airedEpisodeNumber']),
-                        date=entry['firstAired'],
-                        title=entry['episodeName'].split(';', 1)[0],
-                        synopsis=str(entry['overview'])
-                            .replace('\r\n', '').replace('  ', '').strip(),
-                        media='television',
-                        id_tvdb=str(id_tvdb),
+                        series=series_data["data"]["seriesName"],
+                        season=ustr(entry["airedSeason"]),
+                        episode=ustr(entry["airedEpisodeNumber"]),
+                        date=entry["firstAired"],
+                        title=entry["episodeName"].split(";", 1)[0],
+                        synopsis=(entry["overview"] or "")
+                        .replace("\r\n", "")
+                        .replace("  ", "")
+                        .strip(),
+                        media="television",
+                        id_tvdb=ustr(id_tvdb),
                     )
                     found = True
                 except (AttributeError, ValueError):
                     continue
-            if page == episode_data['links']['last']:
+            if page == episode_data["links"]["last"]:
                 break
             elif page >= page_max:
                 break
@@ -274,7 +270,7 @@ class TVDb(Provider):
             self.token, series, cache=self.cache
         )
 
-        for series_id in [entry['id'] for entry in series_data['data'][:5]]:
+        for series_id in [entry["id"] for entry in series_data["data"][:5]]:
             try:
                 for data in self._search_id_tvdb(series_id, season, episode):
                     found = True
@@ -291,8 +287,8 @@ class TVDb(Provider):
             self.token, series, cache=self.cache
         )
         series_entries = {
-            entry['id']: entry['seriesName']
-            for entry in series_data['data'][:5]
+            entry["id"]: entry["seriesName"]
+            for entry in series_data["data"][:5]
         }
         page = 1
         page_max = 100
@@ -304,25 +300,27 @@ class TVDb(Provider):
                     )
                 except MapiNotFoundException:
                     break
-                for entry in response['data']:
-                    if not entry['firstAired'].startswith(date):
+                for entry in response["data"]:
+                    if not entry["firstAired"].startswith(date):
                         continue
                     try:
                         yield MetadataTelevision(
                             series=series_name,
-                            season=str(entry['airedSeason']),
-                            episode=str(entry['airedEpisodeNumber']),
-                            date=entry['firstAired'],
-                            title=entry['episodeName'].split(';', 1)[0],
-                            synopsis=str(entry['overview']).replace('\r\n', '')
-                                .replace('  ', '').strip(),
-                            media='television',
-                            id_tvdb=str(entry['airedSeasonID']),
+                            season=ustr(entry["airedSeason"]),
+                            episode=ustr(entry["airedEpisodeNumber"]),
+                            date=entry["firstAired"],
+                            title=entry["episodeName"].split(";", 1)[0],
+                            synopsis=ustr(entry["overview"])
+                            .replace("\r\n", "")
+                            .replace("  ", "")
+                            .strip(),
+                            media="television",
+                            id_tvdb=ustr(entry["airedSeasonID"]),
                         )
                         found = True
                     except (AttributeError, ValueError):
                         continue
-                if page == response['links']['last']:
+                if page == response["links"]["last"]:
                     break
                 elif page >= page_max:
                     break
