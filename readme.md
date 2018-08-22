@@ -3,6 +3,7 @@
 [![coverage](https://img.shields.io/codecov/c/github/jkwill87/mapi/develop.svg?style=for-the-badge)](https://codecov.io/gh/jkwill87/mapi)
 [![licence](https://img.shields.io/github/license/jkwill87/mapi.svg?style=for-the-badge)](https://en.wikipedia.org/wiki/MIT_License)
 ![api](https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg?style=for-the-badge)
+[![code style black](https://img.shields.io/badge/Code%20Style-Black-black.svg?style=for-the-badge)](https://github.com/ambv/black)
 
 # mapi
 
