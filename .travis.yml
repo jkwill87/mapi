@@ -6,7 +6,7 @@ python:
 install: pip install -r requirements-dev.txt
 dist: trusty
 os: linux
-script: python tasks.py test
+script: coverage run --source=mapi -m unittest discover -v
 after_success:
   - codecov
 env:
