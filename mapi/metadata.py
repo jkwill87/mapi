@@ -4,7 +4,7 @@
 """
 
 from datetime import datetime as dt
-from re import sub, IGNORECASE
+from re import IGNORECASE, findall, sub
 from string import capwords
 
 from mapi import ustr
@@ -260,10 +260,19 @@ class MetadataTelevision(Metadata):
     @staticmethod
     def _str_pad_episode(s):
         # 01x01 pattern
-        s = sub(r"(?<=\s)(\d)(?=x\d)", r"0\1", s, IGNORECASE)
-        s = sub(r"(?<=\dx)(\d)(?=\s|$)", r"0\1", s, IGNORECASE)
+        match = findall(r"((\d{1,3})x(\d{1,4}))", s, IGNORECASE)
+        if match:
+            original, season, episode = match[0]
+            season = int(season)
+            episode = int(episode)
+            s = s.replace(original, "%02dx%02d" % (season, episode))
         # S01E01 pattern
-        s = sub(r"([S|E])(\d)(?=\s|$|E)", r"\g<1>0\g<2>", s, IGNORECASE)
+        match = findall(r"(S(\d{1,3})E(\d{1,4}))", s, IGNORECASE)
+        if match:
+            original, season, episode = match[0]
+            season = int(season)
+            episode = int(episode)
+            s = s.replace(original, "S%02dE%02d" % (season, episode))
         return s
 
     def format(self, template=None):
