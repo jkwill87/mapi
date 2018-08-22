@@ -3,12 +3,16 @@
 """ Metadata data classes
 """
 
-from collections.abc import MutableMapping
 from datetime import datetime as dt
 from re import sub, IGNORECASE
 from string import capwords
 
 from mapi import ustr
+
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
 
