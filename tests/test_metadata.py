@@ -17,8 +17,12 @@ class TestMetadataMovie(TestCase):
         s = self.metadata.format()
         self.assertEqual("Saw III (2006)", s)
 
-    def test_format__override(self):
+    def test_format__override__sigil(self):
         s = self.metadata.format("TITLE:<$title>")
+        self.assertEqual("TITLE:Saw III", s)
+
+    def test_format__override__curly(self):
+        s = self.metadata.format("TITLE:{title}", convention="curly")
         self.assertEqual("TITLE:Saw III", s)
 
     def test_format__missing(self):
@@ -29,7 +33,7 @@ class TestMetadataMovie(TestCase):
     def test_format__apostrophes(self):
         self.metadata["title"] = "a bug's life"
         s = self.metadata.format("<$title>")
-        self.assertEquals("A Bug's Life", s)
+        self.assertEqual("A Bug's Life", s)
 
     def test_invalid__media(self):
         with self.assertRaises(ValueError):

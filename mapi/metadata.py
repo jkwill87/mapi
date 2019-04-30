@@ -8,6 +8,7 @@ from re import IGNORECASE, findall, sub
 from string import capwords
 
 from mapi import ustr
+from mapi.exceptions import MapiException
 
 try:
     from collections.abc import MutableMapping
@@ -17,6 +18,8 @@ except ImportError:
 DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
 
 EXTRA_FIELDS = {"extension", "group", "quality"}
+
+FORMAT_CONVENTIONS = {"curly", "sigil"}
 
 
 class Metadata(MutableMapping):
@@ -231,10 +234,17 @@ class Metadata(MutableMapping):
             # log.warning("couldn't sub for %s" % mobj.group())
             return ""
 
-    def format(self, template=None):
+    def format(self, template=None, convention="sigil"):
         """ Substitutes variables within template with that of fields'
         """
-        pattern = r"(?:<([^<]*?)\$(\w+)([^>]*?)>)"
+        if convention not in FORMAT_CONVENTIONS:
+            raise MapiException(
+                "convention must be one of %s" % ",".join(FORMAT_CONVENTIONS)
+            )
+        elif convention == "sigil":
+            pattern = r"(?:<([^<]*?)\$(\w+)([^>]*?)>)"
+        elif convention == "curly":
+            pattern = r"(?:{([^{]*?)(\w+)([^}]*?)})"
         s = sub(pattern, self._format_repl, template or self.template)
         s = self._str_fix_whitespace(s)
         return s
