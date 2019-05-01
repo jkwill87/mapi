@@ -285,8 +285,8 @@ class MetadataTelevision(Metadata):
             s = s.replace(original, "S%02dE%02d" % (season, episode))
         return s
 
-    def format(self, template=None):
-        s = super(MetadataTelevision, self).format(template)
+    def format(self, template=None, convention="sigil"):
+        s = super(MetadataTelevision, self).format(template, convention)
         return self._str_pad_episode(s)
 
 
