@@ -15,16 +15,16 @@ from . import *
 
 JUNK_IMDB_ID = "tt1234567890"
 JUNK_TEXT = "asdf#$@#g9765sdfg54hggaw"
-TMDB_API_KEY = environ.get("API_KEY_TMDB")
-TVDB_API_KEY = environ.get("API_KEY_TVDB")
+API_KEY_TMDB = environ.get("API_KEY_TMDB")
+API_KEY_TVDB = environ.get("API_KEY_TVDB")
 GOONIES_IMDB_ID = "tt0089218"
 GOONIES_TMDB_ID = 9340
 LOST_TVDB_ID_EPISODE = 127131
 LOST_TVDB_ID_SERIES = 73739
 LOST_IMDB_ID_SERIES = "tt0411008"
 
-assert TVDB_API_KEY
-assert TMDB_API_KEY
+assert API_KEY_TVDB
+assert API_KEY_TMDB
 
 
 class MockRequestResponse:
@@ -288,7 +288,7 @@ class TestGetUserAgent(TestCase):
 
 class TestTmdbFind(TestCase):
     def test_imdb_success(self):
-        self.assertIsNotNone(TMDB_API_KEY)
+        self.assertIsNotNone(API_KEY_TMDB)
         expected_top_level_keys = {
             "movie_results",
             "person_results",
@@ -312,7 +312,7 @@ class TestTmdbFind(TestCase):
             "vote_average",
             "vote_count",
         }
-        result = tmdb_find(TMDB_API_KEY, "imdb_id", GOONIES_IMDB_ID)
+        result = tmdb_find(API_KEY_TMDB, "imdb_id", GOONIES_IMDB_ID)
         self.assertIsInstance(result, dict)
         self.assertSetEqual(expected_top_level_keys, set(result.keys()))
         self.assertGreater(len(result.get("movie_results", {})), 0)
@@ -327,15 +327,15 @@ class TestTmdbFind(TestCase):
 
     def test_invalid_id_imdb(self):
         with self.assertRaises(MapiProviderException):
-            tmdb_find(TMDB_API_KEY, "imdb_id", JUNK_TEXT)
+            tmdb_find(API_KEY_TMDB, "imdb_id", JUNK_TEXT)
 
     def test_not_found(self):
         with self.assertRaises(MapiNotFoundException):
-            tmdb_find(TMDB_API_KEY, "imdb_id", JUNK_IMDB_ID)
+            tmdb_find(API_KEY_TMDB, "imdb_id", JUNK_IMDB_ID)
 
     def test_invalid_provider(self):
         with self.assertRaises(MapiProviderException):
-            tmdb_find(TMDB_API_KEY, JUNK_TEXT, GOONIES_IMDB_ID)
+            tmdb_find(API_KEY_TMDB, JUNK_TEXT, GOONIES_IMDB_ID)
 
 
 class TestTmdbMovies(TestCase):
@@ -367,7 +367,7 @@ class TestTmdbMovies(TestCase):
             "vote_average",
             "vote_count",
         }
-        result = tmdb_movies(TMDB_API_KEY, GOONIES_TMDB_ID)
+        result = tmdb_movies(API_KEY_TMDB, GOONIES_TMDB_ID)
         self.assertIsInstance(result, dict)
         self.assertSetEqual(expected_top_level_keys, set(result.keys()))
         self.assertEqual("The Goonies", result.get("original_title"))
@@ -378,11 +378,11 @@ class TestTmdbMovies(TestCase):
 
     def test_id_tmdb_fail(self):
         with self.assertRaises(MapiProviderException):
-            tmdb_movies(TMDB_API_KEY, JUNK_TEXT)
+            tmdb_movies(API_KEY_TMDB, JUNK_TEXT)
 
     def test_not_found(self):
         with self.assertRaises(MapiNotFoundException):
-            tmdb_movies(TMDB_API_KEY, "1" * 10)
+            tmdb_movies(API_KEY_TMDB, "1" * 10)
 
 
 class TestTmdbSearchMovies(TestCase):
@@ -409,7 +409,7 @@ class TestTmdbSearchMovies(TestCase):
             "vote_average",
             "vote_count",
         }
-        result = tmdb_search_movies(TMDB_API_KEY, "the goonies", 1985)
+        result = tmdb_search_movies(API_KEY_TMDB, "the goonies", 1985)
         self.assertIsInstance(result, dict)
         self.assertSetEqual(expected_top_level_keys, set(result.keys()))
         self.assertIsInstance(result["results"], list)
@@ -418,7 +418,7 @@ class TestTmdbSearchMovies(TestCase):
         )
         self.assertEqual(1, len(result["results"]))
         self.assertEqual(result["results"][0]["original_title"], "The Goonies")
-        result = tmdb_search_movies(TMDB_API_KEY, "the goonies")
+        result = tmdb_search_movies(API_KEY_TMDB, "the goonies")
         self.assertGreater(len(result["results"]), 1)
 
     def test_api_key_fail(self):
@@ -427,16 +427,16 @@ class TestTmdbSearchMovies(TestCase):
 
     def test_year_fail(self):
         with self.assertRaises(MapiProviderException):
-            tmdb_search_movies(TMDB_API_KEY, "the goonies", year=JUNK_TEXT)
+            tmdb_search_movies(API_KEY_TMDB, "the goonies", year=JUNK_TEXT)
 
     def test_not_found(self):
         with self.assertRaises(MapiNotFoundException):
-            tmdb_search_movies(TMDB_API_KEY, JUNK_TEXT)
+            tmdb_search_movies(API_KEY_TMDB, JUNK_TEXT)
 
 
 class TestTvdbLogin(TestCase):
     def test_login_success(self):
-        self.assertIsNotNone(tvdb_login(TVDB_API_KEY))
+        self.assertIsNotNone(tvdb_login(API_KEY_TVDB))
 
     def test_login_fail(self):
         with self.assertRaises(MapiProviderException):
@@ -445,7 +445,7 @@ class TestTvdbLogin(TestCase):
 
 class TestTvdbRefreshToken(TestCase):
     def test_refresh_success(self):
-        token = tvdb_login(TVDB_API_KEY)
+        token = tvdb_login(API_KEY_TVDB)
         self.assertIsNotNone(tvdb_refresh_token(token))
 
     def test_refresh_fail(self):
@@ -455,7 +455,7 @@ class TestTvdbRefreshToken(TestCase):
 
 class TestTvdbEpisodesId(TestCase):
     def setUp(self):
-        self.token = tvdb_login(TVDB_API_KEY)
+        self.token = tvdb_login(API_KEY_TVDB)
 
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
@@ -519,7 +519,7 @@ class TestTvdbEpisodesId(TestCase):
 
 class TestTvdbSeriesId(TestCase):
     def setUp(self):
-        self.token = tvdb_login(TVDB_API_KEY)
+        self.token = tvdb_login(API_KEY_TVDB)
 
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
@@ -573,7 +573,7 @@ class TestTvdbSeriesId(TestCase):
 
 class TestTvdbSeriesIdEpisodes(TestCase):
     def setUp(self):
-        self.token = tvdb_login(TVDB_API_KEY)
+        self.token = tvdb_login(API_KEY_TVDB)
 
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
@@ -637,7 +637,7 @@ class TestTvdbSeriesIdEpisodes(TestCase):
 
 class TestTvdbSeriesEpisodesQuery(TestCase):
     def setUp(self):
-        self.token = tvdb_login(TVDB_API_KEY)
+        self.token = tvdb_login(API_KEY_TVDB)
 
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):
@@ -818,7 +818,7 @@ class TestTvdbSeriesEpisodesQuery(TestCase):
 
 class TestTvdbSearchSeries(TestCase):
     def setUp(self):
-        self.token = tvdb_login(TVDB_API_KEY)
+        self.token = tvdb_login(API_KEY_TVDB)
 
     def test_invalid_token(self):
         with self.assertRaises(MapiProviderException):

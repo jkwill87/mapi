@@ -36,7 +36,7 @@ from mapi.providers import TVDb
 client = TVDb()  # API Key taken from environment variables
 results = client.search(series='Rick and Morty', season=2)
 for result in results:
-     print(result)
+     print("{series} - {season:02}x{episode:02}".format_map(result))
 ```
     Rick and Morty - 02x01 - A Rickle in Time
     Rick and Morty - 02x02 - Mortynight Run
@@ -62,7 +62,7 @@ from mapi.providers import TMDb
 client = TMDb()
 results = client.search(title='Star Trek', year='1990-1999')
 for i, result in enumerate(results, 1):
-    print('%d) %s' % (i, result))
+    print(str(i) + ") {title} ({year})".format_map(result))
     if i > 9: break
 ```
     1) Star Trek: Voyager (1995)
@@ -104,6 +104,9 @@ Some APIs, like TMDb, allow you to search by an IMDb **'tt-const'** as well:
 
 
 ```python
+from pprint import pprint
+from mapi.providers import TMDb
+client = TMDb()
 results = client.search(id_imdb='tt0089218')  # Using IMDb ID
 pprint(dict(next(results)))
 ```
@@ -123,6 +126,7 @@ pprint(dict(next(results)))
 Not all searches yield results; maybe you had a typo, maybe the data just isn't there, either way theres no need to fret, this can be handled gracefully using exception handling:
 
 ```python
+from mapi.exceptions import MapiNotFoundException
 from mapi.providers import TMDb
 client = TMDb()
 try:

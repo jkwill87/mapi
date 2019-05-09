@@ -13,28 +13,6 @@ class TestMetadataMovie(TestCase):
             media="movie", title="saw iii", date="2006-01-01"
         )
 
-    def test_format__default(self):
-        s = self.metadata.format()
-        self.assertEqual("Saw III (2006)", s)
-
-    def test_format__override__sigil(self):
-        s = self.metadata.format("TITLE:<$title>")
-        self.assertEqual("TITLE:Saw III", s)
-
-    def test_format__override__curly(self):
-        s = self.metadata.format("TITLE:{title}", convention="curly")
-        self.assertEqual("TITLE:Saw III", s)
-
-    def test_format__missing(self):
-        self.metadata["date"] = None
-        s = self.metadata.format()
-        self.assertEqual("Saw III", s)
-
-    def test_format__apostrophes(self):
-        self.metadata["title"] = "a bug's life"
-        s = self.metadata.format("<$title>")
-        self.assertEqual("A Bug's Life", s)
-
     def test_invalid__media(self):
         with self.assertRaises(ValueError):
             self.metadata["media"] = "yolo"
@@ -61,28 +39,6 @@ class TestMetadataTelevision(TestCase):
             episode=3,
             title="Five More Short Graybles",
         )
-
-    def test_format_default(self):
-        s = self.metadata.format()
-        self.assertEqual("Adventure Time - 05x03 - Five More Short Graybles", s)
-
-    def test_format_override(self):
-        s = self.metadata.format(
-            "<$series - >< - S$season><E$episode - >< - $title>"
-        )
-        self.assertEqual(
-            "Adventure Time - S05E03 - Five More Short Graybles", s
-        )
-
-    def test_format_missing_episode(self):
-        self.metadata["episode"] = None
-        s = self.metadata.format()
-        self.assertEqual("Adventure Time - 5 - Five More Short Graybles", s)
-
-    def test_format_missing_title(self):
-        self.metadata["title"] = None
-        s = self.metadata.format()
-        self.assertEqual("Adventure Time - 05x03", s)
 
     def test_invalid_media(self):
         with self.assertRaises(ValueError):
