@@ -199,7 +199,7 @@ def tmdb_find(
     status, content = _request_json(url, parameters, cache=cache)
     if status == 401:
         raise MapiProviderException("invalid API key")
-    elif status != 200 or not any(content.keys()):
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
         raise MapiNetworkException("TMDb down or unavailable?")
     elif status == 404 or not any(content.get(k, {}) for k in keys):
         raise MapiNotFoundException
@@ -221,7 +221,7 @@ def tmdb_movies(api_key, id_tmdb, language="en-US", cache=True):
         raise MapiProviderException("invalid API key")
     elif status == 404:
         raise MapiNotFoundException
-    elif status != 200 or not any(content.keys()):
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
         raise MapiNetworkException("TMDb down or unavailable?")
     return content
 
@@ -250,7 +250,7 @@ def tmdb_search_movies(
     status, content = _request_json(url, parameters, cache=cache)
     if status == 401:
         raise MapiProviderException("invalid API key")
-    elif status != 200 or not any(content.keys()):
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
         raise MapiNetworkException("TMDb down or unavailable?")
     elif status == 404 or status == 422 or not content.get("total_results"):
         raise MapiNotFoundException
@@ -268,7 +268,7 @@ def tvdb_login(api_key):
     status, content = _request_json(url, body=body, cache=False)
     if status == 401:
         raise MapiProviderException("invalid api key")
-    elif status != 200 or not content.get("token"):
+    elif status != 200 or not content.get("token"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content["token"]
 
@@ -283,7 +283,7 @@ def tvdb_refresh_token(token):
     status, content = _request_json(url, headers=headers, cache=False)
     if status == 401:
         raise MapiProviderException("invalid token")
-    elif status != 200 or not content.get("token"):
+    elif status != 200 or not content.get("token"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content["token"]
 
@@ -309,7 +309,7 @@ def tvdb_episodes_id(token, id_tvdb, lang="en", cache=True):
         raise MapiNotFoundException
     elif status == 200 and "invalidLanguage" in content.get("errors", {}):
         raise MapiNotFoundException
-    elif status != 200 or not content.get("data"):
+    elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content
 
@@ -334,7 +334,7 @@ def tvdb_series_id(token, id_tvdb, lang="en", cache=True):
         raise MapiProviderException("invalid token")
     elif status == 404:
         raise MapiNotFoundException
-    elif status != 200 or not content.get("data"):
+    elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content
 
@@ -362,7 +362,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang="en", cache=True):
         raise MapiProviderException("invalid token")
     elif status == 404:
         raise MapiNotFoundException
-    elif status != 200 or not content.get("data"):
+    elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content
 
@@ -393,7 +393,7 @@ def tvdb_series_episodes_query(
         raise MapiProviderException("invalid token")
     elif status == 404:
         raise MapiNotFoundException
-    elif status != 200 or not content.get("data"):
+    elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content
 
@@ -422,8 +422,8 @@ def tvdb_search_series(
         raise MapiProviderException(
             "series, id_imdb, id_zap2it parameters are mutually exclusive"
         )
-    elif status == 404:
+    elif status == 404:  # pragma: no cover
         raise MapiNotFoundException
-    elif status != 200 or not content.get("data"):
+    elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
     return content

@@ -9,9 +9,9 @@ from string import Formatter, capwords
 
 from mapi import ustr
 
-try:
+try:  # pragma: no cover
     from collections.abc import MutableMapping
-except ImportError:
+except ImportError:  # pragma: no cover
     from collections import MutableMapping
 
 DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
