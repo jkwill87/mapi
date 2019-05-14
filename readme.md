@@ -5,6 +5,7 @@
 ![api](https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg?style=for-the-badge)
 [![code style black](https://img.shields.io/badge/Code%20Style-Black-black.svg?style=for-the-badge)](https://github.com/ambv/black)
 
+
 # mapi
 
 mapi (**M**etadata **API**) is a python library which provides a high-level interface for media database providers, allowing users to efficiently search for television and movie metadata using a simple interface.
@@ -36,7 +37,7 @@ from mapi.providers import TVDb
 client = TVDb()  # API Key taken from environment variables
 results = client.search(series='Rick and Morty', season=2)
 for result in results:
-     print("{series} - {season:02}x{episode:02}".format_map(result))
+     print(result)
 ```
     Rick and Morty - 02x01 - A Rickle in Time
     Rick and Morty - 02x02 - Mortynight Run
@@ -49,10 +50,6 @@ for result in results:
     Rick and Morty - 02x09 - Look Who's Purging Now
     Rick and Morty - 02x10 - The Wedding Squanchers
 
-
-You can read more about the format method in the source documentation.
-
-
 ## Searching for a movie by title and year
 
 Okay, so no we want to look up some movies. We can search for using a specific year, by an upper range using **'-year'**, by a lower range using **'year-'**, or between a range of years using **'year-year'**. Lets use the latter to get a listing of Star Trek movies from the 90s. As it turns out, there's a lot.
@@ -62,7 +59,7 @@ from mapi.providers import TMDb
 client = TMDb()
 results = client.search(title='Star Trek', year='1990-1999')
 for i, result in enumerate(results, 1):
-    print(str(i) + ") {title} ({year})".format_map(result))
+    print('%d) %s' % (i, result))
     if i > 9: break
 ```
     1) Star Trek: Voyager (1995)
@@ -77,7 +74,6 @@ for i, result in enumerate(results, 1):
     10) Star Trek: A Captain's Log (1994)
 
 Searches return a generator, so by breaking on 10, we only ask for what we need, reducing the bandwidth and time required for the request.
-
 
 ## Looking up a movie by ID
 
@@ -120,7 +116,6 @@ pprint(dict(next(results)))
                  'Pirate One-Eyed Willie.',
      'title': 'The Goonies'}
 
-
 ## Handling a search gone awry
 
 Not all searches yield results; maybe you had a typo, maybe the data just isn't there, either way theres no need to fret, this can be handled gracefully using exception handling:
@@ -144,7 +139,6 @@ except MapiNotFoundException:
 - TVDb and TMDb require an API key to successfully be initialized
 - These can be provided using environment variables; `API_KEY_TMDB` and `API_KEY_TVDB`, respectively
 - These can also be provided as `api_key`, a parameter to the provider classes.
-
 
 ## Searching
 
@@ -176,6 +170,11 @@ Each provider is guaranteed to return the following fields for a successful sear
 | series   | TVDb | Series' name                               |
 | season   | TVDb | Series' airing season                      |
 | episode  | TVDB | Series' airing episode                     |
+
+## Formatting
+
+Mapi uses Python's standard string format conventions. You can call the builtin `format()` function on a mapi object and use any of the results keys. You can use format specifiers on numeric fields like episodes and seasons. For instance `format(metadata, "{series} S{season:02}E{episode:02}")` would pad season and episode numbers to two digits.
+
 
 # License
 
