@@ -65,6 +65,8 @@ SESSION = requests_cache.CachedSession(
     expire_after=604800,
 )
 
+OMDB_MEDIA_TYPES = {"movie", "series", "episode"}
+
 
 def _clean_dict(target_dict, whitelist=None):
     """ Convenience function that removes a dicts keys that have falsy values
@@ -404,7 +406,7 @@ def tvdb_search_series(
     """ Allows the user to search for a series based on the following parameters
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
-    Note: results a maximum of 100 entries per page, no option for pagination=
+    Note: results a maximum of 100 entries per page, no option for pagination
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -426,4 +428,75 @@ def tvdb_search_series(
         raise MapiNotFoundException
     elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
+    return content
+
+
+def omdb_title(
+    api_key,
+    id_imdb=None,
+    title=None,
+    year=None,
+    media_type=None,
+    plot="short",
+    cache=True,
+):
+    """
+    Lookup media using the Open Movie Database
+
+    Online docs: http://www.omdbapi.com/#parameters
+    """
+    if not title or id_imdb and title or not id_imdb:  # xnor
+        raise MapiProviderException("either id_imdb or title must be specified")
+    elif media_type and media_type not in OMDB_MEDIA_TYPES:
+        raise MapiProviderException(
+            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
+        )
+    url = "http://www.omdbapi.com"
+    parameters = {
+        "apikey": api_key,
+        "i": id_imdb,
+        "t": title,
+        "y": year,
+        "type": media_type,
+        "plot": plot,
+    }
+    status, content = _request_json(url, parameters, cache=cache)
+    error = content.get("Error")
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("OMDb down or unavailable?")
+    elif error:
+        raise MapiProviderException(error)
+    return content
+
+
+def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
+    """
+    Search for media using the Open Movie Database
+
+    Online docs: http://www.omdbapi.com/#parameters
+    """
+    if media_type and media_type not in OMDB_MEDIA_TYPES:
+        raise MapiProviderException(
+            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
+        )
+    if 1 > page > 100:
+        raise MapiProviderException("page must be between 1 and 100")
+    url = "http://www.omdbapi.com"
+    parameters = {
+        "apikey": api_key,
+        "s": query,
+        "y": year,
+        "type": media_type,
+        "page": page,
+    }
+    status, content = _request_json(url, parameters, cache=cache)
+    error = content.get("Error")
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("OMDb down or unavailable?")
+    elif error:
+        raise MapiProviderException(error)
     return content
