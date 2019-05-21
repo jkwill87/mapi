@@ -13,18 +13,22 @@ from mapi.endpoints import _clean_dict, _d2l, _get_user_agent, _request_json
 from mapi.exceptions import MapiNotFoundException, MapiProviderException
 from . import *
 
+API_KEY_OMDB = environ.get("API_KEY_OMDB")
+assert API_KEY_OMDB
+
+API_KEY_TMDB = environ.get("API_KEY_TMDB")
+assert API_KEY_TMDB
+
+API_KEY_TVDB = environ.get("API_KEY_TVDB")
+assert API_KEY_TVDB
+
 JUNK_IMDB_ID = "tt1234567890"
 JUNK_TEXT = "asdf#$@#g9765sdfg54hggaw"
-API_KEY_TMDB = environ.get("API_KEY_TMDB")
-API_KEY_TVDB = environ.get("API_KEY_TVDB")
 GOONIES_IMDB_ID = "tt0089218"
 GOONIES_TMDB_ID = 9340
 LOST_TVDB_ID_EPISODE = 127131
 LOST_TVDB_ID_SERIES = 73739
 LOST_IMDB_ID_SERIES = "tt0411008"
-
-assert API_KEY_TVDB
-assert API_KEY_TMDB
 
 
 class MockRequestResponse:
@@ -284,6 +288,120 @@ class TestGetUserAgent(TestCase):
     def test_random(self):
         for _ in range(10):
             self.assertIn(_get_user_agent(), AGENT_ALL)
+
+
+class TestOmdbTitle(TestCase):
+    @patch("mapi.endpoints.requests_cache.CachedSession.request")
+    def test_title_id_xnor__title(self, mock_request):
+        mock_response = MockRequestResponse(200, '{"key":"value"}')
+        mock_request.return_value = mock_response
+        omdb_title(API_KEY_OMDB, title="some title")
+
+    @patch("mapi.endpoints.requests_cache.CachedSession.request")
+    def test_title_id_xnor__id(self, mock_request):
+        mock_response = MockRequestResponse(200, '{"key":"value"}')
+        mock_request.return_value = mock_response
+        omdb_title(API_KEY_OMDB, id_imdb=123)
+
+    @patch("mapi.endpoints.requests_cache.CachedSession.request")
+    def test_title_id_xnor__both(self, mock_request):
+        mock_response = MockRequestResponse(200, '{"key":"value"}')
+        mock_request.return_value = mock_response
+        with self.assertRaises(MapiProviderException):
+            omdb_title(API_KEY_OMDB, title="some title", id_imdb=123)
+
+    @patch("mapi.endpoints.requests_cache.CachedSession.request")
+    def test_title_id_xnor__neither(self, mock_request):
+        mock_response = MockRequestResponse(200, '{"key":"value"}')
+        mock_request.return_value = mock_response
+        with self.assertRaises(MapiProviderException):
+            omdb_title(API_KEY_OMDB)
+
+    def test_media_type__movie(self):
+        expected_top_level_keys = {
+            "Actors",
+            "Awards",
+            "BoxOffice",
+            "Country",
+            "Director",
+            "DVD",
+            "Genre",
+            "imdbID",
+            "imdbRating",
+            "imdbVotes",
+            "Language",
+            "Metascore",
+            "Plot",
+            "Poster",
+            "Production",
+            "Rated",
+            "Ratings",
+            "Released",
+            "Response",
+            "Runtime",
+            "Title",
+            "Type",
+            "Website",
+            "Writer",
+            "Year",
+        }
+        result = omdb_title(
+            API_KEY_OMDB, media_type="movie", title="ninja turtles"
+        )
+        self.assertSetEqual(expected_top_level_keys, set(result.keys()))
+        self.assertTrue(result["Response"])
+        self.assertEqual("movie", result["Type"])
+        self.assertEqual("Teenage Mutant Ninja Turtles", result["Title"])
+
+    def test_media_type__series(self):
+        expected_top_level_keys = {
+            "Actors",
+            "Awards",
+            "Country",
+            "Director",
+            "Genre",
+            "imdbID",
+            "imdbRating",
+            "imdbVotes",
+            "Language",
+            "Metascore",
+            "Plot",
+            "Poster",
+            "Rated",
+            "Ratings",
+            "Released",
+            "Response",
+            "Runtime",
+            "Title",
+            "totalSeasons",
+            "Type",
+            "Writer",
+            "Year",
+        }
+
+        result = omdb_title(
+            API_KEY_OMDB, media_type="series", title="ninja turtles"
+        )
+        self.assertSetEqual(expected_top_level_keys, set(result.keys()))
+        self.assertTrue(result["Response"])
+        self.assertEqual("series", result["Type"])
+        self.assertEqual("Teenage Mutant Ninja Turtles", result["Title"])
+
+    def test_media_type__junk(self):
+        with self.assertRaises(MapiProviderException):
+            omdb_title(API_KEY_OMDB, media_type="yolo", title="ninja turtles")
+
+    def test_api_key_fail(self):
+        with self.assertRaises(MapiProviderException):
+            omdb_title(JUNK_TEXT, "")
+
+    def test_id_imdb_fail(self):
+        with self.assertRaises(MapiProviderException):
+            tmdb_movies(API_KEY_OMDB, "")
+
+    def test_not_found(self):
+        with self.assertRaises(MapiNotFoundException):
+            tmdb_movies(API_KEY_TMDB, "1" * 10)
 
 
 class TestTmdbFind(TestCase):
