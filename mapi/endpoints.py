@@ -17,6 +17,32 @@ from mapi.exceptions import (
     MapiProviderException,
 )
 
+# User agent constants
+AGENT_CHROME = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/601.1"
+    " (KHTML, like Gecko) CriOS/53.0.2785.86 Mobile/14A403 Safari/601.1.46"
+)
+AGENT_EDGE = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
+    "Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"
+)
+AGENT_IOS = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) "
+    "AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 "
+    "Safari/602.1"
+)
+AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
+
+# Setup requests caching
+SESSION = requests_cache.CachedSession(
+    cache_name=user_cache_dir() + "/mapi-py%d" % version_info.major,
+    expire_after=604800,
+)
+
+OMDB_MEDIA_TYPES = {"movie", "series"}
+
+OMDB_PLOT_TYPES = {"short", "long"}
+
 TVDB_LANGUAGE_CODES = [
     "cs",
     "da",
@@ -42,30 +68,6 @@ TVDB_LANGUAGE_CODES = [
     "tr",
     "zh",
 ]
-
-# User agent constants
-AGENT_CHROME = (
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/601.1"
-    " (KHTML, like Gecko) CriOS/53.0.2785.86 Mobile/14A403 Safari/601.1.46"
-)
-AGENT_EDGE = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
-    "Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"
-)
-AGENT_IOS = (
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) "
-    "AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 "
-    "Safari/602.1"
-)
-AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
-
-# Setup requests caching
-SESSION = requests_cache.CachedSession(
-    cache_name=user_cache_dir() + "/mapi-py%d" % version_info.major,
-    expire_after=604800,
-)
-
-OMDB_MEDIA_TYPES = {"movie", "series", "episode"}
 
 
 def _clean_dict(target_dict, whitelist=None):
@@ -167,6 +169,81 @@ def _request_json(
         SESSION._is_cache_disabled = initial_cache_state
 
     return status, content
+
+
+def omdb_title(
+    api_key,
+    id_imdb=None,
+    media_type=None,
+    title=None,
+    year=None,
+    plot=None,
+    cache=True,
+):
+    """
+    Lookup media using the Open Movie Database
+
+    Online docs: http://www.omdbapi.com/#parameters
+    """
+    if (not title and not id_imdb) or (title and id_imdb):
+        raise MapiProviderException("either id_imdb or title must be specified")
+    elif media_type and media_type not in OMDB_MEDIA_TYPES:
+        raise MapiProviderException(
+            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
+        )
+    elif plot and plot not in OMDB_PLOT_TYPES:
+        raise MapiProviderException(
+            "plot must be one of %s" % ",".join(OMDB_PLOT_TYPES)
+        )
+    url = "http://www.omdbapi.com"
+    parameters = {
+        "apikey": api_key,
+        "i": id_imdb,
+        "t": title,
+        "y": year,
+        "type": media_type,
+        "plot": plot,
+    }
+    status, content = _request_json(url, parameters, cache=cache)
+    error = content.get("Error")
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("OMDb down or unavailable?")
+    elif error:
+        raise MapiProviderException(error)
+    return content
+
+
+def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
+    """
+    Search for media using the Open Movie Database
+
+    Online docs: http://www.omdbapi.com/#parameters
+    """
+    if media_type and media_type not in OMDB_MEDIA_TYPES:
+        raise MapiProviderException(
+            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
+        )
+    if 1 > page > 100:
+        raise MapiProviderException("page must be between 1 and 100")
+    url = "http://www.omdbapi.com"
+    parameters = {
+        "apikey": api_key,
+        "s": query,
+        "y": year,
+        "type": media_type,
+        "page": page,
+    }
+    status, content = _request_json(url, parameters, cache=cache)
+    error = content.get("Error")
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("OMDb down or unavailable?")
+    elif error:
+        raise MapiProviderException(error)
+    return content
 
 
 def tmdb_find(
@@ -428,75 +505,4 @@ def tvdb_search_series(
         raise MapiNotFoundException
     elif status != 200 or not content.get("data"):  # pragma: no cover
         raise MapiNetworkException("TVDb down or unavailable?")
-    return content
-
-
-def omdb_title(
-    api_key,
-    id_imdb=None,
-    title=None,
-    year=None,
-    media_type=None,
-    plot="short",
-    cache=True,
-):
-    """
-    Lookup media using the Open Movie Database
-
-    Online docs: http://www.omdbapi.com/#parameters
-    """
-    if not title or id_imdb and title or not id_imdb:  # xnor
-        raise MapiProviderException("either id_imdb or title must be specified")
-    elif media_type and media_type not in OMDB_MEDIA_TYPES:
-        raise MapiProviderException(
-            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
-        )
-    url = "http://www.omdbapi.com"
-    parameters = {
-        "apikey": api_key,
-        "i": id_imdb,
-        "t": title,
-        "y": year,
-        "type": media_type,
-        "plot": plot,
-    }
-    status, content = _request_json(url, parameters, cache=cache)
-    error = content.get("Error")
-    if status == 401:
-        raise MapiProviderException("invalid API key")
-    elif status != 200 or not any(content.keys()):  # pragma: no cover
-        raise MapiNetworkException("OMDb down or unavailable?")
-    elif error:
-        raise MapiProviderException(error)
-    return content
-
-
-def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
-    """
-    Search for media using the Open Movie Database
-
-    Online docs: http://www.omdbapi.com/#parameters
-    """
-    if media_type and media_type not in OMDB_MEDIA_TYPES:
-        raise MapiProviderException(
-            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
-        )
-    if 1 > page > 100:
-        raise MapiProviderException("page must be between 1 and 100")
-    url = "http://www.omdbapi.com"
-    parameters = {
-        "apikey": api_key,
-        "s": query,
-        "y": year,
-        "type": media_type,
-        "page": page,
-    }
-    status, content = _request_json(url, parameters, cache=cache)
-    error = content.get("Error")
-    if status == 401:
-        raise MapiProviderException("invalid API key")
-    elif status != 200 or not any(content.keys()):  # pragma: no cover
-        raise MapiNetworkException("OMDb down or unavailable?")
-    elif error:
-        raise MapiProviderException(error)
     return content
