@@ -15,13 +15,15 @@ See https://github.com/jkwill87/mapi for more information.
 
 """
 
-import logging as _logging
-import sys as _sys
+import logging
+import sys
+
+__all__ = ["log", "ustr"]
 
 # Set up logging
-log = _logging.getLogger(__name__)
-log.addHandler((_logging.StreamHandler()))
-log.setLevel(_logging.DEBUG if "pydevd" in _sys.modules else _logging.ERROR)
-_logging.getLogger("requests").setLevel(_logging.CRITICAL)
+log = logging.getLogger(__name__)
+log.addHandler((logging.StreamHandler()))
+log.setLevel(logging.DEBUG if "pydevd" in sys.modules else logging.ERROR)
+logging.getLogger("requests").setLevel(logging.CRITICAL)
 
 ustr = type(u"")  # unicode string type
