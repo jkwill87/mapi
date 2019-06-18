@@ -15,9 +15,7 @@ except ImportError:  # pragma: no cover
     from collections import MutableMapping
 
 DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
-
 EXTRA_FIELDS = {"extension", "group", "quality"}
-
 NUMERIC_FIELDS = {"season", "episode"}
 
 
@@ -43,7 +41,8 @@ class Metadata(MutableMapping):
     def __delitem__(self, key):
         self[key] = None
 
-    def __format__(self, format_spec="{title}"):
+    def __format__(self, format_spec):
+        format_spec = format_spec or "{title}"
         re_pattern = r"({(\w+)(?:\:\d{1,2})?})"
         s = sub(re_pattern, self._format_repl, format_spec)
         s = self._str_fix_whitespace(s)
@@ -272,8 +271,13 @@ class MetadataTelevision(Metadata):
         super(MetadataTelevision, self).__init__(**params)
         self._dict["media"] = "television"
 
+    def __format__(self, format_spec):
+        return super().__format__(
+            format_spec or "{series} - {season:02}x{episode:02} - {title}"
+        )
+
     def __str__(self):
-        return self.__format__("{series} - {season:02}x{episode:02} - {title}")
+        return self.__format__(None)
 
 
 class MetadataMovie(Metadata):
@@ -286,5 +290,8 @@ class MetadataMovie(Metadata):
         super(MetadataMovie, self).__init__(**params)
         self._dict["media"] = "movie"
 
+    def __format__(self, format_spec):
+        return super().__format__(format_spec or "{title} ({year})")
+
     def __str__(self):
-        return self.__format__("{title} ({year})")
+        return self.__format__(None)
