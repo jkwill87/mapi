@@ -115,7 +115,7 @@ def _request_json(
     assert url
     content = None
     status = 500
-    log.info("url: %s" % url)
+    log.info("url: %s", url)
 
     if isinstance(headers, dict):
         headers = _clean_dict(headers)
@@ -159,12 +159,12 @@ def _request_json(
                 url, parameters, body, headers, False, agent, 0
             )
     else:
-        log.info("method: %s" % method)
-        log.info("headers: %r" % headers)
-        log.info("parameters: %r" % parameters)
-        log.info("cache: %r" % cache)
-        log.info("status: %d" % status)
-        log.debug("content: %s" % content)
+        log.info("method: %s", method)
+        log.info("headers: %r", headers)
+        log.info("parameters: %r", parameters)
+        log.info("cache: %r", cache)
+        log.info("status: %d", status)
+        log.debug("content: %s", content)
     finally:
         SESSION._is_cache_disabled = initial_cache_state
 
