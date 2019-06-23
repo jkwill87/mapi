@@ -211,11 +211,13 @@ class TestRequestJson(TestCase):
 
     @ignore_warnings
     @patch("mapi.endpoints.requests_cache.CachedSession.request")
-    @patch("mapi.endpoints.SESSION.cache.clear")
-    def test_retry(self, mock_clear, mock_request):
+    @patch("mapi.endpoints.clear_cache")
+    def test_request_failure(self, mock_clear_cache, mock_request):
         mock_request.side_effect = Exception
-        _request_json(url="http://google.com")
-        mock_clear.assert_called_once_with()
+        status, content = _request_json(url="http://google.com")
+        self.assertEqual(status, 500)
+        self.assertIsNone(content)
+        mock_clear_cache.assert_called_once_with()
 
 
 class TestCleanDict(TestCase):
@@ -450,10 +452,6 @@ class TestTmdbFind(TestCase):
     def test_not_found(self):
         with self.assertRaises(MapiNotFoundException):
             tmdb_find(API_KEY_TMDB, "imdb_id", JUNK_IMDB_ID)
-
-    def test_invalid_provider(self):
-        with self.assertRaises(MapiProviderException):
-            tmdb_find(API_KEY_TMDB, JUNK_TEXT, GOONIES_IMDB_ID)
 
 
 class TestTmdbMovies(TestCase):
