@@ -1,8 +1,9 @@
 # coding=utf-8
 
-""" Stand-alone functions which have a 1:1 mapping to that of API endpoints
+""" Standalone functions which have a 1:1 mapping to that of API endpoints
 """
 import random
+from os.path import join
 from re import match
 from sys import version_info
 
@@ -17,30 +18,9 @@ from mapi.exceptions import (
     MapiProviderException,
 )
 
-# User agent constants
-AGENT_CHROME = (
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/601.1"
-    " (KHTML, like Gecko) CriOS/53.0.2785.86 Mobile/14A403 Safari/601.1.46"
-)
-AGENT_EDGE = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
-    "Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"
-)
-AGENT_IOS = (
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) "
-    "AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 "
-    "Safari/602.1"
-)
-AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
-
-# Setup requests caching
-SESSION = requests_cache.CachedSession(
-    cache_name=user_cache_dir() + "/mapi-py%d" % version_info.major,
-    expire_after=604800,
-)
+CACHE_PATH = join(user_cache_dir(), "mapi-py%d.sqlite" % version_info.major)
 
 OMDB_MEDIA_TYPES = {"movie", "series"}
-
 OMDB_PLOT_TYPES = {"short", "long"}
 
 TVDB_LANGUAGE_CODES = [
@@ -69,6 +49,22 @@ TVDB_LANGUAGE_CODES = [
     "zh",
 ]
 
+# User agent constants
+AGENT_CHROME = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/601.1"
+    " (KHTML, like Gecko) CriOS/53.0.2785.86 Mobile/14A403 Safari/601.1.46"
+)
+AGENT_EDGE = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
+    "Gecko) Chrome/51.0.2704.79 Safari/537.36 Edge/14.14393"
+)
+AGENT_IOS = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 10_0_1 like Mac OS X) "
+    "AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 "
+    "Safari/602.1"
+)
+AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
+
 
 def _clean_dict(target_dict, whitelist=None):
     """ Convenience function that removes a dicts keys that have falsy values
@@ -86,6 +82,16 @@ def _d2l(d):
     """ Convenience function that converts a dict into a sorted list of tuples
     """
     return sorted([(k, v) for k, v in d.items()])
+
+
+def _get_session():
+    """ Convenience function that returns request-cache session singleton
+    """
+    if not hasattr(_get_session, "session"):
+        _get_session.session = requests_cache.CachedSession(
+            cache_name=CACHE_PATH.rstrip(".sqlite"), expire_after=604800
+        )
+    return _get_session.session
 
 
 def _get_user_agent(platform=None):
@@ -115,6 +121,9 @@ def _request_json(
     assert url
     content = None
     status = 500
+    session = _get_session()
+
+    log.info("-" * 80)
     log.info("url: %s", url)
 
     if isinstance(headers, dict):
@@ -132,10 +141,10 @@ def _request_json(
         method = "GET"
         headers["user-agent"] = _get_user_agent(agent)
 
-    initial_cache_state = SESSION._is_cache_disabled  # yes, i'm a bad person
+    initial_cache_state = session._is_cache_disabled  # yes, i'm a bad person
     try:
-        SESSION._is_cache_disabled = not cache
-        response = SESSION.request(
+        session._is_cache_disabled = not cache
+        response = session.request(
             url=url,
             params=parameters,
             json=body,
@@ -148,27 +157,33 @@ def _request_json(
         cache = getattr(response, "from_cache", False)
     except RequestException as e:
         log.debug(e, exc_info=True)
-        return _request_json(
-            url, parameters, body, headers, cache, agent, reattempt - 1
-        )
+        if reattempt:
+            return _request_json(
+                url, parameters, body, headers, cache, agent, reattempt - 1
+            )
+        else:
+            raise MapiNetworkException("Max retries exceeded")
     except Exception as e:
         log.error(e, exc_info=True)
-        if reattempt > 0:
-            SESSION.cache.clear()
+        if reattempt:
+            session.cache.clear()
             return _request_json(
                 url, parameters, body, headers, False, agent, 0
             )
     else:
-        log.info("method: %s", method)
-        log.info("headers: %r", headers)
-        log.info("parameters: %r", parameters)
-        log.info("cache: %r", cache)
+        log.debug("method: %s", method)
+        log.debug("headers: %r", headers)
+        log.debug("parameters: %r", parameters)
+        log.debug("cache: %r", cache)
         log.info("status: %d", status)
         log.debug("content: %s", content)
     finally:
-        SESSION._is_cache_disabled = initial_cache_state
-
+        session._is_cache_disabled = initial_cache_state
     return status, content
+
+
+def clear_cache():
+    _get_session().cache.clear()
 
 
 def omdb_title(
@@ -236,13 +251,12 @@ def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
         "page": page,
     }
     status, content = _request_json(url, parameters, cache=cache)
-    error = content.get("Error")
     if status == 401:
         raise MapiProviderException("invalid API key")
-    elif status != 200 or not any(content.keys()):  # pragma: no cover
+    elif content and not content.get("totalResults"):
+        raise MapiNotFoundException()
+    elif not content or status != 200:  # pragma: no cover
         raise MapiNetworkException("OMDb down or unavailable?")
-    elif error:
-        raise MapiProviderException(error)
     return content
 
 
@@ -449,7 +463,7 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang="en", cache=True):
 def tvdb_series_episodes_query(
     token, id_tvdb, episode=None, season=None, page=1, lang="en", cache=True
 ):
-    """ This route allows the user to query against episodes for the given series
+    """ Allows the user to query against episodes for the given series
 
     Note: Paginated with 100 results per page; omitted imdbId, when would you
     ever need to query against both tvdb and imdb series ids??

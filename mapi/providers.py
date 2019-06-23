@@ -15,12 +15,13 @@ from mapi.exceptions import (
 )
 from mapi.metadata import MetadataMovie, MetadataTelevision
 
+API_TELEVISION = {"tvdb", "omdb"}
+API_MOVIE = {"tmdb", "omdb"}
+API_ALL = API_TELEVISION | API_MOVIE
+DATE_FORMAT = r"(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?"
+
 # Compatibility for Python 2.7/3+
 _AbstractClass = ABCMeta("ABC", (object,), {"__slots__": ()})
-
-API_TELEVISION = {"tvdb"}
-API_MOVIE = {"tmdb"}
-API_ALL = API_TELEVISION | API_MOVIE
 
 
 def has_provider(provider):
@@ -41,8 +42,9 @@ def has_provider_support(provider, media_type):
 def provider_factory(provider, **options):
     """ Factory function for DB Provider Concrete Classes
     """
+    providers = {"tmdb": TMDb, "tvdb": TVDb, "omdb": OMDb}
     try:
-        return {"tmdb": TMDb, "tvdb": TVDb}[provider.lower()](**options)
+        return providers[provider.lower()](**options)
     except KeyError:
         msg = "Attempted to initialize non-existing DB Provider"
         log.error(msg)
@@ -184,7 +186,10 @@ class TVDb(Provider):
         super(TVDb, self).__init__(**options)
         if not self.api_key:
             raise MapiProviderException("TVDb requires an API key")
-        self.token = endpoints.tvdb_login(self.api_key)
+        self.token = "" if self.cache else self._login()
+
+    def _login(self):
+        return endpoints.tvdb_login(self.api_key)
 
     def search(self, id_key=None, **parameters):
         """ Searches TVDb for movie metadata
@@ -198,25 +203,35 @@ class TVDb(Provider):
         series = parameters.get("series")
         date = parameters.get("date")
 
-        if id_tvdb:
-            for result in self._search_id_tvdb(id_tvdb, season, episode):
-                yield result
-        elif id_imdb:
-            for result in self._search_id_imdb(id_imdb, season, episode):
-                yield result
-        elif series and date:
-            if not match(
-                r"(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?",
-                date,
-            ):
-                raise MapiProviderException("Date must be in YYYY-MM-DD format")
-            for result in self._search_series_date(series, date):
-                yield result
-        elif series:
-            for result in self._search_series(series, season, episode):
-                yield result
-        else:
-            raise MapiNotFoundException
+        try:
+            if id_tvdb:
+                for result in self._search_id_tvdb(id_tvdb, season, episode):
+                    yield result
+            elif id_imdb:
+                for result in self._search_id_imdb(id_imdb, season, episode):
+                    yield result
+            elif series and date:
+                if not match(DATE_FORMAT, date):
+                    raise MapiProviderException(
+                        "Date format must be YYYY-MM-DD"
+                    )
+                for result in self._search_series_date(series, date):
+                    yield result
+            elif series:
+                for result in self._search_series(series, season, episode):
+                    yield result
+            else:
+                raise MapiNotFoundException
+        except MapiProviderException as e:
+            if not self.token:
+                log.info(
+                    "Result not cached; logging in and reattempting search"
+                )
+                self.token = self._login()
+                for result in self.search(id_key, **parameters):
+                    yield result
+            else:
+                raise e
 
     def _search_id_imdb(self, id_imdb, season=None, episode=None):
         series_data = endpoints.tvdb_search_series(
