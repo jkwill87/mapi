@@ -272,7 +272,7 @@ class MetadataTelevision(Metadata):
         self._dict["media"] = "television"
 
     def __format__(self, format_spec):
-        return super().__format__(
+        return super(MetadataTelevision, self).__format__(
             format_spec or "{series} - {season:02}x{episode:02} - {title}"
         )
 
@@ -291,7 +291,9 @@ class MetadataMovie(Metadata):
         self._dict["media"] = "movie"
 
     def __format__(self, format_spec):
-        return super().__format__(format_spec or "{title} ({year})")
+        return super(MetadataMovie, self).__format__(
+            format_spec or "{title} ({year})"
+        )
 
     def __str__(self):
         return self.__format__(None)
