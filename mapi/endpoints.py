@@ -10,6 +10,7 @@ from sys import version_info
 import requests_cache
 from appdirs import user_cache_dir
 from requests import RequestException
+from requests.adapters import HTTPAdapter
 
 from mapi import log, ustr
 from mapi.exceptions import (
@@ -91,6 +92,9 @@ def _get_session():
         _get_session.session = requests_cache.CachedSession(
             cache_name=CACHE_PATH.rstrip(".sqlite"), expire_after=604800
         )
+        adapter = HTTPAdapter(max_retries=3)
+        _get_session.session.mount("http://", adapter)
+        _get_session.session.mount("https://", adapter)
     return _get_session.session
 
 
@@ -105,13 +109,7 @@ def _get_user_agent(platform=None):
 
 
 def _request_json(
-    url,
-    parameters=None,
-    body=None,
-    headers=None,
-    cache=True,
-    agent=None,
-    reattempt=5,
+    url, parameters=None, body=None, headers=None, cache=True, agent=None
 ):
     """ Queries a url for json data
 
@@ -157,19 +155,9 @@ def _request_json(
         cache = getattr(response, "from_cache", False)
     except RequestException as e:
         log.debug(e, exc_info=True)
-        if reattempt:
-            return _request_json(
-                url, parameters, body, headers, cache, agent, reattempt - 1
-            )
-        else:
-            raise MapiNetworkException("Max retries exceeded")
     except Exception as e:
-        log.error(e, exc_info=True)
-        if reattempt:
-            session.cache.clear()
-            return _request_json(
-                url, parameters, body, headers, False, agent, 0
-            )
+        log.debug(e, exc_info=True)
+        clear_cache()
     else:
         log.debug("method: %s", method)
         log.debug("headers: %r", headers)
