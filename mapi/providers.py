@@ -344,3 +344,9 @@ class TVDb(Provider):
                 page += 1
         if not found:
             raise MapiNotFoundException
+
+
+class OMDb(Provider):
+    """
+    Queries the OMDb API
+    """
