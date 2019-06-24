@@ -1,12 +1,12 @@
 -r requirements.txt
 autopep8
 codecov
-coverage
 future
 mock;python_version<"3"
 pylint
 pypandoc
 pytest
+pytest-cov
 rope
 setuptools>=38.6.0
 twine>=1.11.0
