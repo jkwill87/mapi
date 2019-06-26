@@ -1,14 +1,9 @@
--r requirements.txt
+-r requirements-testing.txt
 autopep8
-codecov
 future
-mock;python_version<"3"
 pylint
 pypandoc
-pytest
-pytest-cov
 rope
 setuptools>=38.6.0
 twine>=1.11.0
-unittest2;python_version<"3"
 wheel>=0.31.0
