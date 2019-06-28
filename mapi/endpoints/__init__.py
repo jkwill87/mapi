@@ -124,8 +124,7 @@ def request_json(
 
     initial_cache_state = session._is_cache_disabled  # yes, i'm a bad person
     try:
-        # session._is_cache_disabled = not cache
-        session._is_cache_disabled = True
+        session._is_cache_disabled = not cache
         response = session.request(
             url=url,
             params=parameters,
