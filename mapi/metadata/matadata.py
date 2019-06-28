@@ -7,12 +7,10 @@ from datetime import datetime as dt
 from re import sub
 from string import Formatter, capwords
 
-from mapi import ustr
+from mapi.compatibility import MutableMapping, ustr
 
-try:  # pragma: no cover
-    from collections.abc import MutableMapping
-except ImportError:  # pragma: no cover
-    from collections import MutableMapping
+__all__ = ["Metadata", "DEFAULT_FIELDS", "EXTRA_FIELDS", "NUMERIC_FIELDS"]
+
 
 DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
 EXTRA_FIELDS = {"extension", "group", "quality"}
@@ -253,47 +251,3 @@ class Metadata(MutableMapping):
             if left_partitioned and right_partitioned:
                 s = s[:pos] + exception.upper() + s[pos + word_length :]
         return s
-
-
-class MetadataTelevision(Metadata):
-    """ Television Metadata class
-    """
-
-    fields = Metadata.fields | {
-        "episode",
-        "id_imdb",
-        "id_tvdb",
-        "season",
-        "series",
-    }
-
-    def __init__(self, **params):
-        super(MetadataTelevision, self).__init__(**params)
-        self._dict["media"] = "television"
-
-    def __format__(self, format_spec):
-        return super(MetadataTelevision, self).__format__(
-            format_spec or "{series} - {season:02}x{episode:02} - {title}"
-        )
-
-    def __str__(self):
-        return self.__format__(None)
-
-
-class MetadataMovie(Metadata):
-    """ Movie Metadata class
-    """
-
-    fields = Metadata.fields | {"id_imdb", "id_tmdb"}
-
-    def __init__(self, **params):
-        super(MetadataMovie, self).__init__(**params)
-        self._dict["media"] = "movie"
-
-    def __format__(self, format_spec):
-        return super(MetadataMovie, self).__format__(
-            format_spec or "{title} ({year})"
-        )
-
-    def __str__(self):
-        return self.__format__(None)
