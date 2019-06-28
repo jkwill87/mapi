@@ -38,25 +38,25 @@ class TVDb(Provider):
         date_fmt = r"(19|20)\d{2}(-(?:0[1-9]|1[012])(-(?:[012][1-9]|3[01]))?)?"
 
         try:
-            if id_tvdb:
-                for result in self._search_id_tvdb(id_tvdb, season, episode):
-                    yield result
+            if id_tvdb and date:
+                results = self._search_tvdb_date(id_tvdb, date)
+            elif id_tvdb:
+                results = self._search_id_tvdb(id_tvdb, season, episode)
             elif id_imdb:
-                for result in self._search_id_imdb(id_imdb, season, episode):
-                    yield result
+                results = self._search_id_imdb(id_imdb, season, episode)
             elif series and date:
                 if not re.match(date_fmt, date):
                     raise MapiProviderException(
                         "Date format must be YYYY-MM-DD"
                     )
-                for result in self._search_series_date(series, date):
-                    yield result
+                results = self._search_series_date(series, date)
             elif series:
-                for result in self._search_series(series, season, episode):
-                    yield result
+                results = self._search_series(series, season, episode)
             else:
                 raise MapiNotFoundException
-        except MapiProviderException as e:
+            for result in results:
+                yield result
+        except MapiProviderException:
             if not self.token:
                 log.info(
                     "Result not cached; logging in and reattempting search"
@@ -65,7 +65,7 @@ class TVDb(Provider):
                 for result in self.search(id_key, **parameters):
                     yield result
             else:
-                raise e
+                raise
 
     def _search_id_imdb(self, id_imdb, season=None, episode=None):
         series_data = tvdb_search_series(
@@ -79,10 +79,14 @@ class TVDb(Provider):
         found = False
         series_data = tvdb_series_id(self.token, id_tvdb, cache=self.cache)
         page = 1
-        page_max = 5
         while True:
             episode_data = tvdb_series_id_episodes_query(
-                self.token, id_tvdb, episode, season, cache=self.cache
+                self.token,
+                id_tvdb,
+                episode,
+                season,
+                page=page,
+                cache=self.cache,
             )
             for entry in episode_data["data"]:
                 try:
@@ -104,8 +108,6 @@ class TVDb(Provider):
                     continue
             if page == episode_data["links"]["last"]:
                 break
-            elif page >= page_max:
-                break
             page += 1
         if not found:
             raise MapiNotFoundException
@@ -125,50 +127,26 @@ class TVDb(Provider):
         if not found:
             raise MapiNotFoundException
 
+    def _search_tvdb_date(self, id_tvdb, date):
+        found = False
+        for meta in self._search_id_tvdb(id_tvdb):
+            if meta["date"] and meta["date"].startswith(date):
+                found = True
+                yield meta
+        if not found:
+            raise MapiNotFoundException
+
     def _search_series_date(self, series, date):
         assert series and date
-        found = False
         series_data = tvdb_search_series(self.token, series, cache=self.cache)
-        series_entries = {
-            entry["id"]: entry["seriesName"]
-            for entry in series_data["data"][:5]
-        }
-        page = 1
-        page_max = 100
-        for id_tvdb, series_name in series_entries.items():
-            while True:
-                try:
-                    response = tvdb_series_id_episodes(
-                        self.token, id_tvdb, page, cache=self.cache
-                    )
-                except MapiNotFoundException:
-                    break
-                for entry in response["data"]:
-                    if not entry["firstAired"].startswith(date):
-                        continue
-                    try:
-                        yield MetadataTelevision(
-                            series=series_name,
-                            season=ustr(entry["airedSeason"]),
-                            episode=ustr(entry["airedEpisodeNumber"]),
-                            date=entry["firstAired"],
-                            title=entry["episodeName"].split(";", 1)[0],
-                            synopsis=ustr(entry["overview"])
-                            .replace("\r\n", "")
-                            .replace("  ", "")
-                            .strip(),
-                            media="television",
-                            id_tvdb=ustr(entry["airedSeasonID"]),
-                        )
-                        found = True
-                    except (AttributeError, ValueError):
-                        continue
-                if page == response["links"]["last"]:
-                    break
-                elif page >= page_max:
-                    break
-                elif found and len(date) == 10:
-                    break
-                page += 1
+        tvdb_ids = [entry["id"] for entry in series_data["data"]][:5]
+        found = False
+        for tvdb_id in tvdb_ids:
+            try:
+                for result in self._search_tvdb_date(tvdb_id, date):
+                    yield result
+                found = True
+            except MapiNotFoundException:
+                continue
         if not found:
             raise MapiNotFoundException
