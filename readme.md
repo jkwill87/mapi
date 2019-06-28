@@ -13,12 +13,13 @@ mapi (**M**etadata **API**) is a python library which provides a high-level inte
 
 # Installation
 
-`$ pip install mapi`
+- `$ pip install mapi`
 
 
 # Running Tests
 
-`$ python -m unittest discover`
+- `$ pip install -r requirements-testing.txt`
+- `$ python -m pytest`
 
 **Notes:**
 - Run `pip install -r requirements-dev.txt` first to install testing dependencies
@@ -118,7 +119,7 @@ pprint(dict(next(results)))
 
 ## Handling a search gone awry
 
-Not all searches yield results; maybe you had a typo, maybe the data just isn't there, either way theres no need to fret, this can be handled gracefully using exception handling:
+Not all searches yield results; maybe you had a typo, maybe the data just isn't there, either way there is no need to fret, this can be handled gracefully using exception handling:
 
 ```python
 from mapi.exceptions import MapiNotFoundException

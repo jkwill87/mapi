@@ -47,11 +47,12 @@ def omdb_title(
         "type": media_type,
         "plot": plot,
     }
+
     status, content = request_json(url, parameters, cache=cache)
-    error = content.get("Error")
+    error = content.get("Error") if isinstance(content, dict) else None
     if status == 401:
         raise MapiProviderException("invalid API key")
-    elif status != 200 or not any(content.keys()):  # pragma: no cover
+    elif status != 200 or not isinstance(content, dict):
         raise MapiNetworkException("OMDb down or unavailable?")
     elif error:
         raise MapiProviderException(error)
