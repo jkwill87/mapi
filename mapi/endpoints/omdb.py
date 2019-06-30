@@ -1,16 +1,16 @@
 # coding=utf-8
 
-from mapi.endpoints import request_json
 from mapi.exceptions import (
     MapiNetworkException,
     MapiNotFoundException,
     MapiProviderException,
 )
+from mapi.utils import clean_dict, request_json
 
 __all__ = ["OMDB_PLOT_TYPES", "OMDB_MEDIA_TYPES", "omdb_search", "omdb_title"]
 
 
-OMDB_MEDIA_TYPES = {"movie", "series"}
+OMDB_MEDIA_TYPES = {"episode", "movie", "series"}
 OMDB_PLOT_TYPES = {"short", "long"}
 
 
@@ -19,6 +19,8 @@ def omdb_title(
     id_imdb=None,
     media_type=None,
     title=None,
+    season=None,
+    episode=None,
     year=None,
     plot=None,
     cache=True,
@@ -44,10 +46,12 @@ def omdb_title(
         "i": id_imdb,
         "t": title,
         "y": year,
+        "season": season,
+        "episode": episode,
         "type": media_type,
         "plot": plot,
     }
-
+    parameters = clean_dict(parameters)
     status, content = request_json(url, parameters, cache=cache)
     error = content.get("Error") if isinstance(content, dict) else None
     if status == 401:
@@ -79,6 +83,7 @@ def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
         "type": media_type,
         "page": page,
     }
+    parameters = clean_dict(parameters)
     status, content = request_json(url, parameters, cache=cache)
     if status == 401:
         raise MapiProviderException("invalid API key")

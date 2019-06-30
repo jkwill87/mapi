@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 
-API_TELEVISION = {"tvdb", "omdb"}
+API_TELEVISION = {"tvdb"}
 API_MOVIE = {"tmdb", "omdb"}
 API_ALL = API_TELEVISION | API_MOVIE
 
