@@ -103,8 +103,6 @@ def request_json(
     transparently by using the package's monkey patching
     """
     assert url
-    content = None
-    status = 500
     session = get_session()
 
     log.info("-" * 80)
@@ -140,6 +138,8 @@ def request_json(
         content = response.json() if status // 100 == 2 else None
         cache = getattr(response, "from_cache", False)
     except Exception as e:
+        content = None
+        status = 500
         log.debug(e, exc_info=True)
     else:
         log.debug("method: %s", method)
