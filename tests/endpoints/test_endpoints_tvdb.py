@@ -8,7 +8,6 @@ import pytest
 from mapi.endpoints.tvdb import *
 from tests import JUNK_TEXT
 
-
 LOST_IMDB_ID_SERIES = "tt0411008"
 LOST_TVDB_ID_EPISODE = 127131
 LOST_TVDB_ID_SERIES = 73739

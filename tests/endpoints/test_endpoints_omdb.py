@@ -7,7 +7,7 @@ import pytest
 from mock import patch
 
 from mapi.endpoints.omdb import *
-from mapi.exceptions import MapiProviderException, MapiNotFoundException
+from mapi.exceptions import MapiNotFoundException, MapiProviderException
 from tests import JUNK_TEXT, MockRequestResponse
 
 

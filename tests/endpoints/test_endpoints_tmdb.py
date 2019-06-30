@@ -9,7 +9,6 @@ from mapi.endpoints.tmdb import *
 from mapi.exceptions import MapiProviderException
 from tests import JUNK_TEXT
 
-
 GOONIES_IMDB_ID = "tt0089218"
 GOONIES_TMDB_ID = 9340
 JUNK_IMDB_ID = "tt1234567890"

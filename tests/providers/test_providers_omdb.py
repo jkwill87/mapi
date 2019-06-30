@@ -3,7 +3,4 @@
 """ Unit tests for mapi/providers/omdb.py
 """
 
-import pytest
-
-
 # TODO ...
