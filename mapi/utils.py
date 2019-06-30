@@ -16,17 +16,18 @@ from mapi import log
 from mapi.compatibility import ustr
 
 __all__ = [
+    "AGENT_ALL",
     "AGENT_CHROME",
     "AGENT_EDGE",
     "AGENT_IOS",
-    "AGENT_ALL",
     "CACHE_PATH",
-    "clear_cache",
     "clean_dict",
+    "clear_cache",
     "d2l",
     "get_session",
     "get_user_agent",
     "request_json",
+    "year_expand",
 ]
 
 AGENT_CHROME = (
@@ -46,12 +47,6 @@ AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
 CACHE_PATH = join(user_cache_dir(), "mapi-py%d.sqlite" % version_info.major)
 
 
-def clear_cache():
-    """ Clears requests-cache cache
-    """
-    get_session().cache.clear()
-
-
 def clean_dict(target_dict, whitelist=None):
     """ Convenience function that removes a dicts keys that have falsy values
     """
@@ -62,6 +57,12 @@ def clean_dict(target_dict, whitelist=None):
         if v not in (None, Ellipsis, [], (), "")
         and (not whitelist or k in whitelist)
     }
+
+
+def clear_cache():
+    """ Clears requests-cache cache
+    """
+    get_session().cache.clear()
 
 
 def d2l(d):
