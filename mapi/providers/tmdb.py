@@ -4,6 +4,7 @@ from mapi.compatibility import ustr
 from mapi.endpoints.tmdb import *
 from mapi.metadata import MetadataMovie
 from mapi.providers import Provider
+from mapi.utils import year_expand
 
 __all__ = ["TMDb"]
 
@@ -26,20 +27,21 @@ class TMDb(Provider):
         year = parameters.get("year")
 
         if id_tmdb:
-            yield self._search_id_tmdb(id_tmdb)
+            results = self._search_id_tmdb(id_tmdb)
         elif id_imdb:
-            yield self._search_id_imdb(id_imdb)
+            results = self._search_id_imdb(id_imdb)
         elif title:
-            for result in self._search_title(title, year):
-                yield result
+            results = self._search_title(title, year)
         else:
             raise MapiNotFoundException
+        for result in results:
+            yield result
 
     def _search_id_imdb(self, id_imdb):
         response = tmdb_find(
             self.api_key, "imdb_id", id_imdb, cache=self.cache
         )["movie_results"][0]
-        return MetadataMovie(
+        yield MetadataMovie(
             title=response["title"],
             date=response["release_date"],
             synopsis=response["overview"],
@@ -50,7 +52,7 @@ class TMDb(Provider):
     def _search_id_tmdb(self, id_tmdb):
         assert id_tmdb
         response = tmdb_movies(self.api_key, id_tmdb, cache=self.cache)
-        return MetadataMovie(
+        yield MetadataMovie(
             title=response["title"],
             date=response["release_date"],
             synopsis=response["overview"],
@@ -61,9 +63,9 @@ class TMDb(Provider):
     def _search_title(self, title, year):
         assert title
         found = False
-        year_from, year_to = self._year_expand(year)
+        year_from, year_to = year_expand(year)
         page = 1
-        page_max = 10  # each page yields max of 20 results
+        page_max = 10  # each page yields a maximum of 20 results
 
         while True:
             response = tmdb_search_movies(
@@ -75,7 +77,6 @@ class TMDb(Provider):
                         title=entry["title"],
                         date=entry["release_date"],
                         synopsis=entry["overview"],
-                        media="movie",
                         id_tmdb=ustr(entry["id"]),
                     )
                 except ValueError:
