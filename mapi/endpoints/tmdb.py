@@ -2,12 +2,12 @@
 
 from re import match
 
-from mapi.utils import request_json
 from mapi.exceptions import (
     MapiNetworkException,
     MapiNotFoundException,
     MapiProviderException,
 )
+from mapi.utils import request_json
 
 
 def tmdb_find(

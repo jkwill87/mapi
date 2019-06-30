@@ -1,11 +1,11 @@
 # coding=utf-8
 
-from mapi.utils import request_json
 from mapi.exceptions import (
     MapiNetworkException,
     MapiNotFoundException,
     MapiProviderException,
 )
+from mapi.utils import request_json
 
 TVDB_LANGUAGE_CODES = [
     "cs",
