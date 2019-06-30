@@ -59,7 +59,7 @@ def omdb_title(
     elif status != 200 or not isinstance(content, dict):
         raise MapiNetworkException("OMDb down or unavailable?")
     elif error:
-        raise MapiProviderException(error)
+        raise MapiNotFoundException(error)
     return content
 
 

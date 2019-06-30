@@ -136,7 +136,7 @@ def test_omdb_title__id_imdb_fail(omdb_api_key):
 
 @pytest.mark.usefixtures("omdb_api_key")
 def test_omdb_title__not_found(omdb_api_key):
-    with pytest.raises(MapiProviderException):
+    with pytest.raises(MapiNotFoundException):
         omdb_title(omdb_api_key, "1" * 2)
 
 
@@ -191,6 +191,19 @@ def test_omdb_search__year(omdb_api_key):
 
 
 @pytest.mark.usefixtures("omdb_api_key")
-def test_omdb_search__page(omdb_api_key):
-    result = omdb_search(omdb_api_key, "tale", page=2)
-    # TODO
+def test_omdb_search__page_diff(omdb_api_key):
+    p1 = omdb_search(omdb_api_key, "Dogs", page=1)
+    p2 = omdb_search(omdb_api_key, "Dogs", page=2)
+    assert p1 != p2
+
+
+@pytest.mark.usefixtures("omdb_api_key")
+def test_omdb_search__page_out_of_bounds(omdb_api_key):
+    with pytest.raises(MapiNotFoundException):
+        omdb_search(omdb_api_key, "Super Mario", page=100)
+
+
+@pytest.mark.usefixtures("omdb_api_key")
+def test_omdb_search__media_type_invalid(omdb_api_key):
+    with pytest.raises(MapiProviderException):
+        omdb_search(omdb_api_key, "ninja turtles", media_type="hologram")
