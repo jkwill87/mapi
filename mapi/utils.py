@@ -1,5 +1,8 @@
 # coding=utf-8
 
+""" A collection of utility functions non-specific to mapi's domain logic
+"""
+
 import random
 from os.path import join
 from re import match
@@ -137,8 +140,6 @@ def request_json(
         content = response.json() if status // 100 == 2 else None
         cache = getattr(response, "from_cache", False)
     except Exception as e:
-        status = 500
-        content = None
         log.debug(e, exc_info=True)
     else:
         log.debug("method: %s", method)
