@@ -65,7 +65,7 @@ class TMDb(Provider):
         found = False
         year_from, year_to = year_expand(year)
         page = 1
-        page_max = 10  # each page yields a maximum of 20 results
+        page_max = 5  # each page yields a maximum of 20 results
 
         while True:
             response = tmdb_search_movies(

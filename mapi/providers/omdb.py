@@ -60,7 +60,7 @@ class OMDb(Provider):
         year_from, year_to = year_expand(year)
         found = False
         page = 1
-        page_max = 20  # each page yields a maximum of 10 results
+        page_max = 10  # each page yields a maximum of 10 results
         while True:
             try:
                 response = omdb_search(
