@@ -1,12 +1,13 @@
-*.monopic
-*.pyc
-*.sqlite
 .coverage
 .DS_Store
 .eggs/
 .idea
 .py*
 .vscode
+*.env
+*.monopic
+*.pyc
+*.sqlite
 build
 dist
 MANIFEST
