@@ -1,19 +1,18 @@
 # coding=utf-8
 
-""" Unit tests for mapi/endpoints/__init__.py
+""" Unit tests for mapi/utils.py
 """
 
 import pytest
 from mock import patch
 from requests import Session
 
-from mapi.endpoints import *
-from mapi.endpoints import clean_dict, d2l, get_user_agent, request_json
+from mapi.utils import AGENT_ALL, clean_dict, d2l, get_user_agent, request_json
 from tests import MockRequestResponse
 
 
 @pytest.mark.parametrize("code", [200, 201, 209, 400, 500])
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__status(mock_request, code):
     mock_response = MockRequestResponse(code, "{}")
     mock_request.return_value = mock_response
@@ -24,7 +23,7 @@ def test_request_json__status(mock_request, code):
 @pytest.mark.parametrize(
     "code, truthy", [(200, True), (299, True), (400, False), (500, False)]
 )
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__data(mock_request, code, truthy):
     mock_response = MockRequestResponse(code, '{"status":true}')
     mock_request.return_value = mock_response
@@ -32,7 +31,7 @@ def test_request_json__data(mock_request, code, truthy):
     assert content if truthy else not content
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__json_data(mock_request):
     json_data = """{
         "status": true,
@@ -53,7 +52,7 @@ def test_request_json__json_data(mock_request):
     assert content == json_dict
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__xml_data(mock_request):
     xml_data = """
         <?xml version="1.0" encoding="UTF-8" ?>
@@ -68,11 +67,11 @@ def test_request_json__xml_data(mock_request):
     mock_response = MockRequestResponse(200, xml_data)
     mock_request.return_value = mock_response
     status, content = request_json("http://...", cache=False)
-    assert status == 200
+    assert status == 500
     assert content is None
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__html_data(mock_request):
     html_data = """
         <!DOCTYPE html>
@@ -90,11 +89,11 @@ def test_request_json__html_data(mock_request):
     mock_response = MockRequestResponse(200, html_data)
     mock_request.return_value = mock_response
     status, content = request_json("http://...", cache=False)
-    assert status == 200
+    assert status == 500
     assert content is None
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__get_headers(mock_request):
     mock_request.side_effect = Session().request
     request_json(
@@ -107,7 +106,7 @@ def test_request_json__get_headers(mock_request):
     assert "user-agent" in kwargs["headers"]
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__get_parameters(mock_request):
     test_parameters = {"apple": "pie"}
     mock_request.side_effect = Session().request
@@ -123,7 +122,7 @@ def test_request_json__get_invalid_url():
     assert content is None
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__post_body(mock_request):
     data = {"apple": "pie"}
     mock_request.side_effect = Session().request
@@ -133,7 +132,7 @@ def test_request_json__post_body(mock_request):
     assert data == kwargs["json"]
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__post_parameters(mock_request):
     mock_request.side_effect = Session().request
     data = {"apple": "pie", "orange": None}
@@ -143,7 +142,7 @@ def test_request_json__post_parameters(mock_request):
     assert kwargs["params"] == d2l(clean_dict(data))
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_request_json__post_headers(mock_request):
     mock_request.side_effect = Session().request
     data = {"apple": "pie", "orange": None}
@@ -154,14 +153,12 @@ def test_request_json__post_headers(mock_request):
     assert "orange" not in kwargs["headers"]
 
 
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
-@patch("mapi.endpoints.clear_cache")
-def test_request_json__failure(mock_clear_cache, mock_request):
+@patch("mapi.utils.requests_cache.CachedSession.request")
+def test_request_json__failure(mock_request):
     mock_request.side_effect = Exception
     status, content = request_json(url="http://google.com")
     assert status == 500
     assert content is None
-    mock_clear_cache.assert_called_once_with()
 
 
 def test_clean_dict__str_values():

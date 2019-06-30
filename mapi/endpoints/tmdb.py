@@ -2,7 +2,7 @@
 
 from re import match
 
-from mapi.endpoints import request_json
+from mapi.utils import request_json
 from mapi.exceptions import (
     MapiNetworkException,
     MapiNotFoundException,

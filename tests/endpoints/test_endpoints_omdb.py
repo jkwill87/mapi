@@ -12,7 +12,7 @@ from tests import JUNK_TEXT, MockRequestResponse
 
 
 @pytest.mark.usefixtures("omdb_api_key")
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_omdb_title__title_id_xnor__title(mock_request, omdb_api_key):
     mock_response = MockRequestResponse(200, '{"key":"value"}')
     mock_request.return_value = mock_response
@@ -20,7 +20,7 @@ def test_omdb_title__title_id_xnor__title(mock_request, omdb_api_key):
 
 
 @pytest.mark.usefixtures("omdb_api_key")
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_omdb_title__title_id_xnor__id(mock_request, omdb_api_key):
     mock_response = MockRequestResponse(200, '{"key":"value"}')
     mock_request.return_value = mock_response
@@ -28,7 +28,7 @@ def test_omdb_title__title_id_xnor__id(mock_request, omdb_api_key):
 
 
 @pytest.mark.usefixtures("omdb_api_key")
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_omdb_title__title_id_xnor__both(mock_request, omdb_api_key):
     mock_response = MockRequestResponse(200, '{"key":"value"}')
     mock_request.return_value = mock_response
@@ -37,7 +37,7 @@ def test_omdb_title__title_id_xnor__both(mock_request, omdb_api_key):
 
 
 @pytest.mark.usefixtures("omdb_api_key")
-@patch("mapi.endpoints.requests_cache.CachedSession.request")
+@patch("mapi.utils.requests_cache.CachedSession.request")
 def test_omdb_title__title_id_xnor__neither(mock_request, omdb_api_key):
     mock_response = MockRequestResponse(200, '{"key":"value"}')
     mock_request.return_value = mock_response

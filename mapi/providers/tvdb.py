@@ -30,7 +30,7 @@ class TVDb(Provider):
         TODO: Consider making parameters for episode ids
         """
         episode = parameters.get("episode")
-        id_tvdb = parameters.get("id_tvdb") or id_key
+        id_tvdb = id_key or parameters.get("id_tvdb")
         id_imdb = parameters.get("id_imdb")
         season = parameters.get("season")
         series = parameters.get("series")
