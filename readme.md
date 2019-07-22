@@ -2,7 +2,7 @@
 [![travis\_ci](https://img.shields.io/travis/jkwill87/mapi/develop.svg?style=for-the-badge)](https://travis-ci.org/jkwill87/mapi)
 [![coverage](https://img.shields.io/codecov/c/github/jkwill87/mapi/develop.svg?style=for-the-badge)](https://codecov.io/gh/jkwill87/mapi)
 [![licence](https://img.shields.io/github/license/jkwill87/mapi.svg?style=for-the-badge)](https://en.wikipedia.org/wiki/MIT_License)
-![api](https://img.shields.io/badge/api-TMDb/TVDb-D8D200.svg?style=for-the-badge)
+![api](https://img.shields.io/badge/api-TMDb/TVDb/OMDb-D8D200.svg?style=for-the-badge)
 [![code style black](https://img.shields.io/badge/Code%20Style-Black-black.svg?style=for-the-badge)](https://github.com/ambv/black)
 
 
@@ -137,8 +137,8 @@ except MapiNotFoundException:
 
 ## Provider Configuration
 
-- TVDb and TMDb require an API key to successfully be initialized
-- These can be provided using environment variables; `API_KEY_TMDB` and `API_KEY_TVDB`, respectively
+- TVDb, TMDb, and OMDb require an API key to successfully be initialized.
+- These can be provided using environment variables; `API_KEY_TMDB`, `API_KEY_TVDB`, and `API_KEY_OMDB` respectively.
 - These can also be provided as `api_key`, a parameter to the provider classes.
 
 ## Searching
@@ -147,11 +147,11 @@ The following table describes the permissible fields which may be used for a giv
 
 | Field   | API                | Type      | Description            | Notes |
 |---------|--------------------|-----------|------------------------|-------|
-| id_imdb | TMDb, TVDb         | str       | IMDb movie id key      | 1, 2  |
+| id_imdb | TMDb, TVDb, OMDb   | str       | IMDb movie id key      | 1, 2  |
 | id_tmdb | TMDb               | str / int | TMDb movie id key      | 2, 3  |
 | id_tvdb | TVDb series id key | str / int | TVDb season id key     | 2, 3  |
-| title   | TMDB               | str       | Feature's title        |       |
-| year    | TMDB               | str / int | Feature's release year |       |
+| title   | TMDB, OMDb         | str       | Feature's title        |       |
+| year    | TMDB, OMDb         | str / int | Feature's release year |       |
 | date    | TVDB               | str       | YYYY-MM-DD formatted   | 4     |
 | series  | TVDB               | str       | Series' name           |       |
 | season  | TVDB               | str / int | Series' airing season  |       |
@@ -164,6 +164,7 @@ Each provider is guaranteed to return the following fields for a successful sear
 | Field    | API  | Description                                |
 |----------|------|--------------------------------------------|
 | id_tmdb  | TMDb | TMDb movie id key                          |
+| id_imdb  | OMDb | IMDb movie id key                          |
 | id_tvdb  | TVDb | TVDb season id key                         |
 | date     | ALL  | Media's release date (YYYY-MM-DD)          |
 | synopsis | ALL  | Media synopsis                             |
