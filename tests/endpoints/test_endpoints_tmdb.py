@@ -15,7 +15,7 @@ JUNK_IMDB_ID = "tt1234567890"
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_find__imdb_success(tmdb_api_key):
+def test_tmdb_find__imdb_success(tmdb_api_key):
     expected_top_level_keys = {
         "movie_results",
         "person_results",
@@ -49,25 +49,25 @@ def test_omdb_find__imdb_success(tmdb_api_key):
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_find__api_key_fail():
+def test_tmdb_find__api_key_fail():
     with pytest.raises(MapiProviderException):
         tmdb_find(JUNK_TEXT, "imdb_id", GOONIES_IMDB_ID, cache=False)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_find__invalid_id_imdb(tmdb_api_key):
+def test_tmdb_find__invalid_id_imdb(tmdb_api_key):
     with pytest.raises(MapiProviderException):
         tmdb_find(tmdb_api_key, "imdb_id", JUNK_TEXT, cache=False)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_find__not_found(tmdb_api_key):
+def test_tmdb_find__not_found(tmdb_api_key):
     with pytest.raises(MapiNotFoundException):
         tmdb_find(tmdb_api_key, "imdb_id", JUNK_IMDB_ID)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_movies__success(tmdb_api_key):
+def test_tmdb_movies__success(tmdb_api_key):
     expected_top_level_keys = {
         "adult",
         "backdrop_path",
@@ -101,25 +101,25 @@ def test_omdb_movies__success(tmdb_api_key):
     assert result.get("original_title") == "The Goonies"
 
 
-def test_omdb_movies__api_key_fail():
+def test_tmdb_movies__api_key_fail():
     with pytest.raises(MapiProviderException):
         tmdb_movies(JUNK_TEXT, "", cache=False)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_movies__id_tmdb_fail(tmdb_api_key):
+def test_tmdb_movies__id_tmdb_fail(tmdb_api_key):
     with pytest.raises(MapiProviderException):
         tmdb_movies(tmdb_api_key, JUNK_TEXT, cache=False)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_movies__not_found(tmdb_api_key):
+def test_tmdb_movies__not_found(tmdb_api_key):
     with pytest.raises(MapiNotFoundException):
         tmdb_movies(tmdb_api_key, "1" * 10)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_search_movies__success(tmdb_api_key):
+def test_tmdb_search_movies__success(tmdb_api_key):
     expected_top_level_keys = {
         "page",
         "results",
@@ -153,19 +153,20 @@ def test_omdb_search_movies__success(tmdb_api_key):
     assert len(result["results"]) > 1
 
 
-def test_omdb_search_movies__bad_api_key():
+@pytest.mark.skip
+def test_tmdb_search_movies__bad_api_key():
     with pytest.raises(MapiProviderException):
         tmdb_search_movies(JUNK_TEXT, "the goonies", cache=False)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_search_movies__bad_title(tmdb_api_key):
+def test_tmdb_search_movies__bad_title(tmdb_api_key):
     with pytest.raises(MapiNotFoundException):
         tmdb_search_movies(tmdb_api_key, JUNK_TEXT, cache=False)
 
 
 @pytest.mark.usefixtures("tmdb_api_key")
-def test_omdb_search_movies__bad_year(tmdb_api_key):
+def test_tmdb_search_movies__bad_year(tmdb_api_key):
     with pytest.raises(MapiProviderException):
         tmdb_search_movies(
             tmdb_api_key, "the goonies", year=JUNK_TEXT, cache=False
