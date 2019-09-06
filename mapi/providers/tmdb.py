@@ -2,15 +2,15 @@
 
 from mapi.compatibility import ustr
 from mapi.endpoints.tmdb import *
-from mapi.metadata import MetadataMovie
-from mapi.providers import Provider
+from mapi.metadata.metadata_movie import MetadataMovie
+from mapi.providers import ProviderBase
 from mapi.utils import year_expand
 
 __all__ = ["TMDb"]
 
 
-class TMDb(Provider):
-    """ Queries the TMDb API
+class TMDb(ProviderBase):
+    """Queries the TMDb API.
     """
 
     def __init__(self, **options):

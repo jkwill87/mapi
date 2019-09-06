@@ -1,20 +1,14 @@
 # coding=utf-8
 
-""" Metadata data classes
-"""
+"""Metadata data classes."""
 
 from datetime import datetime as dt
 from re import sub
 from string import Formatter, capwords
 
-from mapi.compatibility import MutableMapping, ustr
+from mapi.compatibility import MutableMapping, ustr, AbstractClass
 
-__all__ = ["Metadata", "DEFAULT_FIELDS", "EXTRA_FIELDS", "NUMERIC_FIELDS"]
-
-
-DEFAULT_FIELDS = {"date", "media", "synopsis", "title"}
-EXTRA_FIELDS = {"extension", "group", "quality"}
-NUMERIC_FIELDS = {"season", "episode"}
+__all__ = ["MetadataBase"]
 
 
 class _MetaFormatter(Formatter):
@@ -24,16 +18,20 @@ class _MetaFormatter(Formatter):
         return format(value, format_spec) if value else ""
 
 
-class Metadata(MutableMapping):
-    """ Base Metadata class
+class MetadataBase(AbstractClass, MutableMapping):
+    """Base Metadata class.
     """
 
-    fields = DEFAULT_FIELDS | EXTRA_FIELDS
+    fields_default = {"date", "media", "synopsis", "title", "extension", "group", "quality"}
+    fields_extra = {"extension", "group", "quality"}
+    fields_numeric = {"season", "episode"}
+    fields_accepted = fields_default | fields_extra
+
     _formatter = _MetaFormatter()
     _fallback_str = "[unset metadata]"
 
     def __init__(self, **params):
-        self._dict = {k: None for k in DEFAULT_FIELDS}
+        self._dict = {k: None for k in self.fields_default}
         self.update(params)
 
     def __delitem__(self, key):
@@ -71,7 +69,7 @@ class Metadata(MutableMapping):
 
     def __setitem__(self, key, value):
         # Validate key
-        if key not in self.fields:
+        if key not in self.fields_accepted:
             raise KeyError(
                 "'%s' cannot be set for %s" % (key, self.__class__.__name__)
             )
@@ -94,7 +92,7 @@ class Metadata(MutableMapping):
             value = None
 
         # Store numeric values as ints
-        elif key in NUMERIC_FIELDS:
+        elif key in self.fields_numeric:
             value = int(value)
 
         # Store all other values as strings
@@ -110,7 +108,7 @@ class Metadata(MutableMapping):
     def _format_repl(self, mobj):
         format_string, key = mobj.groups()
         value = self._formatter.vformat(format_string, None, self)
-        if key not in EXTRA_FIELDS:
+        if key not in self.fields_extra:
             value = self._str_title_case(value)
         return value
 

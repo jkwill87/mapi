@@ -5,14 +5,14 @@ import re
 from mapi import log
 from mapi.compatibility import ustr
 from mapi.endpoints.tvdb import *
-from mapi.metadata import MetadataTelevision
-from mapi.providers import Provider
+from mapi.metadata.metadata_television import MetadataTelevision
+from mapi.providers import ProviderBase
 
 __all__ = ["TVDb"]
 
 
-class TVDb(Provider):
-    """ Queries the TVDb API
+class TVDb(ProviderBase):
+    """Queries the TVDb API.
     """
 
     def __init__(self, **options):

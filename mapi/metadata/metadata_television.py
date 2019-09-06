@@ -1,15 +1,15 @@
 # coding=utf-8
 
-from mapi.metadata import Metadata
+from mapi.metadata._metadata_base import MetadataBase
 
 __all__ = ["MetadataTelevision"]
 
 
-class MetadataTelevision(Metadata):
-    """ Television Metadata class
+class MetadataTelevision(MetadataBase):
+    """Television Metadata class.
     """
 
-    fields = Metadata.fields | {
+    fields_accepted = MetadataBase.fields_accepted | {
         "episode",
         "id_imdb",
         "id_tvdb",

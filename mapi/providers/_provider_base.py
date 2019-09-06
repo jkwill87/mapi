@@ -5,18 +5,15 @@ from os import environ
 
 from mapi.compatibility import AbstractClass
 
-__all__ = ["Provider"]
+__all__ = ["ProviderBase"]
 
 
-class Provider(AbstractClass):
-    """ ABC for Providers, high-level interfaces for metadata media providers
+class ProviderBase(AbstractClass):
+    """ABC for Providers, high-level interfaces for metadata media providers.
     """
 
     def __init__(self, **options):
-        """ Initializes the provider
-
-        :param options: Optional kwargs; see below..
-        """
+        """Initializes the provider."""
         cls_name = self.__class__.__name__
         self._api_key = options.get(
             "api_key", environ.get("API_KEY_%s" % cls_name.upper())

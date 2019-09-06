@@ -4,8 +4,8 @@ from datetime import datetime as dt
 
 from mapi.endpoints.omdb import *
 from mapi.exceptions import MapiNotFoundException, MapiProviderException
-from mapi.metadata import MetadataMovie
-from mapi.providers import Provider
+from mapi.metadata.metadata_movie import MetadataMovie
+from mapi.providers import ProviderBase
 from mapi.utils import year_expand
 
 __all__ = ["OMDb"]

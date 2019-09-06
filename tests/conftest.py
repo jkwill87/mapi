@@ -10,27 +10,24 @@ import pytest
 
 @pytest.fixture
 def metadata():
-    """ Creates a Metadata object
-    """
-    from mapi.metadata import Metadata
+    """Creates a Metadata object."""
+    from mapi.metadata._metadata_base import MetadataBase
 
-    return Metadata(title="Home Movies", date="2019-05-23")
+    return MetadataBase(title="Home Movies", date="2019-05-23")
 
 
 @pytest.fixture
 def metadata_movie():
-    """ Creates a MetadataMovie object
-    """
-    from mapi.metadata import MetadataMovie
+    """Creates a MetadataMovie object."""
+    from mapi.metadata.metadata_movie import MetadataMovie
 
     return MetadataMovie(media="movie", title="saw iii", date="2006-01-01")
 
 
 @pytest.fixture
 def metadata_television():
-    """ Creates a MetadataTelevision object
-    """
-    from mapi.metadata import MetadataTelevision
+    """Creates a MetadataTelevision object."""
+    from mapi.metadata.metadata_television import MetadataTelevision
 
     return MetadataTelevision(
         media="television",
