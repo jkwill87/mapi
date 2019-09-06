@@ -26,7 +26,7 @@ def omdb_title(
     cache=True,
 ):
     """
-    Lookup media using the Open Movie Database
+    Lookup media using the Open Movie Database.
 
     Online docs: http://www.omdbapi.com/#parameters
     """
@@ -65,9 +65,9 @@ def omdb_title(
 
 def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
     """
-    Search for media using the Open Movie Database
+    Search for media using the Open Movie Database.
 
-    Online docs: http://www.omdbapi.com/#parameters
+    Online docs: http://www.omdbapi.com/#parameters.
     """
     if media_type and media_type not in OMDB_MEDIA_TYPES:
         raise MapiProviderException(

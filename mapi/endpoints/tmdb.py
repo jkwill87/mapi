@@ -13,13 +13,14 @@ from mapi.utils import request_json
 def tmdb_find(
     api_key, external_source, external_id, language="en-US", cache=True
 ):
-    """ Search for The Movie Database objects using another DB's foreign key
+    """
+    Search for The Movie Database objects using another DB's foreign key.
 
     Note: language codes aren't checked on this end or by TMDb, so if you
         enter an invalid language code your search itself will succeed, but
-        certain fields like synopsis will just be empty
+        certain fields like synopsis will just be empty.
 
-    Online docs: developers.themoviedb.org/3/find
+    Online docs: developers.themoviedb.org/3/find.
     """
     sources = ["imdb_id", "freebase_mid", "freebase_id", "tvdb_id", "tvrage_id"]
     if external_source not in sources:
@@ -50,9 +51,10 @@ def tmdb_find(
 
 
 def tmdb_movies(api_key, id_tmdb, language="en-US", cache=True):
-    """ Lookup a movie item using The Movie Database
+    """
+    Lookup a movie item using The Movie Database.
 
-    Online docs: developers.themoviedb.org/3/movies
+    Online docs: developers.themoviedb.org/3/movies.
     """
     try:
         url = "https://api.themoviedb.org/3/movie/%d" % int(id_tmdb)
@@ -72,9 +74,10 @@ def tmdb_movies(api_key, id_tmdb, language="en-US", cache=True):
 def tmdb_search_movies(
     api_key, title, year=None, adult=False, region=None, page=1, cache=True
 ):
-    """ Search for movies using The Movie Database
+    """
+    Search for movies using The Movie Database.
 
-    Online docs: developers.themoviedb.org/3/search/search-movies
+    Online docs: developers.themoviedb.org/3/search/search-movies.
     """
     url = "https://api.themoviedb.org/3/search/movie"
     try:

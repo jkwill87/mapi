@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Manages compatibility for Python versions 2.7 and 3+
-"""
+"""Manages compatibility for Python versions 2.7 and 3+."""
 
 from abc import ABCMeta
 

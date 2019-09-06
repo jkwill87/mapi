@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" A collection of utility functions non-specific to mapi's domain logic
-"""
+"""A collection of utility functions non-specific to mapi's domain logic."""
 
 import random
 from os.path import join
@@ -48,8 +47,7 @@ CACHE_PATH = join(user_cache_dir(), "mapi-py%d.sqlite" % version_info.major)
 
 
 def clean_dict(target_dict, whitelist=None):
-    """ Convenience function that removes a dicts keys that have falsy values
-    """
+    """Convenience function that removes a dicts keys that have falsy values."""
     assert isinstance(target_dict, dict)
     return {
         ustr(k).strip(): ustr(v).strip()
@@ -60,20 +58,17 @@ def clean_dict(target_dict, whitelist=None):
 
 
 def clear_cache():
-    """ Clears requests-cache cache
-    """
+    """Clears requests-cache cache."""
     get_session().cache.clear()
 
 
 def d2l(d):
-    """ Convenience function that converts a dict into a sorted list of tuples
-    """
+    """Convenience function that converts a dict into a sorted tuples list."""
     return sorted([(k, v) for k, v in d.items()])
 
 
 def get_session():
-    """ Convenience function that returns request-cache session singleton
-    """
+    """Convenience function that returns request-cache session singleton."""
     if not hasattr(get_session, "session"):
         get_session.session = requests_cache.CachedSession(
             cache_name=CACHE_PATH.rstrip(".sqlite"),
@@ -86,8 +81,7 @@ def get_session():
 
 
 def get_user_agent(platform=None):
-    """ Convenience function that looks up a user agent string, random if N/A
-    """
+    """Convenience function that looks up a user agent string, random if N/A."""
     if isinstance(platform, ustr):
         platform = platform.upper()
     return {"chrome": AGENT_CHROME, "edge": AGENT_EDGE, "ios": AGENT_IOS}.get(
@@ -98,10 +92,11 @@ def get_user_agent(platform=None):
 def request_json(
     url, parameters=None, body=None, headers=None, cache=True, agent=None
 ):
-    """ Queries a url for json data
+    """
+    Queries a url for json data.
 
     Note: Requests are cached using requests_cached for a week, this is done
-    transparently by using the package's monkey patching
+    transparently by using the package's monkey patching.
     """
     assert url
     session = get_session()
@@ -155,8 +150,7 @@ def request_json(
 
 
 def year_expand(s):
-    """ Parses a year or dash-delimited year range
-    """
+    """Parses a year or dash-delimited year range."""
     regex = r"^((?:19|20)\d{2})?(\s*-\s*)?((?:19|20)\d{2})?$"
     try:
         start, dash, end = match(regex, ustr(s)).groups()

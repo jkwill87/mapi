@@ -11,9 +11,8 @@ from mapi.utils import year_expand
 __all__ = ["OMDb"]
 
 
-class OMDb(Provider):
-    """
-    Queries the OMDb API
+class OMDb(ProviderBase):
+    """Queries the OMDb API.
     """
 
     def __init__(self, **options):

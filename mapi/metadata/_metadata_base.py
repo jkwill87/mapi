@@ -6,7 +6,7 @@ from datetime import datetime as dt
 from re import sub
 from string import Formatter, capwords
 
-from mapi.compatibility import MutableMapping, ustr, AbstractClass
+from mapi.compatibility import AbstractClass, MutableMapping, ustr
 
 __all__ = ["MetadataBase"]
 
@@ -22,7 +22,15 @@ class MetadataBase(AbstractClass, MutableMapping):
     """Base Metadata class.
     """
 
-    fields_default = {"date", "media", "synopsis", "title", "extension", "group", "quality"}
+    fields_default = {
+        "date",
+        "media",
+        "synopsis",
+        "title",
+        "extension",
+        "group",
+        "quality",
+    }
     fields_extra = {"extension", "group", "quality"}
     fields_numeric = {"season", "episode"}
     fields_accepted = fields_default | fields_extra

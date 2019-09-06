@@ -19,8 +19,7 @@ class TMDb(ProviderBase):
             raise MapiProviderException("TMDb requires an API key")
 
     def search(self, id_key=None, **parameters):
-        """ Searches TMDb for movie metadata
-        """
+        """Searches TMDb for movie metadata."""
         id_tmdb = id_key or parameters.get("id_tmdb")
         id_imdb = parameters.get("id_imdb")
         title = parameters.get("title")

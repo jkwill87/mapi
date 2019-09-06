@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Shared fixtures automatically imported by PyTest
-"""
+"""Shared fixtures automatically imported by PyTest."""
 
 from os import environ
 
@@ -40,8 +39,7 @@ def metadata_television():
 
 @pytest.fixture
 def omdb_api_key():
-    """ Returns testing API key for OMDb
-    """
+    """Returns testing API key for OMDb."""
     key = environ.get("API_KEY_OMDB")
     assert key
     return key
@@ -50,8 +48,7 @@ def omdb_api_key():
 @pytest.fixture
 @pytest.mark.usefixtures("omdb_api_key")
 def omdb_provider(omdb_api_key):
-    """ Returns a fresh OMDb provider object
-    """
+    """Returns a fresh OMDb provider object."""
     from mapi.providers import OMDb
 
     return OMDb(api_key=omdb_api_key)
@@ -59,8 +56,7 @@ def omdb_provider(omdb_api_key):
 
 @pytest.fixture()
 def tmdb_api_key():
-    """ Returns testing API key for TMDb
-    """
+    """Returns testing API key for TMDb."""
     key = environ.get("API_KEY_TMDB")
     assert key
     return key
@@ -69,8 +65,7 @@ def tmdb_api_key():
 @pytest.fixture()
 @pytest.mark.usefixtures("tmdb_api_key")
 def tmdb_provider(tmdb_api_key):
-    """ Returns a fresh TMDb provider object
-    """
+    """Returns a fresh TMDb provider object."""
     from mapi.providers import TMDb
 
     return TMDb(api_key=tmdb_api_key)
@@ -78,8 +73,7 @@ def tmdb_provider(tmdb_api_key):
 
 @pytest.fixture()
 def tvdb_api_key():
-    """ Returns testing API key for TVDb
-    """
+    """Returns testing API key for TVDb."""
     key = environ.get("API_KEY_TVDB")
     assert key
     return key
@@ -88,8 +82,7 @@ def tvdb_api_key():
 @pytest.fixture()
 @pytest.mark.usefixtures("tvdb_api_key")
 def tvdb_provider(tvdb_api_key):
-    """ Returns a fresh TVDb provider object
-    """
+    """Returns a fresh TVDb provider object."""
     from mapi.providers import TVDb
 
     return TVDb(api_key=tvdb_api_key)
@@ -98,8 +91,7 @@ def tvdb_provider(tvdb_api_key):
 @pytest.fixture()
 @pytest.mark.usefixtures("tvdb_api_key")
 def tvdb_token(tvdb_api_key):
-    """ Calls mapi.endpoints.tvdb_login on first call then returns cached token
-    """
+    """Calls mapi.endpoints.tvdb_login then returns cached token."""
     if not hasattr(tvdb_token, "token"):
         from mapi.endpoints.tvdb import tvdb_login
 

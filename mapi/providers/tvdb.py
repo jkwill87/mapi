@@ -25,7 +25,7 @@ class TVDb(ProviderBase):
         return tvdb_login(self.api_key)
 
     def search(self, id_key=None, **parameters):
-        """ Searches TVDb for movie metadata
+        """Searches TVDb for movie metadata.
 
         TODO: Consider making parameters for episode ids
         """

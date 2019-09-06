@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Unit tests for mapi/providers/_provider.py
-"""
+"""Unit tests for mapi/providers/_provider_base.py."""
 
 import pytest
 

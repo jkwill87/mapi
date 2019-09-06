@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Unit tests for mapi/providers/tmdb.py
-"""
+"""Unit tests for mapi/providers/tmdb.py."""
 
 import pytest
 from mock import patch

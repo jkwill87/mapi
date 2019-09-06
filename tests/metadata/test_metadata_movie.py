@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Unit tests for mapi/metadata/movie.py
-"""
+"""Unit tests for mapi/metadata/movie.py."""
 
 import pytest
 

@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Unit tests for mapi/endpoints/tvdb.py
-"""
+"""Unit tests for mapi/endpoints/tvdb.py."""
 
 import pytest
 

@@ -5,8 +5,8 @@ from mapi.metadata._metadata_base import MetadataBase
 __all__ = ["MetadataMovie"]
 
 
-class MetadataMovie(Metadata):
-    """ Movie Metadata class
+class MetadataMovie(MetadataBase):
+    """Movie Metadata class.
     """
 
     fields_accepted = MetadataBase.fields_accepted | {"id_imdb", "id_tmdb"}

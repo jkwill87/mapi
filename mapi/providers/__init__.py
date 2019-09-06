@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Provides a high-level interface for metadata media providers
-"""
+"""Provides a high-level interface for metadata media providers."""
 
 from mapi import log
 from mapi.exceptions import MapiException
@@ -17,9 +16,6 @@ __all__ = [
     "OMDb",
     "TMDb",
     "TVDb",
-    "API_TELEVISION",
-    "API_MOVIE",
-    "API_ALL",
     "has_provider",
     "has_provider_support",
     "provider_factory",
@@ -32,14 +28,12 @@ API_ALL = API_TELEVISION | API_MOVIE
 
 
 def has_provider(provider):
-    """ Verifies that module has support for requested API provider
-    """
+    """Verifies that module has support for requested API provider."""
     return provider.lower() in API_ALL
 
 
 def has_provider_support(provider, media_type):
-    """ Verifies if API provider has support for requested media type
-    """
+    """Verifies if API provider has support for requested media type."""
     if provider.lower() not in API_ALL:
         return False
     provider_const = "API_" + media_type.upper()
@@ -47,8 +41,7 @@ def has_provider_support(provider, media_type):
 
 
 def provider_factory(provider, **options):
-    """ Factory function for DB Provider Concrete Classes
-    """
+    """Factory function for DB Provider concrete classes."""
     providers = {"tmdb": TMDb, "tvdb": TVDb, "omdb": OMDb}
     try:
         return providers[provider.lower()](**options)

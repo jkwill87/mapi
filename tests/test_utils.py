@@ -1,7 +1,6 @@
 # coding=utf-8
 
-""" Unit tests for mapi/utils.py
-"""
+"""Unit tests for mapi/utils.py."""
 
 import pytest
 from mock import patch

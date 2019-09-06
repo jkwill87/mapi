@@ -35,10 +35,11 @@ TVDB_LANGUAGE_CODES = [
 
 
 def tvdb_login(api_key):
-    """ Logs into TVDb using the provided api key
+    """
+    Logs into TVDb using the provided api key.
 
     Note: You can register for a free TVDb key at thetvdb.com/?tab=apiregister
-    Online docs: api.thetvdb.com/swagger#!/Authentication/post_login=
+    Online docs: api.thetvdb.com/swagger#!/Authentication/post_login.
     """
     url = "https://api.thetvdb.com/login"
     body = {"apikey": api_key}
@@ -51,9 +52,10 @@ def tvdb_login(api_key):
 
 
 def tvdb_refresh_token(token):
-    """ Refreshes JWT token
+    """
+    Refreshes JWT token.
 
-    Online docs: api.thetvdb.com/swagger#!/Authentication/get_refresh_token=
+    Online docs: api.thetvdb.com/swagger#!/Authentication/get_refresh_token.
     """
     url = "https://api.thetvdb.com/refresh_token"
     headers = {"Authorization": "Bearer %s" % token}
@@ -66,9 +68,10 @@ def tvdb_refresh_token(token):
 
 
 def tvdb_episodes_id(token, id_tvdb, lang="en", cache=True):
-    """ Returns the full information for a given episode id
+    """
+    Returns the full information for a given episode id.
 
-    Online docs: https://api.thetvdb.com/swagger#!/Episodes=
+    Online docs: https://api.thetvdb.com/swagger#!/Episodes.
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -92,10 +95,11 @@ def tvdb_episodes_id(token, id_tvdb, lang="en", cache=True):
 
 
 def tvdb_series_id(token, id_tvdb, lang="en", cache=True):
-    """ Returns a series records that contains all information known about a
-    particular series id
+    """
+    Returns a series records that contains all information known about a
+    particular series id.
 
-    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id=
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id.
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -117,10 +121,11 @@ def tvdb_series_id(token, id_tvdb, lang="en", cache=True):
 
 
 def tvdb_series_id_episodes(token, id_tvdb, page=1, lang="en", cache=True):
-    """ All episodes for a given series
+    """
+    All episodes for a given series.
 
-    Note: Paginated with 100 results per page
-    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes=
+    Note: Paginated with 100 results per page.
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes.
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -147,11 +152,12 @@ def tvdb_series_id_episodes(token, id_tvdb, page=1, lang="en", cache=True):
 def tvdb_series_id_episodes_query(
     token, id_tvdb, episode=None, season=None, page=1, lang="en", cache=True
 ):
-    """ Allows the user to query against episodes for the given series
+    """
+    Allows the user to query against episodes for the given series.
 
-    Note: Paginated with 100 results per page; omitted imdbId, when would you
-    ever need to query against both tvdb and imdb series ids??
-    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes_query=
+    Note: Paginated with 100 results per page; omitted imdbId-- when would you
+    ever need to query against both tvdb and imdb series ids?
+    Online docs: api.thetvdb.com/swagger#!/Series/get_series_id_episodes_query.
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
@@ -178,10 +184,11 @@ def tvdb_series_id_episodes_query(
 def tvdb_search_series(
     token, series=None, id_imdb=None, id_zap2it=None, lang="en", cache=True
 ):
-    """ Allows the user to search for a series based on the following parameters
+    """
+    Allows the user to search for a series based on the following parameters.
 
     Online docs: https://api.thetvdb.com/swagger#!/Search/get_search_series
-    Note: results a maximum of 100 entries per page, no option for pagination
+    Note: results a maximum of 100 entries per page, no option for pagination.
     """
     if lang not in TVDB_LANGUAGE_CODES:
         raise MapiProviderException(
