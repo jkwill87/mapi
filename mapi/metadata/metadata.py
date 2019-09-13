@@ -55,13 +55,18 @@ class Metadata(MutableMapping):
     def __getitem__(self, key):
         # Case insensitive keys
         key = key.lower()
-
+        value = self._dict.get(key)
         # Special case for year
         if key == "year":
-            date = self._dict.__getitem__("date")
-            return date[:4] if date else None
-        else:
-            return self._dict.__getitem__(key)
+            date = self._dict.get("date")
+            value = date[:4] if date else None
+        # Numeric Keys
+        elif key in self.fields_numeric and value is not None:
+            value = int(value)
+        # String keys
+        elif value is not None:
+            value = ustr(value)
+        return value
 
     def __hash__(self):
         return frozenset(self._dict.items()).__hash__()
@@ -95,14 +100,6 @@ class Metadata(MutableMapping):
         # Store falsy fields (e.g. None, False, etc.) as None
         if not value and value != 0:
             value = None
-
-        # Store numeric values as ints
-        elif key in self.fields_numeric:
-            value = int(value)
-
-        # Store all other values as strings
-        else:
-            value = ustr(value)
 
         # Looks good if its gotten this far, store it!
         self._dict[key] = value
