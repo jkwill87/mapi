@@ -152,7 +152,6 @@ def test_tmdb_search_movies__success(tmdb_api_key):
     assert len(result["results"]) > 1
 
 
-@pytest.mark.skip
 def test_tmdb_search_movies__bad_api_key():
     with pytest.raises(MapiProviderException):
         tmdb_search_movies(JUNK_TEXT, "the goonies", cache=False)
