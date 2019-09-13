@@ -17,16 +17,16 @@ def test_str(metadata):
 
 
 def test_iter(metadata):
-    keys = {key for key, _ in metadata.items()}
-    assert 2 == len(keys)
+    keys = set(metadata.keys())
+    assert len(keys) == 2
     assert "title" in keys
     assert "date" in keys
 
 
 def test_iter__no_none(metadata):
     metadata["date"] = None
-    keys = {key for key, _ in metadata.items()}
-    assert 1 == len(keys)
+    keys = set(metadata.keys())
+    assert len(keys) == 1
     assert "title" in keys
     assert "date" not in keys
 
