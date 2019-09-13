@@ -6,10 +6,9 @@ from datetime import datetime as dt
 from re import sub
 from string import Formatter, capwords
 
-from mapi.compatibility import AbstractClass, MutableMapping, ustr
+from mapi.compatibility import MutableMapping, ustr
 
-__all__ = ["MetadataBase"]
-
+__all__ = ["Metadata"]
 
 class _MetaFormatter(Formatter):
     def format_field(self, value, format_spec):
@@ -17,8 +16,7 @@ class _MetaFormatter(Formatter):
         # being raised when value specifier is given w/o a corresponding value
         return format(value, format_spec) if value else ""
 
-
-class MetadataBase(AbstractClass, MutableMapping):
+class Metadata(MutableMapping):
     """Base Metadata class.
     """
 

@@ -10,9 +10,9 @@ import pytest
 @pytest.fixture
 def metadata():
     """Creates a Metadata object."""
-    from mapi.metadata._metadata_base import MetadataBase
+    from mapi.metadata.metadata import Metadata
 
-    return MetadataBase(title="Home Movies", date="2019-05-23")
+    return Metadata(title="Home Movies", date="2019-05-23")
 
 
 @pytest.fixture

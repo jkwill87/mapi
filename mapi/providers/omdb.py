@@ -5,13 +5,13 @@ from datetime import datetime as dt
 from mapi.endpoints.omdb import *
 from mapi.exceptions import MapiNotFoundException, MapiProviderException
 from mapi.metadata.metadata_movie import MetadataMovie
-from mapi.providers import ProviderBase
+from mapi.providers import Provider
 from mapi.utils import year_expand
 
 __all__ = ["OMDb"]
 
 
-class OMDb(ProviderBase):
+class OMDb(Provider):
     """Queries the OMDb API.
     """
 

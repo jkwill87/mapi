@@ -5,10 +5,10 @@ from os import environ
 
 from mapi.compatibility import AbstractClass
 
-__all__ = ["ProviderBase"]
+__all__ = ["Provider"]
 
 
-class ProviderBase(AbstractClass):
+class Provider(AbstractClass):
     """ABC for Providers, high-level interfaces for metadata media providers.
     """
 

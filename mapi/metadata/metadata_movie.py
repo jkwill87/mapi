@@ -1,15 +1,15 @@
 # coding=utf-8
 
-from mapi.metadata._metadata_base import MetadataBase
+from mapi.metadata.metadata import Metadata
 
 __all__ = ["MetadataMovie"]
 
 
-class MetadataMovie(MetadataBase):
+class MetadataMovie(Metadata):
     """Movie Metadata class.
     """
 
-    fields_accepted = MetadataBase.fields_accepted | {"id_imdb", "id_tmdb"}
+    fields_accepted = Metadata.fields_accepted | {"id_imdb", "id_tmdb"}
 
     def __init__(self, **params):
         super(MetadataMovie, self).__init__(**params)

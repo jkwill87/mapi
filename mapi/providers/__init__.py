@@ -4,7 +4,7 @@
 
 from mapi import log
 from mapi.exceptions import MapiException
-from mapi.providers._provider_base import ProviderBase
+from mapi.providers._provider import Provider
 from mapi.providers.omdb import OMDb
 from mapi.providers.tmdb import TMDb
 from mapi.providers.tvdb import TVDb

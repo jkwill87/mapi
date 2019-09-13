@@ -1,6 +1,6 @@
 # coding=utf-8
 
-"""Unit tests for mapi/metadata/_base.py."""
+"""Unit tests for mapi/metadata/metadata.py."""
 
 import pytest
 
