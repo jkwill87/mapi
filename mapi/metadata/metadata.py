@@ -36,7 +36,7 @@ class Metadata(MutableMapping):
     )()
 
     def __init__(self, **params):
-        self._dict = {k: None for k in self.fields_default}
+        self._dict = {k: None for k in self.fields_accepted}
         self.update(params)
 
     def __delitem__(self, key):
