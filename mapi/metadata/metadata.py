@@ -64,8 +64,8 @@ class Metadata(MutableMapping):
         elif key in self.fields_numeric and value is not None:
             value = int(value)
         # String keys
-        elif value is not None:
-            value = ustr(value)
+        else:
+            value = ustr(value or "")
         return value
 
     def __hash__(self):

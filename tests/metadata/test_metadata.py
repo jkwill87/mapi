@@ -46,14 +46,13 @@ def test_get__case_insensitive(metadata):
 
 
 def test_len(metadata):
-    l = len(metadata)
-    assert l == 2
+    assert len(metadata) == 2
 
 
 def test_len__no_none(metadata):
     metadata["title"] = None
-    l = len(metadata)
-    assert l == 1
+    assert len(metadata) == 1
+    assert metadata["title"] == ""
 
 
 def test_format(metadata):
@@ -74,7 +73,7 @@ def test_format__whitespace(metadata):
 
 def test_deletion__valid_key(metadata):
     del metadata["title"]
-    assert metadata["title"] is None
+    assert metadata["title"] == ""
 
 
 def test_deletion__invalid_key(metadata):
