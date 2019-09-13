@@ -10,11 +10,6 @@ from mapi.compatibility import MutableMapping, ustr
 
 __all__ = ["Metadata"]
 
-class _MetaFormatter(Formatter):
-    def format_field(self, value, format_spec):
-        # prevent None values from being stored as 'None' and ValueError from
-        # being raised when value specifier is given w/o a corresponding value
-        return format(value, format_spec) if value else ""
 
 class Metadata(MutableMapping):
     """Base Metadata class.
@@ -33,8 +28,12 @@ class Metadata(MutableMapping):
     fields_numeric = {"season", "episode"}
     fields_accepted = fields_default | fields_extra
 
-    _formatter = _MetaFormatter()
     _fallback_str = "[unset metadata]"
+    _formatter = type(
+        "MetaFormatter",
+        (Formatter,),
+        {"format_field": lambda _, v, f: format(v, f) if v else ""},
+    )()
 
     def __init__(self, **params):
         self._dict = {k: None for k in self.fields_default}
