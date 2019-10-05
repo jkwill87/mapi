@@ -7,6 +7,7 @@ from re import sub
 from string import Formatter, capwords
 
 from mapi.compatibility import MutableMapping, ustr
+from mapi.utils import year_parse
 
 __all__ = ["Metadata"]
 
@@ -17,6 +18,7 @@ class Metadata(MutableMapping):
 
     fields_default = {
         "date",
+        "year",
         "media",
         "synopsis",
         "title",
@@ -25,7 +27,7 @@ class Metadata(MutableMapping):
         "quality",
     }
     fields_extra = {"extension", "group", "quality"}
-    fields_numeric = {"season", "episode"}
+    fields_numeric = {"season", "episode", "year"}
     fields_accepted = fields_default | fields_extra
 
     _fallback_str = "[unset metadata]"
@@ -57,12 +59,12 @@ class Metadata(MutableMapping):
         key = key.lower()
         value = self._dict.get(key)
         # Special case for year
-        if key == "year":
+        if key == "year" and not self._dict.get("year"):
             date = self._dict.get("date")
-            value = date[:4] if date else None
-        # Numeric Keys
-        elif key in self.fields_numeric and value is not None:
-            value = int(value)
+            value = year_parse(date)
+        # Numeric keys
+        elif key in self.fields_numeric and value != 0:
+            value = int(value) if value else None
         # String keys
         else:
             value = ustr(value or "")

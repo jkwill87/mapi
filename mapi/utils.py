@@ -4,7 +4,7 @@
 
 import random
 from os.path import join
-from re import match
+from re import findall, match
 from sys import version_info
 
 import requests_cache
@@ -147,6 +147,16 @@ def request_json(
     finally:
         session._is_cache_disabled = initial_cache_state
     return status, content
+
+
+def year_parse(s):
+    """Parses a year from a string."""
+    regex = r"((?:19|20)\d{2})(?:$|[-/]\d{2}[-/]\d{2})"
+    try:
+        year = int(findall(regex, ustr(s))[0])
+    except IndexError:
+        year = None
+    return year
 
 
 def year_expand(s):
