@@ -148,6 +148,7 @@ class Metadata(MutableMapping):
             "for",
             "from",
             "in",
+            "is",
             "la",
             "le",
             "nor",
@@ -201,6 +202,7 @@ class Metadata(MutableMapping):
             "nyc",
             "omg",
             "pga",
+            "oj",
             "rsvp",
             "tnt",
             "tv",
@@ -216,7 +218,8 @@ class Metadata(MutableMapping):
             "xxx",
             "yolo",
         }
-        padding_chars = "[\"!$'(),-./:;<>@[]_`{} ]"
+        padding_chars = ".- "
+        punctuation_chars = "[\"!?$'(),-./:;<>@[]_`{}]"
         string_lower = s.lower()
         string_length = len(s)
         s = capwords(s)
@@ -226,11 +229,15 @@ class Metadata(MutableMapping):
             pos = string_lower.find(exception)
             if pos == -1:
                 continue
-            starts = pos == 0
+            starts = pos < 2
             if starts:
                 continue
             prev_char = string_lower[pos - 1]
-            left_partitioned = prev_char in padding_chars
+            leading_char = string_lower[pos - 2]
+            left_partitioned = (
+                prev_char in padding_chars
+                and leading_char not in punctuation_chars
+            )
             word_length = len(exception)
             ends = pos + word_length == string_length
             next_char = None if ends else string_lower[pos + word_length]
@@ -252,4 +259,5 @@ class Metadata(MutableMapping):
             right_partitioned = ends or next_char in padding_chars
             if left_partitioned and right_partitioned:
                 s = s[:pos] + exception.upper() + s[pos + word_length :]
+        s = sub(r"(\w\.)+", lambda p: p.group(0).upper(), s)
         return s
