@@ -10,25 +10,25 @@ import pytest
 @pytest.fixture
 def metadata():
     """Creates a Metadata object."""
-    from mapi.metadata.metadata import Metadata
+    from mapi.metadata import Metadata
 
     return Metadata(title="Home Movies", date="2019-05-23")
 
 
 @pytest.fixture
-def metadata_movie():
+def movie_metadata():
     """Creates a MetadataMovie object."""
-    from mapi.metadata.metadata_movie import MetadataMovie
+    from mapi.metadata import MovieMetadata
 
-    return MetadataMovie(media="movie", title="saw iii", date="2006-01-01")
+    return MovieMetadata(media="movie", title="saw iii", date="2006-01-01")
 
 
 @pytest.fixture
-def metadata_television():
+def television_metadata():
     """Creates a MetadataTelevision object."""
-    from mapi.metadata.metadata_television import MetadataTelevision
+    from mapi.metadata import TelevisionMetadata
 
-    return MetadataTelevision(
+    return TelevisionMetadata(
         media="television",
         series="adventure time",
         season=5,
@@ -93,7 +93,7 @@ def tvdb_provider(tvdb_api_key):
 def tvdb_token(tvdb_api_key):
     """Calls mapi.endpoints.tvdb_login then returns cached token."""
     if not hasattr(tvdb_token, "token"):
-        from mapi.endpoints.tvdb import tvdb_login
+        from mapi.endpoints import tvdb_login
 
         tvdb_token.token = tvdb_login(tvdb_api_key)
     return tvdb_token.token

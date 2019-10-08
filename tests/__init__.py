@@ -4,7 +4,6 @@ from logging import getLogger
 
 getLogger("mapi").disabled = True
 
-
 JUNK_TEXT = "asdf#$@#g9765sdfg54hggaw"
 
 MOVIE_META = [

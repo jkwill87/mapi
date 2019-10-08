@@ -1,12 +1,31 @@
 # coding=utf-8
 
+from re import match
+
 from mapi.exceptions import (
     MapiNetworkException,
     MapiNotFoundException,
     MapiProviderException,
 )
-from mapi.utils import request_json
+from mapi.utils import clean_dict, request_json
 
+__all__ = [
+    "omdb_search",
+    "omdb_title",
+    "tmdb_find",
+    "tmdb_movies",
+    "tmdb_search_movies",
+    "tvdb_episodes_id",
+    "tvdb_login",
+    "tvdb_refresh_token",
+    "tvdb_search_series",
+    "tvdb_series_id",
+    "tvdb_series_id_episodes",
+    "tvdb_series_id_episodes_query",
+]
+
+OMDB_MEDIA_TYPES = {"episode", "movie", "series"}
+OMDB_PLOT_TYPES = {"short", "long"}
 TVDB_LANGUAGE_CODES = [
     "cs",
     "da",
@@ -32,6 +51,179 @@ TVDB_LANGUAGE_CODES = [
     "tr",
     "zh",
 ]
+
+
+def omdb_title(
+    api_key,
+    id_imdb=None,
+    media_type=None,
+    title=None,
+    season=None,
+    episode=None,
+    year=None,
+    plot=None,
+    cache=True,
+):
+    """
+    Lookup media using the Open Movie Database.
+
+    Online docs: http://www.omdbapi.com/#parameters
+    """
+    if (not title and not id_imdb) or (title and id_imdb):
+        raise MapiProviderException("either id_imdb or title must be specified")
+    elif media_type and media_type not in OMDB_MEDIA_TYPES:
+        raise MapiProviderException(
+            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
+        )
+    elif plot and plot not in OMDB_PLOT_TYPES:
+        raise MapiProviderException(
+            "plot must be one of %s" % ",".join(OMDB_PLOT_TYPES)
+        )
+    url = "http://www.omdbapi.com"
+    parameters = {
+        "apikey": api_key,
+        "i": id_imdb,
+        "t": title,
+        "y": year,
+        "season": season,
+        "episode": episode,
+        "type": media_type,
+        "plot": plot,
+    }
+    parameters = clean_dict(parameters)
+    status, content = request_json(url, parameters, cache=cache)
+    error = content.get("Error") if isinstance(content, dict) else None
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not isinstance(content, dict):
+        raise MapiNetworkException("OMDb down or unavailable?")
+    elif error:
+        raise MapiNotFoundException(error)
+    return content
+
+
+def omdb_search(api_key, query, year=None, media_type=None, page=1, cache=True):
+    """
+    Search for media using the Open Movie Database.
+
+    Online docs: http://www.omdbapi.com/#parameters.
+    """
+    if media_type and media_type not in OMDB_MEDIA_TYPES:
+        raise MapiProviderException(
+            "media_type must be one of %s" % ",".join(OMDB_MEDIA_TYPES)
+        )
+    if 1 > page > 100:
+        raise MapiProviderException("page must be between 1 and 100")
+    url = "http://www.omdbapi.com"
+    parameters = {
+        "apikey": api_key,
+        "s": query,
+        "y": year,
+        "type": media_type,
+        "page": page,
+    }
+    parameters = clean_dict(parameters)
+    status, content = request_json(url, parameters, cache=cache)
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif content and not content.get("totalResults"):
+        raise MapiNotFoundException()
+    elif not content or status != 200:  # pragma: no cover
+        raise MapiNetworkException("OMDb down or unavailable?")
+    return content
+
+
+def tmdb_find(
+    api_key, external_source, external_id, language="en-US", cache=True
+):
+    """
+    Search for The Movie Database objects using another DB's foreign key.
+
+    Note: language codes aren't checked on this end or by TMDb, so if you
+        enter an invalid language code your search itself will succeed, but
+        certain fields like synopsis will just be empty.
+
+    Online docs: developers.themoviedb.org/3/find.
+    """
+    sources = ["imdb_id", "freebase_mid", "freebase_id", "tvdb_id", "tvrage_id"]
+    if external_source not in sources:
+        raise MapiProviderException("external_source must be in %s" % sources)
+    if external_source == "imdb_id" and not match(r"tt\d+", external_id):
+        raise MapiProviderException("invalid imdb tt-const value")
+    url = "https://api.themoviedb.org/3/find/" + external_id or ""
+    parameters = {
+        "api_key": api_key,
+        "external_source": external_source,
+        "language": language,
+    }
+    keys = [
+        "movie_results",
+        "person_results",
+        "tv_episode_results",
+        "tv_results",
+        "tv_season_results",
+    ]
+    status, content = request_json(url, parameters, cache=cache)
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("TMDb down or unavailable?")
+    elif status == 404 or not any(content.get(k, {}) for k in keys):
+        raise MapiNotFoundException
+    return content
+
+
+def tmdb_movies(api_key, id_tmdb, language="en-US", cache=True):
+    """
+    Lookup a movie item using The Movie Database.
+
+    Online docs: developers.themoviedb.org/3/movies.
+    """
+    try:
+        url = "https://api.themoviedb.org/3/movie/%d" % int(id_tmdb)
+    except ValueError:
+        raise MapiProviderException("id_tmdb must be numeric")
+    parameters = {"api_key": api_key, "language": language}
+    status, content = request_json(url, parameters, cache=cache)
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status == 404:
+        raise MapiNotFoundException
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("TMDb down or unavailable?")
+    return content
+
+
+def tmdb_search_movies(
+    api_key, title, year=None, adult=False, region=None, page=1, cache=True
+):
+    """
+    Search for movies using The Movie Database.
+
+    Online docs: developers.themoviedb.org/3/search/search-movies.
+    """
+    url = "https://api.themoviedb.org/3/search/movie"
+    try:
+        if year:
+            year = int(year)
+    except ValueError:
+        raise MapiProviderException("year must be numeric")
+    parameters = {
+        "api_key": api_key,
+        "query": title,
+        "page": page,
+        "include_adult": adult,
+        "region": region,
+        "year": year,
+    }
+    status, content = request_json(url, parameters, cache=cache)
+    if status == 401:
+        raise MapiProviderException("invalid API key")
+    elif status != 200 or not any(content.keys()):  # pragma: no cover
+        raise MapiNetworkException("TMDb down or unavailable?")
+    elif status == 404 or status == 422 or not content.get("total_results"):
+        raise MapiNotFoundException
+    return content
 
 
 def tvdb_login(api_key):

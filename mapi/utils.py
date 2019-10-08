@@ -3,8 +3,8 @@
 """A collection of utility functions non-specific to mapi's domain logic."""
 
 import random
-from os.path import join
-from re import findall, match
+import re
+from os import path
 from sys import version_info
 
 import requests_cache
@@ -27,6 +27,7 @@ __all__ = [
     "get_user_agent",
     "request_json",
     "year_expand",
+    "year_parse",
 ]
 
 AGENT_CHROME = (
@@ -43,7 +44,9 @@ AGENT_IOS = (
     "Safari/602.1"
 )
 AGENT_ALL = (AGENT_CHROME, AGENT_EDGE, AGENT_IOS)
-CACHE_PATH = join(user_cache_dir(), "mapi-py%d.sqlite" % version_info.major)
+CACHE_PATH = path.join(
+    user_cache_dir(), "mapi-py%d.sqlite" % version_info.major
+)
 
 
 def clean_dict(target_dict, whitelist=None):
@@ -153,7 +156,7 @@ def year_parse(s):
     """Parses a year from a string."""
     regex = r"((?:19|20)\d{2})(?:$|[-/]\d{2}[-/]\d{2})"
     try:
-        year = int(findall(regex, ustr(s))[0])
+        year = int(re.findall(regex, ustr(s))[0])
     except IndexError:
         year = None
     return year
@@ -163,7 +166,7 @@ def year_expand(s):
     """Parses a year or dash-delimited year range."""
     regex = r"^((?:19|20)\d{2})?(\s*-\s*)?((?:19|20)\d{2})?$"
     try:
-        start, dash, end = match(regex, ustr(s)).groups()
+        start, dash, end = re.match(regex, ustr(s)).groups()
         start = start or 1900
         end = end or 2099
     except AttributeError:

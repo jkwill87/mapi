@@ -4,8 +4,8 @@
 
 import pytest
 
-from mapi.endpoints.tmdb import *
-from mapi.exceptions import MapiProviderException
+from mapi.endpoints import tmdb_find, tmdb_movies, tmdb_search_movies
+from mapi.exceptions import MapiNotFoundException, MapiProviderException
 from tests import JUNK_TEXT
 
 GOONIES_IMDB_ID = "tt0089218"

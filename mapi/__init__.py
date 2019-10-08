@@ -16,12 +16,10 @@ See https://github.com/jkwill87/mapi for more information.
 """
 
 import logging
-import sys
 
 __all__ = ["log"]
 
-
 log = logging.getLogger(__name__)
 log.addHandler((logging.StreamHandler()))
-log.setLevel(logging.INFO if "pydevd" in sys.modules else logging.ERROR)
+log.setLevel(logging.INFO)
 logging.getLogger("requests").setLevel(logging.CRITICAL)

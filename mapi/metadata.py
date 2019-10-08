@@ -2,14 +2,14 @@
 
 """Metadata data classes."""
 
+import re
 from datetime import datetime as dt
-from re import sub
 from string import Formatter, capwords
 
 from mapi.compatibility import MutableMapping, ustr
 from mapi.utils import year_parse
 
-__all__ = ["Metadata"]
+__all__ = ["Metadata", "MovieMetadata", "TelevisionMetadata"]
 
 
 class Metadata(MutableMapping):
@@ -47,7 +47,7 @@ class Metadata(MutableMapping):
     def __format__(self, format_spec):
         format_spec = format_spec or "{title}"
         re_pattern = r"({(\w+)(?:\:\d{1,2})?})"
-        s = sub(re_pattern, self._format_repl, format_spec)
+        s = re.sub(re_pattern, self._format_repl, format_spec)
         s = self._str_fix_whitespace(s)
         return s
 
@@ -119,14 +119,14 @@ class Metadata(MutableMapping):
     @staticmethod
     def _str_fix_whitespace(s):
         # Concatenate dashes
-        s = sub(r"-\s*-", "-", s)
+        s = re.sub(r"-\s*-", "-", s)
         # Remove empty brackets
         s = s.replace("()", "")
         s = s.replace("[]", "")
         # Strip leading/ trailing dashes
-        s = sub(r"-\s*$|^\s*-", "", s)
+        s = re.sub(r"-\s*$|^\s*-", "", s)
         # Concatenate whitespace
-        s = sub(r"\s+", " ", s)
+        s = re.sub(r"\s+", " ", s)
         # Strip leading/ trailing whitespace
         s = s.strip()
         return s
@@ -259,5 +259,49 @@ class Metadata(MutableMapping):
             right_partitioned = ends or next_char in padding_chars
             if left_partitioned and right_partitioned:
                 s = s[:pos] + exception.upper() + s[pos + word_length :]
-        s = sub(r"(\w\.)+", lambda p: p.group(0).upper(), s)
+        s = re.sub(r"(\w\.)+", lambda p: p.group(0).upper(), s)
         return s
+
+
+class MovieMetadata(Metadata):
+    """Movie Metadata class.
+    """
+
+    fields_accepted = Metadata.fields_accepted | {"id_imdb", "id_tmdb"}
+
+    def __init__(self, **params):
+        super(MovieMetadata, self).__init__(**params)
+        self._dict["media"] = "movie"
+
+    def __format__(self, format_spec):
+        return super(MovieMetadata, self).__format__(
+            format_spec or "{title} ({year})"
+        )
+
+    def __str__(self):
+        return self.__format__(None)
+
+
+class TelevisionMetadata(Metadata):
+    """Television Metadata class.
+    """
+
+    fields_accepted = Metadata.fields_accepted | {
+        "episode",
+        "id_imdb",
+        "id_tvdb",
+        "season",
+        "series",
+    }
+
+    def __init__(self, **params):
+        super(TelevisionMetadata, self).__init__(**params)
+        self._dict["media"] = "television"
+
+    def __format__(self, format_spec):
+        return super(TelevisionMetadata, self).__format__(
+            format_spec or "{series} - {season:02}x{episode:02} - {title}"
+        )
+
+    def __str__(self):
+        return self.__format__(None)

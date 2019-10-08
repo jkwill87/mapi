@@ -4,7 +4,16 @@
 
 import pytest
 
-from mapi.endpoints.tvdb import *
+from mapi.endpoints import (
+    tvdb_episodes_id,
+    tvdb_login,
+    tvdb_refresh_token,
+    tvdb_search_series,
+    tvdb_series_id,
+    tvdb_series_id_episodes,
+    tvdb_series_id_episodes_query,
+)
+from mapi.exceptions import MapiNotFoundException, MapiProviderException
 from tests import JUNK_TEXT
 
 LOST_IMDB_ID_SERIES = "tt0411008"
