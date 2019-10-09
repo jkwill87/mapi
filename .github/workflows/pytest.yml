@@ -1,0 +1,33 @@
+name: pytest
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [2.7, 3.6, 3.7]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-testing.txt
+    - name: Run tests with coverage
+      env:
+        API_KEY_OMDB: ${{ secrets.API_KEY_OMDB }}
+        API_KEY_TMDB: ${{ secrets.API_KEY_TMDB }}
+        API_KEY_TVDB: ${{ secrets.API_KEY_TVDB }}
+      run: >
+      python -m pytest
+      --durations=5
+      --cov-report=term
+      --cov=mapi

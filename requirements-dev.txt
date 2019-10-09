@@ -1,9 +1,5 @@
 -r requirements-testing.txt
-autopep8
-future
 pylint
-pypandoc
-rope
 setuptools>=38.6.0
 twine>=1.11.0
 wheel>=0.31.0
