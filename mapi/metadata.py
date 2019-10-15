@@ -240,7 +240,7 @@ class Metadata(MutableMapping):
             )
             word_length = len(exception)
             ends = pos + word_length == string_length
-            next_char = None if ends else string_lower[pos + word_length]
+            next_char = "" if ends else string_lower[pos + word_length]
             right_partitioned = ends or next_char in padding_chars
             if left_partitioned and right_partitioned:
                 s = s[:pos] + exception.lower() + s[pos + word_length :]
@@ -255,8 +255,10 @@ class Metadata(MutableMapping):
             left_partitioned = starts or prev_char in padding_chars
             word_length = len(exception)
             ends = pos + word_length == string_length
-            next_char = None if ends else string_lower[pos + word_length]
-            right_partitioned = ends or next_char in padding_chars
+            next_char = "" if ends else string_lower[pos + word_length]
+            right_partitioned = (
+                ends or next_char in padding_chars + punctuation_chars
+            )
             if left_partitioned and right_partitioned:
                 s = s[:pos] + exception.upper() + s[pos + word_length :]
         s = re.sub(r"(\w\.)+", lambda p: p.group(0).upper(), s)
