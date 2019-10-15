@@ -18,11 +18,20 @@ from mapi.exceptions import (
 from mapi.metadata import *
 from mapi.utils import year_expand
 
+__all__ = [
+    "API_ALL",
+    "API_MOVIE",
+    "API_TELEVISION",
+    "OMDb",
+    "Provider",
+    "provider_factory",
+    "TMDb",
+    "TVDb",
+]
+
 API_TELEVISION = {"tvdb"}
 API_MOVIE = {"tmdb", "omdb"}
 API_ALL = API_TELEVISION | API_MOVIE
-
-__all__ = ["Provider", "TMDb", "TVDb", "OMDb"]
 
 
 class Provider(AbstractClass):
