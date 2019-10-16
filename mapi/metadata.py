@@ -9,7 +9,7 @@ from string import Formatter, capwords
 from mapi.compatibility import MutableMapping, ustr
 from mapi.utils import year_parse
 
-__all__ = ["Metadata", "MovieMetadata", "TelevisionMetadata"]
+__all__ = ["Metadata", "MetadataMovie", "MetadataTelevision"]
 
 
 class Metadata(MutableMapping):
@@ -263,18 +263,18 @@ class Metadata(MutableMapping):
         return s
 
 
-class MovieMetadata(Metadata):
+class MetadataMovie(Metadata):
     """Movie Metadata class.
     """
 
     fields_accepted = Metadata.fields_accepted | {"id_imdb", "id_tmdb"}
 
     def __init__(self, **params):
-        super(MovieMetadata, self).__init__(**params)
+        super(MetadataMovie, self).__init__(**params)
         self._dict["media"] = "movie"
 
     def __format__(self, format_spec):
-        return super(MovieMetadata, self).__format__(
+        return super(MetadataMovie, self).__format__(
             format_spec or "{title} ({year})"
         )
 
@@ -282,7 +282,7 @@ class MovieMetadata(Metadata):
         return self.__format__(None)
 
 
-class TelevisionMetadata(Metadata):
+class MetadataTelevision(Metadata):
     """Television Metadata class.
     """
 
@@ -295,11 +295,11 @@ class TelevisionMetadata(Metadata):
     }
 
     def __init__(self, **params):
-        super(TelevisionMetadata, self).__init__(**params)
+        super(MetadataTelevision, self).__init__(**params)
         self._dict["media"] = "television"
 
     def __format__(self, format_spec):
-        return super(TelevisionMetadata, self).__format__(
+        return super(MetadataTelevision, self).__format__(
             format_spec or "{series} - {season:02}x{episode:02} - {title}"
         )
 

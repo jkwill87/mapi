@@ -18,17 +18,17 @@ def metadata():
 @pytest.fixture
 def movie_metadata():
     """Creates a MetadataMovie object."""
-    from mapi.metadata import MovieMetadata
+    from mapi.metadata import MetadataMovie
 
-    return MovieMetadata(media="movie", title="saw iii", date="2006-01-01")
+    return MetadataMovie(media="movie", title="saw iii", date="2006-01-01")
 
 
 @pytest.fixture
 def television_metadata():
     """Creates a MetadataTelevision object."""
-    from mapi.metadata import TelevisionMetadata
+    from mapi.metadata import MetadataTelevision
 
-    return TelevisionMetadata(
+    return MetadataTelevision(
         media="television",
         series="adventure time",
         season=5,

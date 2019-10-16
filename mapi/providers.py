@@ -117,7 +117,7 @@ class OMDb(Provider):
                 date = None
             else:
                 date = "%s-01-01" % response["Year"]
-        meta = MovieMetadata(
+        meta = MetadataMovie(
             title=response["Title"],
             date=date,
             synopsis=response["Plot"],
@@ -186,7 +186,7 @@ class TMDb(Provider):
         response = tmdb_find(
             self.api_key, "imdb_id", id_imdb, cache=self.cache
         )["movie_results"][0]
-        yield MovieMetadata(
+        yield MetadataMovie(
             title=response["title"],
             date=response["release_date"],
             synopsis=response["overview"],
@@ -197,7 +197,7 @@ class TMDb(Provider):
     def _search_id_tmdb(self, id_tmdb):
         assert id_tmdb
         response = tmdb_movies(self.api_key, id_tmdb, cache=self.cache)
-        yield MovieMetadata(
+        yield MetadataMovie(
             title=response["title"],
             date=response["release_date"],
             synopsis=response["overview"],
@@ -218,7 +218,7 @@ class TMDb(Provider):
             )
             for entry in response["results"]:
                 try:
-                    meta = MovieMetadata(
+                    meta = MetadataMovie(
                         title=entry["title"],
                         date=entry["release_date"],
                         synopsis=entry["overview"],
@@ -317,7 +317,7 @@ class TVDb(Provider):
             )
             for entry in episode_data["data"]:
                 try:
-                    yield TelevisionMetadata(
+                    yield MetadataTelevision(
                         series=series_data["data"]["seriesName"],
                         season=ustr(entry["airedSeason"]),
                         episode=ustr(entry["airedEpisodeNumber"]),
